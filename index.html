@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Wingo Login + Wallet Game</title>
+  <title>Wingo Game + Admin Panel</title>
   <style>
     body { font-family: Arial; text-align: center; background: #f0f0f0; padding: 30px; }
     input, button { padding: 10px; margin: 5px; font-size: 16px; }
@@ -38,7 +38,7 @@
     <h2>Balance: ₹<span id="wallet">0</span></h2>
     <h2>Color Prediction Game</h2>
     <div id="countdown"></div>
-    <div id="countDisplay"></div>
+    <div id="countDisplay"></div> <!-- Number display fixed -->
     <button class="red" onclick="selectColor('RED')">Red</button>
     <button class="green" onclick="selectColor('GREEN')">Green</button>
     <button class="violet" onclick="selectColor('VIOLET')">Violet</button><br><br>
@@ -129,7 +129,7 @@
         });
 
         startTimer();
-        checkIfAdmin(user.uid); // 🔐 Check admin access
+        checkIfAdmin(user.uid);
       }
     });
 
@@ -140,7 +140,7 @@
 
     function getResultColor(num) {
       if (num === 5) return "VIOLET";
-      else if ([1, 3, 7, 9].includes(num)) return "RED";
+      else if ([1, 3, 7, 9, 0].includes(num)) return "RED";
       else return "GREEN";
     }
 
@@ -152,11 +152,10 @@
 
       currentBalance -= bet;
 
-      let num = countNum;
-      let resultColor = getResultColor(num);
+      let resultColor = getResultColor(countNum);
       let win = selectedColor === resultColor;
 
-      let resultText = `Result: ${resultColor} (${num}) → `;
+      let resultText = `Result: ${resultColor} (${countNum}) → `;
       if (win) {
         let multiplier = selectedColor === "VIOLET" ? 4.5 : 1.96;
         const winAmount = parseFloat((bet * multiplier).toFixed(2));
@@ -180,13 +179,14 @@
       clearInterval(timer);
       timeLeft = 10;
       let countNum = 0;
+
       timer = setInterval(() => {
         document.getElementById("countdown").innerText = `Time Left: ${timeLeft}s`;
-        document.getElementById("countDisplay").innerText = `Random Number: ${countNum}`;
+        document.getElementById("countDisplay").innerText = `Random Number: ${countNum}`; // ✅ Number is visible
         if (timeLeft <= 0) {
           clearInterval(timer);
           placeBet(countNum);
-          startTimer(); // Auto-start next round
+          startTimer(); // Auto restart
         } else {
           countNum = Math.floor(Math.random() * 10);
           timeLeft--;
@@ -194,7 +194,7 @@
       }, 1000);
     }
 
-    // ✅ Admin Functions
+    // 🔐 Admin check
     function checkIfAdmin(uid) {
       get(ref(db, "users/" + uid)).then(snapshot => {
         if (snapshot.exists() && snapshot.val().isAdmin === true) {
