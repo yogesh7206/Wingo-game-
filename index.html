@@ -10,13 +10,6 @@
     .red { background: red; color: white; }
     .green { background: green; color: white; }
     .violet { background: purple; color: white; }
-    .number-btns button {
-      width: 40px;
-      margin: 2px;
-      border: none;
-      border-radius: 5px;
-      font-weight: bold;
-    }
   </style>
 </head>
 <body>
@@ -46,33 +39,19 @@
     <h2>Color Prediction Game</h2>
     <div id="countdown"></div>
     <div id="countDisplay"></div>
-
-    <!-- Color Buttons -->
-    <button class="red" onclick="selectColor('RED')">Red (1.96x)</button>
-    <button class="green" onclick="selectColor('GREEN')">Green (1.96x)</button>
-    <button class="violet" onclick="selectColor('VIOLET')">Violet (4.5x)</button><br><br>
-
-    <!-- Number Betting -->
-    <div id="numberButtons">
-      <h3>Or Bet on Number:</h3>
-      <div class="number-btns">
-        <button style="background: linear-gradient(to right, red, purple); color: white;" onclick="selectNumber(0)">0</button>
-        <button class="red" onclick="selectNumber(1)">1</button>
-        <button class="green" onclick="selectNumber(2)">2</button>
-        <button class="red" onclick="selectNumber(3)">3</button>
-        <button class="green" onclick="selectNumber(4)">4</button>
-        <button style="background: linear-gradient(to right, green, purple); color: white;" onclick="selectNumber(5)">5</button>
-        <button class="green" onclick="selectNumber(6)">6</button>
-        <button class="red" onclick="selectNumber(7)">7</button>
-        <button class="green" onclick="selectNumber(8)">8</button>
-        <button class="red" onclick="selectNumber(9)">9</button>
-      </div>
-    </div><br>
-
+    <button class="red" onclick="selectColor('RED')">Red</button>
+    <button class="green" onclick="selectColor('GREEN')">Green</button>
+    <button class="violet" onclick="selectColor('VIOLET')">Violet</button><br><br>
     <input type="number" id="bet" step="0.1" placeholder="Enter Bet ₹">
     <p id="result"></p>
     <p><b>History:</b> <span id="history"></span></p>
     <button onclick="logout()">Logout</button>
+  </div>
+
+  <!-- Admin Panel -->
+  <div id="adminPanel" class="hidden">
+    <h2>🛡️ Admin Panel</h2>
+    <div id="usersTable"></div>
   </div>
 
   <script type="module">
@@ -96,6 +75,8 @@
 
     let currentUser = null;
     let currentBalance = 0;
+    let selectedColor = null;
+    let history = [];
 
     window.toggleRegister = function () {
       document.getElementById("loginSection").classList.toggle("hidden");
@@ -148,27 +129,13 @@
         });
 
         startTimer();
-      } else {
-        currentUser = null;
-        document.getElementById("gameSection").classList.add("hidden");
-        document.getElementById("loginSection").classList.remove("hidden");
+        checkIfAdmin(user.uid); // 🔐 Check admin access
       }
     });
 
-    let selectedColor = null;
-    let selectedNumber = null;
-    let history = [];
-
     window.selectColor = function (color) {
       selectedColor = color;
-      selectedNumber = null;
-      alert("Selected Color: " + color);
-    };
-
-    window.selectNumber = function (num) {
-      selectedNumber = num;
-      selectedColor = null;
-      alert("Selected Number: " + num);
+      alert("Selected: " + color);
     };
 
     function getResultColor(num) {
@@ -178,7 +145,7 @@
     }
 
     function placeBet(countNum) {
-      if (selectedColor === null && selectedNumber === null) return alert("Choose color or number!");
+      if (!selectedColor) return alert("Choose color!");
       const bet = parseFloat(document.getElementById("bet").value);
       if (isNaN(bet) || bet <= 0) return alert("Enter valid bet!");
       if (bet > currentBalance) return alert("❌ Not enough balance!");
@@ -187,12 +154,11 @@
 
       let num = countNum;
       let resultColor = getResultColor(num);
-      let colorWin = selectedColor === resultColor;
-      let numberWin = selectedNumber === num;
+      let win = selectedColor === resultColor;
 
       let resultText = `Result: ${resultColor} (${num}) → `;
-      if (colorWin || numberWin) {
-        let multiplier = colorWin ? (selectedColor === "VIOLET" ? 4.5 : 1.96) : 9.0;
+      if (win) {
+        let multiplier = selectedColor === "VIOLET" ? 4.5 : 1.96;
         const winAmount = parseFloat((bet * multiplier).toFixed(2));
         currentBalance += winAmount;
         resultText += `🎉 You Win ₹${winAmount}`;
@@ -204,14 +170,8 @@
       document.getElementById("wallet").innerText = currentBalance.toFixed(2);
       document.getElementById("result").innerText = resultText;
 
-      history.unshift(`${resultColor} (${num})`);
+      history.unshift(resultColor);
       document.getElementById("history").innerText = history.slice(0, 5).join(", ");
-
-      selectedColor = null;
-      selectedNumber = null;
-
-      // Auto start next round after 3 seconds
-      setTimeout(startTimer, 3000);
     }
 
     let timeLeft = 10;
@@ -226,12 +186,57 @@
         if (timeLeft <= 0) {
           clearInterval(timer);
           placeBet(countNum);
+          startTimer(); // Auto-start next round
         } else {
           countNum = Math.floor(Math.random() * 10);
           timeLeft--;
         }
       }, 1000);
     }
+
+    // ✅ Admin Functions
+    function checkIfAdmin(uid) {
+      get(ref(db, "users/" + uid)).then(snapshot => {
+        if (snapshot.exists() && snapshot.val().isAdmin === true) {
+          document.getElementById("adminPanel").classList.remove("hidden");
+          loadAllUsers();
+        }
+      });
+    }
+
+    function loadAllUsers() {
+      get(ref(db, "users")).then(snapshot => {
+        if (snapshot.exists()) {
+          const users = snapshot.val();
+          let html = `<table border="1" cellpadding="5" style="margin:auto;">
+            <tr><th>Email</th><th>Balance (₹)</th><th>Update</th></tr>`;
+
+          for (const uid in users) {
+            const user = users[uid];
+            html += `
+              <tr>
+                <td>${user.email}</td>
+                <td><input type="number" id="bal-${uid}" value="${user.balance}" style="width:80px;"></td>
+                <td><button onclick="updateBalance('${uid}')">Update</button></td>
+              </tr>
+            `;
+          }
+
+          html += `</table>`;
+          document.getElementById("usersTable").innerHTML = html;
+        }
+      });
+    }
+
+    window.updateBalance = function (uid) {
+      const newBalance = parseFloat(document.getElementById("bal-" + uid).value);
+      if (!isNaN(newBalance)) {
+        update(ref(db, "users/" + uid), { balance: newBalance }).then(() => {
+          alert("✅ Balance updated!");
+          loadAllUsers();
+        });
+      }
+    };
   </script>
 </body>
 </html>
