@@ -5,7 +5,6 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
   <!-- 🔐 Login/Signup UI -->
   <h2>Login / Signup</h2>
   <input type="email" id="email" placeholder="Email"><br><br>
@@ -15,7 +14,7 @@
   <button onclick="logout()">Log Out</button>
   <p id="message"></p>
 
-  <!-- 🎯 Game UI -->
+  <!-- 🎯 Wingo Game UI -->
   <h1>🎯 Wingo Game</h1>
   <p>Timer: <span id="countdown">60</span>s</p>
 
@@ -31,14 +30,19 @@
   <p id="result"></p>
   <p>Last Results: <span id="history"></span></p>
 
-  <!-- 🧠 Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
+  <!-- 🎮 Game Logic -->
+  <script src="script.js"></script>
 
-  <!-- 🔧 Firebase Init -->
-  <script>
+  <!-- ✅ Firebase Login Logic (v10) -->
+  <script type="module">
+    // Import Firebase functions
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut }
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    // Your Firebase config
     const firebaseConfig = {
-      apiKey: "AIzaSyBe5kG0wYS3FsF_9_q1xxxxxxx",
+      apiKey: "AIzaSyBe5kG0wYS3FsF_9_q1xxxxxxx", // replace with your actual key
       authDomain: "wingologin.firebaseapp.com",
       projectId: "wingologin",
       storageBucket: "wingologin.appspot.com",
@@ -46,44 +50,46 @@
       appId: "1:605536859710:web:ed9495xxxxxx",
       measurementId: "G-FLDY936H9P"
     };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-  </script>
 
-  <!-- ✅ Auth Logic -->
-  <script>
-    function signup() {
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // Sign Up
+    window.signup = function () {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
-      auth.createUserWithEmailAndPassword(email, password)
+
+      createUserWithEmailAndPassword(auth, email, password)
         .then(() => {
           document.getElementById("message").innerText = "✅ Sign up successful!";
         })
         .catch((error) => {
           document.getElementById("message").innerText = "❌ " + error.message;
         });
-    }
+    };
 
-    function login() {
+    // Log In
+    window.login = function () {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
-      auth.signInWithEmailAndPassword(email, password)
+
+      signInWithEmailAndPassword(auth, email, password)
         .then(() => {
           document.getElementById("message").innerText = "✅ Login successful!";
         })
         .catch((error) => {
           document.getElementById("message").innerText = "❌ " + error.message;
         });
-    }
+    };
 
-    function logout() {
-      auth.signOut().then(() => {
-        document.getElementById("message").innerText = "✅ Logged out.";
-      });
-    }
+    // Log Out
+    window.logout = function () {
+      signOut(auth)
+        .then(() => {
+          document.getElementById("message").innerText = "✅ Logged out.";
+        });
+    };
   </script>
-
-  <!-- 🎮 Your Game Logic (unchanged) -->
-  <script src="script.js"></script>
 </body>
 </html>
