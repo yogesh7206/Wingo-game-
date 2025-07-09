@@ -2,47 +2,51 @@
 <html>
 <head>
   <title>Wingo Game</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial, sans-serif; padding: 10px; }
+    input, button { padding: 8px; margin: 5px 0; width: 100%; max-width: 300px; }
+    #game { display: none; }
+  </style>
 </head>
 <body>
 
-  <!-- 🔐 Login / Signup Section -->
+  <!-- 🔐 Login / Signup -->
   <h2>Login / Signup</h2>
-  <input type="email" id="email" placeholder="Email"><br><br>
-  <input type="password" id="password" placeholder="Password"><br><br>
+  <input type="email" id="email" placeholder="Email"><br>
+  <input type="password" id="password" placeholder="Password"><br>
   <button onclick="signup()">Sign Up</button>
   <button onclick="login()">Log In</button>
   <button onclick="logout()">Log Out</button>
   <p id="message"></p>
 
-  <!-- 🎮 Game Section (Hidden Until Login) -->
-  <div id="game" style="display: none;">
+  <!-- 🎮 Game Section -->
+  <div id="game">
     <h1>🎯 Wingo Game</h1>
-    <p><strong>Game ID:</strong> <span id="gameid">Loading...</span></p>
-    <p><strong>Wallet:</strong> ₹<span id="wallet">0</span></p>
+    <p><b>Game ID:</b> <span id="gameid">Loading...</span></p>
+    <p><b>Wallet:</b> ₹<span id="wallet">0</span></p>
     <p>Timer: <span id="countdown">60</span>s</p>
 
     <label>Pick Color:</label><br>
     <button onclick="selectColor('RED')">🔴 RED</button>
     <button onclick="selectColor('GREEN')">🟢 GREEN</button>
-    <button onclick="selectColor('VIOLET')">🟣 VIOLET</button><br><br>
+    <button onclick="selectColor('VIOLET')">🟣 VIOLET</button><br>
 
     <label>Bet Amount (₹):</label>
-    <input id="bet" type="number" value="10"><br><br>
+    <input id="bet" type="number" value="10"><br>
     <button onclick="placeBet()">Place Bet</button>
 
     <p id="result"></p>
     <p>Last Results: <span id="history"></span></p>
   </div>
 
-  <!-- ✅ Firebase SDKs -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js"></script>
 
-  <!-- ✅ Game + Auth Logic -->
+  <!-- Game + Auth Script -->
   <script>
-    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyBe5kGOwYS3FsF_9_q1pjxaWrF1glUe87c",
       authDomain: "wingologin.firebaseapp.com",
@@ -52,7 +56,6 @@
       appId: "1:605536859710:web:ed9495775c8f8dd6a8836f"
     };
 
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.database();
@@ -61,120 +64,94 @@
     let balance = 0;
     let selectedColor = "";
 
-    // Show/hide game after login
+    // 👀 Show game after login
     auth.onAuthStateChanged(async (user) => {
-      const gameDiv = document.getElementById("game");
-      const message = document.getElementById("message");
-
       if (user) {
         currentUID = user.uid;
-        const userRef = db.ref("users/" + currentUID);
-        const snapshot = await userRef.get();
+        document.getElementById("game").style.display = "block";
+        document.getElementById("message").innerText = "✅ Logged in as " + user.email;
 
-        let gameID = "??????";
-        if (snapshot.exists()) {
-          const data = snapshot.val();
-          gameID = data.gameID || generateGameID();
+        const userRef = db.ref("users/" + currentUID);
+        const snap = await userRef.get();
+
+        let gameID = "------";
+        if (snap.exists()) {
+          const data = snap.val();
+          gameID = data.gameID || makeGameID();
           balance = data.wallet || 1000;
         } else {
-          gameID = generateGameID();
+          gameID = makeGameID();
           balance = 1000;
-          await userRef.set({ gameID: gameID, wallet: balance });
+          await userRef.set({ gameID, wallet: balance });
         }
 
         document.getElementById("gameid").innerText = gameID;
         document.getElementById("wallet").innerText = balance;
-        gameDiv.style.display = "block";
-        message.innerText = `✅ Logged in as: ${user.email}`;
       } else {
-        currentUID = null;
-        gameDiv.style.display = "none";
-        message.innerText = "🔒 You are logged out.";
+        document.getElementById("game").style.display = "none";
+        document.getElementById("message").innerText = "🔒 Logged out.";
       }
     });
 
-    function generateGameID() {
+    // 🔐 Auth functions
+    function signup() {
+      const email = document.getElementById("email").value;
+      const pass = document.getElementById("password").value;
+      auth.createUserWithEmailAndPassword(email, pass)
+        .then(() => { document.getElementById("message").innerText = "✅ Sign up successful"; })
+        .catch(err => { document.getElementById("message").innerText = "❌ " + err.message; });
+    }
+
+    function login() {
+      const email = document.getElementById("email").value;
+      const pass = document.getElementById("password").value;
+      auth.signInWithEmailAndPassword(email, pass)
+        .then(() => { document.getElementById("message").innerText = "✅ Login successful"; })
+        .catch(err => { document.getElementById("message").innerText = "❌ " + err.message; });
+    }
+
+    function logout() {
+      auth.signOut();
+    }
+
+    function makeGameID() {
       return Math.floor(100000 + Math.random() * 900000).toString();
     }
 
     function updateWallet() {
       if (currentUID) {
-        const gameID = document.getElementById("gameid").innerText;
         db.ref("users/" + currentUID).set({
-          gameID: gameID,
+          gameID: document.getElementById("gameid").innerText,
           wallet: balance
         });
       }
     }
 
-    window.signup = function () {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      auth.createUserWithEmailAndPassword(email, password)
-        .then(() => {
-          document.getElementById("message").innerText = "✅ Sign up successful!";
-        })
-        .catch((error) => {
-          document.getElementById("message").innerText = "❌ " + error.message;
-        });
-    };
-
-    window.login = function () {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      auth.signInWithEmailAndPassword(email, password)
-        .then(() => {
-          document.getElementById("message").innerText = "✅ Login successful!";
-        })
-        .catch((error) => {
-          document.getElementById("message").innerText = "❌ " + error.message;
-        });
-    };
-
-    window.logout = function () {
-      auth.signOut().then(() => {
-        document.getElementById("message").innerText = "✅ Logged out.";
-        document.getElementById("game").style.display = "none";
-      });
-    };
-
-    window.selectColor = function (color) {
+    // 🎮 Game functions
+    function selectColor(color) {
       selectedColor = color;
-    };
+    }
 
-    window.placeBet = function () {
-      const betAmount = parseInt(document.getElementById("bet").value);
+    function placeBet() {
+      const bet = parseInt(document.getElementById("bet").value);
       const resultText = document.getElementById("result");
-
-      if (isNaN(betAmount) || betAmount <= 0) {
-        resultText.innerText = "❌ Invalid bet amount.";
-        return;
-      }
-
-      if (betAmount > balance) {
-        resultText.innerText = "❌ Not enough balance.";
-        return;
-      }
+      if (isNaN(bet) || bet <= 0) return resultText.innerText = "❌ Invalid bet";
+      if (bet > balance) return resultText.innerText = "❌ Not enough balance";
 
       const colors = ['RED', 'GREEN', 'VIOLET'];
-      const resultColor = colors[Math.floor(Math.random() * 3)];
+      const result = colors[Math.floor(Math.random() * 3)];
 
-      if (selectedColor === resultColor) {
-        balance += betAmount * 2;
-        resultText.innerText = `🎉 You won! Result was ${resultColor}`;
+      if (selectedColor === result) {
+        balance += bet * 2;
+        resultText.innerText = `🎉 You won! Result: ${result}`;
       } else {
-        balance -= betAmount;
-        resultText.innerText = `😢 You lost! Result was ${resultColor}`;
+        balance -= bet;
+        resultText.innerText = `😢 You lost! Result: ${result}`;
       }
 
       document.getElementById("wallet").innerText = balance;
+      document.getElementById("history").innerText = result + " " + document.getElementById("history").innerText;
       updateWallet();
-      updateHistory(resultColor);
-    };
-
-    function updateHistory(result) {
-      const history = document.getElementById("history");
-      history.innerText = result + " " + history.innerText;
     }
   </script>
 </body>
