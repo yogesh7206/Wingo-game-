@@ -3,23 +3,104 @@
 <head>
   <title>Color Prediction Game</title>
   <style>
-    body { font-family: Arial; text-align: center; margin-top: 50px; }
-    button { margin: 5px; padding: 10px 20px; font-size: 18px; }
+    body { font-family: Arial; text-align: center; margin-top: 50px; background: #f0f0f0; }
+    button, input { margin: 5px; padding: 10px 20px; font-size: 18px; }
+    .hidden { display: none; }
   </style>
+
+  <!-- ✅ Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js"></script>
+  <script>
+    // ✅ Your Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBe5kGOwYS3FsF_9_q1pjxaWrF1glUe87c",
+      authDomain: "wingologin.firebaseapp.com",
+      databaseURL: "https://wingologin-default-rtdb.firebaseio.com",
+      projectId: "wingologin",
+      storageBucket: "wingologin.firebasestorage.app",
+      messagingSenderId: "605536859710",
+      appId: "1:605536859710:web:ed9495775c8f8dd6a8836f",
+      measurementId: "G-FLDY936H9P"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+  </script>
 </head>
 <body>
-  <h1>Color Prediction Game</h1>
-  <p>Select Color:</p>
-  <button onclick="selectColor('RED')">Red</button>
-  <button onclick="selectColor('GREEN')">Green</button>
-  <button onclick="selectColor('VIOLET')">Violet</button>
-  <br><br>
-  <input type="number" id="bet" placeholder="Enter Bet ₹">
-  <p id="countdown"></p>
-  <p id="result"></p>
-  <p><b>History:</b> <span id="history"></span></p>
+
+  <!-- 🔐 Login Section -->
+  <div id="loginSection">
+    <h2>Login to Start</h2>
+    <input type="email" id="loginEmail" placeholder="Email"><br>
+    <input type="password" id="loginPass" placeholder="Password"><br>
+    <button onclick="login()">Login</button>
+    <p>Don't have an account? <a href="#" onclick="toggleRegister()">Register</a></p>
+  </div>
+
+  <!-- 📝 Register Section -->
+  <div id="registerSection" class="hidden">
+    <h2>Create an Account</h2>
+    <input type="email" id="regEmail" placeholder="Email"><br>
+    <input type="password" id="regPass" placeholder="Password"><br>
+    <button onclick="register()">Register</button>
+    <p>Already have an account? <a href="#" onclick="toggleRegister()">Login</a></p>
+  </div>
+
+  <!-- 🎮 Game Section -->
+  <div id="gameSection" class="hidden">
+    <h1>Color Prediction Game</h1>
+    <p>Welcome: <span id="userEmail"></span></p>
+    <button onclick="selectColor('RED')">Red</button>
+    <button onclick="selectColor('GREEN')">Green</button>
+    <button onclick="selectColor('VIOLET')">Violet</button><br><br>
+    <input type="number" id="bet" placeholder="Enter Bet ₹">
+    <p id="countdown"></p>
+    <p id="result"></p>
+    <p><b>History:</b> <span id="history"></span></p>
+    <button onclick="logout()">Logout</button>
+  </div>
 
   <script>
+    // Firebase login/register functions
+    function toggleRegister() {
+      document.getElementById("loginSection").classList.toggle("hidden");
+      document.getElementById("registerSection").classList.toggle("hidden");
+    }
+
+    function register() {
+      const email = document.getElementById("regEmail").value;
+      const pass = document.getElementById("regPass").value;
+      auth.createUserWithEmailAndPassword(email, pass)
+        .then(() => alert("Registration successful!"))
+        .catch(error => alert(error.message));
+    }
+
+    function login() {
+      const email = document.getElementById("loginEmail").value;
+      const pass = document.getElementById("loginPass").value;
+      auth.signInWithEmailAndPassword(email, pass)
+        .catch(error => alert(error.message));
+    }
+
+    function logout() {
+      auth.signOut();
+    }
+
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        document.getElementById("loginSection").classList.add("hidden");
+        document.getElementById("registerSection").classList.add("hidden");
+        document.getElementById("gameSection").classList.remove("hidden");
+        document.getElementById("userEmail").innerText = user.email;
+        startTimer(); // start game
+      } else {
+        document.getElementById("gameSection").classList.add("hidden");
+        document.getElementById("loginSection").classList.remove("hidden");
+      }
+    });
+
+    // Color prediction logic
     let selectedColor = null;
     let history = [];
 
@@ -44,7 +125,7 @@
         `Result: ${resultColor} (${num}) → You ${win ? 'Win ₹' + (bet * 2) : 'Lose ₹' + bet}`;
       history.unshift(resultColor);
       document.getElementById("history").innerText = history.slice(0, 5).join(", ");
-      startTimer(); // Start next round
+      startTimer();
     }
 
     let timeLeft = 60;
@@ -58,12 +139,10 @@
         document.getElementById("countdown").innerText = `Time Left: ${timeLeft}s`;
         if (timeLeft <= 0) {
           clearInterval(timer);
-          placeBet(); // Auto-play if time ends
+          placeBet();
         }
       }, 1000);
     }
-
-    startTimer();
   </script>
 </body>
 </html>
