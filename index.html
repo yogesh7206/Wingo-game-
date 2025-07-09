@@ -56,12 +56,12 @@
     <div id="numberButtons">
       <h3>Or Bet on Number:</h3>
       <div class="number-btns">
-        <button class="green" onclick="selectNumber(0)">0</button>
+        <button style="background: linear-gradient(to right, red, purple); color: white;" onclick="selectNumber(0)">0</button>
         <button class="red" onclick="selectNumber(1)">1</button>
         <button class="green" onclick="selectNumber(2)">2</button>
         <button class="red" onclick="selectNumber(3)">3</button>
         <button class="green" onclick="selectNumber(4)">4</button>
-        <button class="violet" onclick="selectNumber(5)">5</button>
+        <button style="background: linear-gradient(to right, green, purple); color: white;" onclick="selectNumber(5)">5</button>
         <button class="green" onclick="selectNumber(6)">6</button>
         <button class="red" onclick="selectNumber(7)">7</button>
         <button class="green" onclick="selectNumber(8)">8</button>
@@ -210,7 +210,7 @@
       selectedColor = null;
       selectedNumber = null;
 
-      // Auto-start next round after 3s delay
+      // Auto start next round after 3 seconds
       setTimeout(startTimer, 3000);
     }
 
