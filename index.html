@@ -39,9 +39,29 @@
     <h2>Color Prediction Game</h2>
     <div id="countdown"></div>
     <div id="countDisplay"></div>
-    <button class="red" onclick="selectColor('RED')">Red</button>
-    <button class="green" onclick="selectColor('GREEN')">Green</button>
-    <button class="violet" onclick="selectColor('VIOLET')">Violet</button><br><br>
+
+    <!-- Color Buttons -->
+    <button class="red" onclick="selectColor('RED')">Red (1.96x)</button>
+    <button class="green" onclick="selectColor('GREEN')">Green (1.96x)</button>
+    <button class="violet" onclick="selectColor('VIOLET')">Violet (4.5x)</button><br><br>
+
+    <!-- Number Betting -->
+    <div id="numberButtons">
+      <h3>Or Bet on Number:</h3>
+      <div>
+        <button onclick="selectNumber(0)">0</button>
+        <button onclick="selectNumber(1)">1</button>
+        <button onclick="selectNumber(2)">2</button>
+        <button onclick="selectNumber(3)">3</button>
+        <button onclick="selectNumber(4)">4</button>
+        <button onclick="selectNumber(5)">5</button>
+        <button onclick="selectNumber(6)">6</button>
+        <button onclick="selectNumber(7)">7</button>
+        <button onclick="selectNumber(8)">8</button>
+        <button onclick="selectNumber(9)">9</button>
+      </div>
+    </div><br>
+
     <input type="number" id="bet" step="0.1" placeholder="Enter Bet ₹">
     <p id="result"></p>
     <p><b>History:</b> <span id="history"></span></p>
@@ -129,11 +149,19 @@
     });
 
     let selectedColor = null;
+    let selectedNumber = null;
     let history = [];
 
     window.selectColor = function (color) {
       selectedColor = color;
-      alert("Selected: " + color);
+      selectedNumber = null;
+      alert("Selected Color: " + color);
+    };
+
+    window.selectNumber = function (num) {
+      selectedNumber = num;
+      selectedColor = null;
+      alert("Selected Number: " + num);
     };
 
     function getResultColor(num) {
@@ -143,7 +171,7 @@
     }
 
     function placeBet(countNum) {
-      if (!selectedColor) return alert("Choose color!");
+      if (selectedColor === null && selectedNumber === null) return alert("Choose color or number!");
       const bet = parseFloat(document.getElementById("bet").value);
       if (isNaN(bet) || bet <= 0) return alert("Enter valid bet!");
       if (bet > currentBalance) return alert("❌ Not enough balance!");
@@ -152,11 +180,12 @@
 
       let num = countNum;
       let resultColor = getResultColor(num);
-      let win = selectedColor === resultColor;
+      let colorWin = selectedColor === resultColor;
+      let numberWin = selectedNumber === num;
 
       let resultText = `Result: ${resultColor} (${num}) → `;
-      if (win) {
-        let multiplier = selectedColor === "VIOLET" ? 4.5 : 1.96;
+      if (colorWin || numberWin) {
+        let multiplier = colorWin ? (selectedColor === "VIOLET" ? 4.5 : 1.96) : 9.0;
         const winAmount = parseFloat((bet * multiplier).toFixed(2));
         currentBalance += winAmount;
         resultText += `🎉 You Win ₹${winAmount}`;
@@ -168,8 +197,11 @@
       document.getElementById("wallet").innerText = currentBalance.toFixed(2);
       document.getElementById("result").innerText = resultText;
 
-      history.unshift(resultColor);
+      history.unshift(`${resultColor} (${num})`);
       document.getElementById("history").innerText = history.slice(0, 5).join(", ");
+
+      selectedColor = null;
+      selectedNumber = null;
     }
 
     let timeLeft = 10;
