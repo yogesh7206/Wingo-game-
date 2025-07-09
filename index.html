@@ -15,10 +15,11 @@
   <button onclick="logout()">Log Out</button>
   <p id="message"></p>
 
-  <!-- 🎯 Wingo Game UI (Initially Hidden) -->
+  <!-- 🎮 Wingo Game Section (Hidden by default) -->
   <div id="game" style="display: none;">
     <h1>🎯 Wingo Game</h1>
-    <p>Wallet: ₹<span id="wallet">1000</span></p>
+    <p><strong>Game ID:</strong> <span id="gameid">Loading...</span></p>
+    <p><strong>Wallet:</strong> ₹<span id="wallet">1000</span></p>
     <p>Timer: <span id="countdown">60</span>s</p>
 
     <label>Pick Color:</label><br>
@@ -34,7 +35,7 @@
     <p>Last Results: <span id="history"></span></p>
   </div>
 
-  <!-- 🕹️ Game Logic (Optional, load your actual logic here) -->
+  <!-- 🎮 Local Game Logic -->
   <script>
     let selectedColor = '';
     let balance = 1000;
@@ -57,13 +58,10 @@
         return;
       }
 
-      // Simulate result
       const colors = ['RED', 'GREEN', 'VIOLET'];
       const resultColor = colors[Math.floor(Math.random() * 3)];
 
-      let win = false;
       if (selectedColor === resultColor) {
-        win = true;
         balance += betAmount * 2;
         resultText.innerText = `🎉 You won! Result was ${resultColor}`;
       } else {
@@ -81,11 +79,12 @@
     }
   </script>
 
-  <!-- ✅ Firebase Auth Logic (v10) -->
+  <!-- ✅ Firebase Auth + Database -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged }
       from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBe5kGOwYS3FsF_9_q1pjxaWrF1glUe87c",
@@ -99,18 +98,51 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const db = getDatabase(app);
 
     // Auth State Listener
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       const gameDiv = document.getElementById("game");
+      const message = document.getElementById("message");
+      const gameIdSpan = document.getElementById("gameid");
+      const walletSpan = document.getElementById("wallet");
+
       if (user) {
-        document.getElementById("message").innerText = "✅ Logged in as: " + user.email;
+        const uid = user.uid;
+        const userRef = ref(db, "users/" + uid);
+        let gameID;
+        let wallet;
+
+        const snapshot = await get(userRef);
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          gameID = data.gameID || generateGameID();
+          wallet = data.wallet || 1000;
+        } else {
+          gameID = generateGameID();
+          wallet = 1000;
+        }
+
+        // Save to Firebase if not already there
+        await set(userRef, { gameID: gameID, wallet: wallet });
+
+        balance = wallet; // load into game balance
+
+        // Update UI
+        gameIdSpan.innerText = gameID;
+        walletSpan.innerText = balance;
+        message.innerText = `✅ Logged in as: ${user.email}`;
         gameDiv.style.display = "block";
       } else {
-        document.getElementById("message").innerText = "🔒 You are logged out.";
         gameDiv.style.display = "none";
+        message.innerText = "🔒 You are logged out.";
       }
     });
+
+    // Random 6-digit ID
+    function generateGameID() {
+      return Math.floor(100000 + Math.random() * 900000);
+    }
 
     // Signup
     window.signup = function () {
@@ -140,10 +172,9 @@
 
     // Logout
     window.logout = function () {
-      signOut(auth)
-        .then(() => {
-          document.getElementById("message").innerText = "✅ Logged out.";
-        });
+      signOut(auth).then(() => {
+        document.getElementById("message").innerText = "✅ Logged out.";
+      });
     };
   </script>
 </body>
