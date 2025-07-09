@@ -1,164 +1,46 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Wingo Game</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body { font-family: Arial, sans-serif; padding: 10px; }
-    input, button { padding: 8px; margin: 5px 0; width: 100%; max-width: 300px; }
-    #game { display: none; }
-  </style>
-</head>
-<body>
+let selectedColor = null;
+let history = [];
 
-  <!-- 🔐 Login / Signup -->
-  <h2>Login / Signup</h2>
-  <input type="email" id="email" placeholder="Email"><br>
-  <input type="password" id="password" placeholder="Password"><br>
-  <button onclick="signup()">Sign Up</button>
-  <button onclick="login()">Log In</button>
-  <button onclick="logout()">Log Out</button>
-  <p id="message"></p>
+function selectColor(color) {
+  selectedColor = color;
+  alert("Selected: " + color);
+}
 
-  <!-- 🎮 Game Section -->
-  <div id="game">
-    <h1>🎯 Wingo Game</h1>
-    <p><b>Game ID:</b> <span id="gameid">------</span></p>
-    <p><b>Wallet:</b> ₹<span id="wallet">0</span></p>
-    <p>Timer: <span id="countdown">60</span>s</p>
+function getResultColor(num) {
+  if (num === 5) return "VIOLET";
+  else if ([1, 3, 7, 9].includes(num)) return "RED";
+  else return "GREEN";
+}
 
-    <label>Pick Color:</label><br>
-    <button onclick="selectColor('RED')">🔴 RED</button>
-    <button onclick="selectColor('GREEN')">🟢 GREEN</button>
-    <button onclick="selectColor('VIOLET')">🟣 VIOLET</button><br>
+function placeBet() {
+  if (!selectedColor) return alert("Pick a color!");
+  const bet = parseInt(document.getElementById("bet").value);
+  let num = Math.floor(Math.random() * 10);
+  let resultColor = getResultColor(num);
 
-    <label>Bet Amount (₹):</label>
-    <input id="bet" type="number" value="10"><br>
-    <button onclick="placeBet()">Place Bet</button>
+  let win = selectedColor === resultColor;
+  document.getElementById("result").innerText =
+    `Result: ${resultColor} (${num}) → You ${win ? "Win ₹" + (bet * 2) : "Lose ₹" + bet}`;
 
-    <p id="result"></p>
-    <p>Last Results: <span id="history"></span></p>
-  </div>
+  history.unshift(resultColor);
+  document.getElementById("history").innerText = history.slice(0, 5).join(", ");
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  startTimer(); // Start next round
+}
 
-  <!-- Game + Auth Script -->
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyBe5kGOwYS3FsF_9_q1pjxaWrF1glUe87c",
-      authDomain: "wingologin.firebaseapp.com",
-      projectId: "wingologin",
-      storageBucket: "wingologin.appspot.com",
-      messagingSenderId: "605536859710",
-      appId: "1:605536859710:web:ed9495775c8f8dd6a8836f"
-    };
+let timeLeft = 60;
+let timer;
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.database();
-
-    let currentUID = null;
-    let balance = 0;
-    let selectedColor = "";
-
-    // Show game after login
-    auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        currentUID = user.uid;
-        document.getElementById("game").style.display = "block";
-        document.getElementById("message").innerText = "✅ Logged in as " + user.email;
-
-        const userRef = db.ref("users/" + currentUID);
-        const snap = await userRef.once("value");
-
-        let gameID = "------";
-        if (snap.exists()) {
-          const data = snap.val();
-          gameID = data.gameID || makeGameID();
-          balance = data.wallet || 1000;
-        } else {
-          gameID = makeGameID();
-          balance = 1000;
-          await userRef.set({ gameID, wallet: balance });
-        }
-
-        document.getElementById("gameid").innerText = gameID;
-        document.getElementById("wallet").innerText = balance;
-      } else {
-        document.getElementById("game").style.display = "none";
-        document.getElementById("message").innerText = "🔒 Logged out.";
-      }
-    });
-
-    function signup() {
-      const email = document.getElementById("email").value;
-      const pass = document.getElementById("password").value;
-      auth.createUserWithEmailAndPassword(email, pass)
-        .then(() => {
-          document.getElementById("message").innerText = "✅ Sign up successful";
-        })
-        .catch(err => {
-          document.getElementById("message").innerText = "❌ " + err.message;
-        });
+function startTimer() {
+  clearInterval(timer);
+  timeLeft = 60;
+  timer = setInterval(() => {
+    timeLeft--;
+    document.getElementById("countdown").innerText = timeLeft;
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      placeBet(); // Auto play if time ends
     }
-
-    function login() {
-      const email = document.getElementById("email").value;
-      const pass = document.getElementById("password").value;
-      auth.signInWithEmailAndPassword(email, pass)
-        .then(() => {
-          document.getElementById("message").innerText = "✅ Login successful";
-        })
-        .catch(err => {
-          document.getElementById("message").innerText = "❌ " + err.message;
-        });
-    }
-
-    function logout() {
-      auth.signOut();
-    }
-
-    function makeGameID() {
-      return Math.floor(100000 + Math.random() * 900000).toString();
-    }
-
-    function updateWallet() {
-      if (currentUID) {
-        db.ref("users/" + currentUID).set({
-          gameID: document.getElementById("gameid").innerText,
-          wallet: balance
-        });
-      }
-    }
-
-    function selectColor(color) {
-      selectedColor = color;
-    }
-
-    function placeBet() {
-      const bet = parseInt(document.getElementById("bet").value);
-      const resultText = document.getElementById("result");
-      if (isNaN(bet) || bet <= 0) return resultText.innerText = "❌ Invalid bet";
-      if (bet > balance) return resultText.innerText = "❌ Not enough balance";
-
-      const colors = ['RED', 'GREEN', 'VIOLET'];
-      const result = colors[Math.floor(Math.random() * 3)];
-
-      if (selectedColor === result) {
-        balance += bet * 2;
-        resultText.innerText = `🎉 You won! Result: ${result}`;
-      } else {
-        balance -= bet;
-        resultText.innerText = `😢 You lost! Result: ${result}`;
-      }
-
-      document.getElementById("wallet").innerText = balance;
-      document.getElementById("history").innerText = result + " " + document.getElementById("history").innerText;
-      updateWallet();
-    }
-  </script>
-</body>
-</html>
+  }, 1000);
+}
+startTimer();
