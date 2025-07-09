@@ -37,11 +37,12 @@
     <h1>Welcome, <span id="userEmail"></span>!</h1>
     <h2>Balance: ₹<span id="wallet">0</span></h2>
     <h2>Color Prediction Game</h2>
+    <div id="countdown"></div>
+    <div id="countDisplay"></div>
     <button class="red" onclick="selectColor('RED')">Red</button>
     <button class="green" onclick="selectColor('GREEN')">Green</button>
     <button class="violet" onclick="selectColor('VIOLET')">Violet</button><br><br>
-    <input type="number" id="bet" placeholder="Enter Bet ₹">
-    <p id="countdown"></p>
+    <input type="number" id="bet" step="0.1" placeholder="Enter Bet ₹">
     <p id="result"></p>
     <p><b>History:</b> <span id="history"></span></p>
     <button onclick="logout()">Logout</button>
@@ -112,11 +113,10 @@
         document.getElementById("registerSection").classList.add("hidden");
         document.getElementById("gameSection").classList.remove("hidden");
 
-        // Get user balance
         get(ref(db, "users/" + user.uid)).then(snapshot => {
           if (snapshot.exists()) {
             currentBalance = snapshot.val().balance || 0;
-            document.getElementById("wallet").innerText = currentBalance;
+            document.getElementById("wallet").innerText = currentBalance.toFixed(2);
           }
         });
 
@@ -128,7 +128,6 @@
       }
     });
 
-    // Game logic
     let selectedColor = null;
     let history = [];
 
@@ -143,7 +142,7 @@
       else return "GREEN";
     }
 
-    function placeBet() {
+    function placeBet(countNum) {
       if (!selectedColor) return alert("Choose color!");
       const bet = parseFloat(document.getElementById("bet").value);
       if (isNaN(bet) || bet <= 0) return alert("Enter valid bet!");
@@ -151,40 +150,43 @@
 
       currentBalance -= bet;
 
-      let num = Math.floor(Math.random() * 10);
+      let num = countNum;
       let resultColor = getResultColor(num);
       let win = selectedColor === resultColor;
 
       let resultText = `Result: ${resultColor} (${num}) → `;
       if (win) {
-        const winAmount = parseFloat((bet * 1.96).toFixed(2));
+        let multiplier = selectedColor === "VIOLET" ? 4.5 : 1.96;
+        const winAmount = parseFloat((bet * multiplier).toFixed(2));
         currentBalance += winAmount;
         resultText += `🎉 You Win ₹${winAmount}`;
       } else {
-        resultText += `😢 You Lose ₹${bet}`;
+        resultText += `😥 You Lose ₹${bet}`;
       }
 
-      // Save updated balance
       update(ref(db, "users/" + currentUser.uid), { balance: currentBalance });
       document.getElementById("wallet").innerText = currentBalance.toFixed(2);
       document.getElementById("result").innerText = resultText;
 
       history.unshift(resultColor);
       document.getElementById("history").innerText = history.slice(0, 5).join(", ");
-      startTimer();
     }
 
-    let timeLeft = 15;
+    let timeLeft = 10;
     let timer;
     function startTimer() {
       clearInterval(timer);
-      timeLeft = 15;
+      timeLeft = 10;
+      let countNum = 0;
       timer = setInterval(() => {
-        timeLeft--;
         document.getElementById("countdown").innerText = `Time Left: ${timeLeft}s`;
+        document.getElementById("countDisplay").innerText = `Random Number: ${countNum}`;
         if (timeLeft <= 0) {
           clearInterval(timer);
-          placeBet();
+          placeBet(countNum);
+        } else {
+          countNum = Math.floor(Math.random() * 10);
+          timeLeft--;
         }
       }, 1000);
     }
