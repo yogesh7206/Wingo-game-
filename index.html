@@ -1,5 +1,26 @@
 <!DOCTYPE html>
 <html>
-  <head><title>Wingo Game</title></head>
-  <body><h1>Hello from Wingo Game!</h1></body>
+<head>
+  <title>Wingo Game</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>🎯 Wingo Game</h1>
+  <p>Timer: <span id="countdown">60</span>s</p>
+
+  <label>Pick Color:</label><br>
+  <button onclick="selectColor('RED')">🔴 RED</button>
+  <button onclick="selectColor('GREEN')">🟢 GREEN</button>
+  <button onclick="selectColor('VIOLET')">🟣 VIOLET</button><br><br>
+
+  <label>Bet Amount (₹):</label>
+  <input id="bet" type="number" value="10"><br><br>
+
+  <button onclick="placeBet()">Place Bet</button>
+
+  <p id="result"></p>
+  <p>Last Results: <span id="history"></span></p>
+
+  <script src="script.js"></script>
+</body>
 </html>
