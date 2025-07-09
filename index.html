@@ -1,46 +1,69 @@
-let selectedColor = null;
-let history = [];
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Color Prediction Game</title>
+  <style>
+    body { font-family: Arial; text-align: center; margin-top: 50px; }
+    button { margin: 5px; padding: 10px 20px; font-size: 18px; }
+  </style>
+</head>
+<body>
+  <h1>Color Prediction Game</h1>
+  <p>Select Color:</p>
+  <button onclick="selectColor('RED')">Red</button>
+  <button onclick="selectColor('GREEN')">Green</button>
+  <button onclick="selectColor('VIOLET')">Violet</button>
+  <br><br>
+  <input type="number" id="bet" placeholder="Enter Bet ₹">
+  <p id="countdown"></p>
+  <p id="result"></p>
+  <p><b>History:</b> <span id="history"></span></p>
 
-function selectColor(color) {
-  selectedColor = color;
-  alert("Selected: " + color);
-}
+  <script>
+    let selectedColor = null;
+    let history = [];
 
-function getResultColor(num) {
-  if (num === 5) return "VIOLET";
-  else if ([1, 3, 7, 9].includes(num)) return "RED";
-  else return "GREEN";
-}
-
-function placeBet() {
-  if (!selectedColor) return alert("Pick a color!");
-  const bet = parseInt(document.getElementById("bet").value);
-  let num = Math.floor(Math.random() * 10);
-  let resultColor = getResultColor(num);
-
-  let win = selectedColor === resultColor;
-  document.getElementById("result").innerText =
-    `Result: ${resultColor} (${num}) → You ${win ? "Win ₹" + (bet * 2) : "Lose ₹" + bet}`;
-
-  history.unshift(resultColor);
-  document.getElementById("history").innerText = history.slice(0, 5).join(", ");
-
-  startTimer(); // Start next round
-}
-
-let timeLeft = 60;
-let timer;
-
-function startTimer() {
-  clearInterval(timer);
-  timeLeft = 60;
-  timer = setInterval(() => {
-    timeLeft--;
-    document.getElementById("countdown").innerText = timeLeft;
-    if (timeLeft <= 0) {
-      clearInterval(timer);
-      placeBet(); // Auto play if time ends
+    function selectColor(color) {
+      selectedColor = color;
+      alert("Selected: " + color);
     }
-  }, 1000);
-}
-startTimer();
+
+    function getResultColor(num) {
+      if (num === 5) return "VIOLET";
+      else if ([1, 3, 7, 9].includes(num)) return "RED";
+      else return "GREEN";
+    }
+
+    function placeBet() {
+      if (!selectedColor) return alert("Pick a color!");
+      const bet = parseInt(document.getElementById("bet").value);
+      let num = Math.floor(Math.random() * 10);
+      let resultColor = getResultColor(num);
+      let win = selectedColor === resultColor;
+      document.getElementById("result").innerText =
+        `Result: ${resultColor} (${num}) → You ${win ? 'Win ₹' + (bet * 2) : 'Lose ₹' + bet}`;
+      history.unshift(resultColor);
+      document.getElementById("history").innerText = history.slice(0, 5).join(", ");
+      startTimer(); // Start next round
+    }
+
+    let timeLeft = 60;
+    let timer;
+
+    function startTimer() {
+      clearInterval(timer);
+      timeLeft = 60;
+      timer = setInterval(() => {
+        timeLeft--;
+        document.getElementById("countdown").innerText = `Time Left: ${timeLeft}s`;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          placeBet(); // Auto-play if time ends
+        }
+      }, 1000);
+    }
+
+    startTimer();
+  </script>
+</body>
+</html>
