@@ -6,7 +6,7 @@
 </head>
 <body>
 
-  <!-- 🔐 Login/Signup UI -->
+  <!-- 🔐 Login/Signup Section -->
   <h2>Login / Signup</h2>
   <input type="email" id="email" placeholder="Email"><br><br>
   <input type="password" id="password" placeholder="Password"><br><br>
@@ -15,52 +15,107 @@
   <button onclick="logout()">Log Out</button>
   <p id="message"></p>
 
-  <!-- 🎯 Wingo Game UI -->
-  <h1>🎯 Wingo Game</h1>
-  <p>Timer: <span id="countdown">60</span>s</p>
+  <!-- 🎯 Wingo Game UI (Initially Hidden) -->
+  <div id="game" style="display: none;">
+    <h1>🎯 Wingo Game</h1>
+    <p>Wallet: ₹<span id="wallet">1000</span></p>
+    <p>Timer: <span id="countdown">60</span>s</p>
 
-  <label>Pick Color:</label><br>
-  <button onclick="selectColor('RED')">🔴 RED</button>
-  <button onclick="selectColor('GREEN')">🟢 GREEN</button>
-  <button onclick="selectColor('VIOLET')">🟣 VIOLET</button><br><br>
+    <label>Pick Color:</label><br>
+    <button onclick="selectColor('RED')">🔴 RED</button>
+    <button onclick="selectColor('GREEN')">🟢 GREEN</button>
+    <button onclick="selectColor('VIOLET')">🟣 VIOLET</button><br><br>
 
-  <label>Bet Amount (₹):</label>
-  <input id="bet" type="number" value="10"><br><br>
-  <button onclick="placeBet()">Place Bet</button>
+    <label>Bet Amount (₹):</label>
+    <input id="bet" type="number" value="10"><br><br>
+    <button onclick="placeBet()">Place Bet</button>
 
-  <p id="result"></p>
-  <p>Last Results: <span id="history"></span></p>
+    <p id="result"></p>
+    <p>Last Results: <span id="history"></span></p>
+  </div>
 
-  <!-- 🎮 Game Logic -->
-  <script src="script.js"></script>
+  <!-- 🕹️ Game Logic (Optional, load your actual logic here) -->
+  <script>
+    let selectedColor = '';
+    let balance = 1000;
 
-  <!-- ✅ Firebase Login Logic (v10 modular) -->
+    function selectColor(color) {
+      selectedColor = color;
+    }
+
+    function placeBet() {
+      const betAmount = parseInt(document.getElementById('bet').value);
+      const resultText = document.getElementById('result');
+
+      if (isNaN(betAmount) || betAmount <= 0) {
+        resultText.innerText = "❌ Please enter a valid bet amount.";
+        return;
+      }
+
+      if (betAmount > balance) {
+        resultText.innerText = "❌ Insufficient wallet balance.";
+        return;
+      }
+
+      // Simulate result
+      const colors = ['RED', 'GREEN', 'VIOLET'];
+      const resultColor = colors[Math.floor(Math.random() * 3)];
+
+      let win = false;
+      if (selectedColor === resultColor) {
+        win = true;
+        balance += betAmount * 2;
+        resultText.innerText = `🎉 You won! Result was ${resultColor}`;
+      } else {
+        balance -= betAmount;
+        resultText.innerText = `😢 You lost! Result was ${resultColor}`;
+      }
+
+      document.getElementById('wallet').innerText = balance;
+      updateHistory(resultColor);
+    }
+
+    function updateHistory(result) {
+      const history = document.getElementById('history');
+      history.innerText = result + " " + history.innerText;
+    }
+  </script>
+
+  <!-- ✅ Firebase Auth Logic (v10) -->
   <script type="module">
-    // Import Firebase modules
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut }
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged }
       from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-    // ✅ Correct Firebase config with fixed storageBucket
     const firebaseConfig = {
       apiKey: "AIzaSyBe5kGOwYS3FsF_9_q1pjxaWrF1glUe87c",
       authDomain: "wingologin.firebaseapp.com",
       projectId: "wingologin",
-      storageBucket: "wingologin.appspot.com",  // ✅ fixed here
+      storageBucket: "wingologin.appspot.com",
       messagingSenderId: "605536859710",
       appId: "1:605536859710:web:ed9495775c8f8dd6a8836f",
       measurementId: "G-FLDY936H9P"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    // 🔐 Signup
+    // Auth State Listener
+    onAuthStateChanged(auth, (user) => {
+      const gameDiv = document.getElementById("game");
+      if (user) {
+        document.getElementById("message").innerText = "✅ Logged in as: " + user.email;
+        gameDiv.style.display = "block";
+      } else {
+        document.getElementById("message").innerText = "🔒 You are logged out.";
+        gameDiv.style.display = "none";
+      }
+    });
+
+    // Signup
     window.signup = function () {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
-
       createUserWithEmailAndPassword(auth, email, password)
         .then(() => {
           document.getElementById("message").innerText = "✅ Sign up successful!";
@@ -70,11 +125,10 @@
         });
     };
 
-    // 🔐 Login
+    // Login
     window.login = function () {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
-
       signInWithEmailAndPassword(auth, email, password)
         .then(() => {
           document.getElementById("message").innerText = "✅ Login successful!";
@@ -84,7 +138,7 @@
         });
     };
 
-    // 🔐 Logout
+    // Logout
     window.logout = function () {
       signOut(auth)
         .then(() => {
@@ -92,6 +146,5 @@
         });
     };
   </script>
-
 </body>
 </html>
