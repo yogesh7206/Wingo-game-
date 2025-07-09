@@ -31,6 +31,7 @@
   <div id="game">
     <div class="section">
       <h3>Wallet: ₹<span id="wallet">0</span></h3>
+      <p>Logged in as: <span id="userEmail"></span></p>
       <input type="number" id="betAmount" placeholder="Bet Amount">
     </div>
     <div class="section">
@@ -39,6 +40,7 @@
       <button class="color-btn Violet" onclick="placeBet('Violet')">Bet on Violet</button>
     </div>
     <div class="section">
+      <h4>Next Round in: <span id="countdown">--</span> seconds</h4>
       <h4>Last Result: <span id="lastResult">Waiting...</span></h4>
     </div>
     <button id="logoutBtn" onclick="logout()">Logout</button>
@@ -50,25 +52,27 @@
   <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-database.js"></script>
 
   <script>
-    // Firebase Config (Replace with your Firebase config)
+    // Your Firebase config here (Replace with your Firebase config)
     const firebaseConfig = {
       apiKey: "YOUR_API_KEY",
       authDomain: "YOUR_PROJECT.firebaseapp.com",
-      projectId: "YOUR_PROJECT",
-      databaseURL: "https://YOUR_PROJECT.firebaseio.com",
+      projectId: "YOUR_PROJECT_ID",
+      databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
       storageBucket: "YOUR_PROJECT.appspot.com",
       messagingSenderId: "YOUR_SENDER_ID",
       appId: "YOUR_APP_ID"
     };
     firebase.initializeApp(firebaseConfig);
 
-    // Auth State
+    // Auth state
     firebase.auth().onAuthStateChanged(user => {
       if (user) {
         document.getElementById('auth').style.display = 'none';
         document.getElementById('game').style.display = 'block';
+        document.getElementById('userEmail').innerText = user.email; // Or use user.uid
         loadWallet();
         startRoundTimer();
+        startCountdown();
       } else {
         document.getElementById('auth').style.display = 'block';
         document.getElementById('game').style.display = 'none';
@@ -102,8 +106,10 @@
       const uid = firebase.auth().currentUser.uid;
       firebase.database().ref('users/' + uid).on('value', snapshot => {
         const data = snapshot.val();
-        if (data) {
-          document.getElementById('wallet').innerText = data.wallet || 0;
+        if (data && typeof data.wallet === 'number') {
+          document.getElementById('wallet').innerText = data.wallet;
+        } else {
+          document.getElementById('wallet').innerText = 0;
         }
       });
     }
@@ -136,7 +142,7 @@
     function getCurrentRoundId() {
       const now = new Date();
       const minutes = now.getMinutes();
-      const round = Math.floor(minutes / 3); // every 3 min round
+      const round = Math.floor(minutes / 3); // every 3 minutes
       return `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}-${now.getHours()}-${round}`;
     }
 
@@ -170,10 +176,18 @@
             document.getElementById('lastResult').innerText = snap.val().result;
           }
         });
-      }, 10000); // Check every 10 sec (adjust as needed)
+      }, 10000); // every 10 seconds (can adjust)
     }
 
-    // Input shortcuts
+    function startCountdown() {
+      setInterval(() => {
+        const now = new Date();
+        const seconds = now.getMinutes() * 60 + now.getSeconds();
+        const next = 180 - (seconds % 180); // 180 sec = 3 minutes
+        document.getElementById('countdown').innerText = next;
+      }, 1000);
+    }
+
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
   </script>
