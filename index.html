@@ -15,7 +15,7 @@
   <button onclick="logout()">Log Out</button>
   <p id="message"></p>
 
-  <!-- 🎮 Game Section (Initially Hidden) -->
+  <!-- 🎮 Game Section (Hidden Until Login) -->
   <div id="game" style="display: none;">
     <h1>🎯 Wingo Game</h1>
     <p><strong>Game ID:</strong> <span id="gameid">Loading...</span></p>
@@ -35,14 +35,13 @@
     <p>Last Results: <span id="history"></span></p>
   </div>
 
-  <!-- Firebase & Game Logic -->
-  <script type="module">
-    // Firebase imports
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged }
-      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  <!-- ✅ Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js"></script>
 
+  <!-- ✅ Game + Auth Logic -->
+  <script>
     // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyBe5kGOwYS3FsF_9_q1pjxaWrF1glUe87c",
@@ -50,31 +49,27 @@
       projectId: "wingologin",
       storageBucket: "wingologin.appspot.com",
       messagingSenderId: "605536859710",
-      appId: "1:605536859710:web:ed9495775c8f8dd6a8836f",
-      measurementId: "G-FLDY936H9P"
+      appId: "1:605536859710:web:ed9495775c8f8dd6a8836f"
     };
 
     // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
 
-    // Global state
-    let selectedColor = '';
-    let balance = 0;
     let currentUID = null;
+    let balance = 0;
+    let selectedColor = "";
 
-    // Show game after login
-    onAuthStateChanged(auth, async (user) => {
+    // Show/hide game after login
+    auth.onAuthStateChanged(async (user) => {
       const gameDiv = document.getElementById("game");
       const message = document.getElementById("message");
-      const gameIdSpan = document.getElementById("gameid");
-      const walletSpan = document.getElementById("wallet");
 
       if (user) {
         currentUID = user.uid;
-        const userRef = ref(db, "users/" + currentUID);
-        const snapshot = await get(userRef);
+        const userRef = db.ref("users/" + currentUID);
+        const snapshot = await userRef.get();
 
         let gameID = "??????";
         if (snapshot.exists()) {
@@ -84,11 +79,11 @@
         } else {
           gameID = generateGameID();
           balance = 1000;
-          await set(userRef, { gameID: gameID, wallet: balance });
+          await userRef.set({ gameID: gameID, wallet: balance });
         }
 
-        gameIdSpan.innerText = gameID;
-        walletSpan.innerText = balance;
+        document.getElementById("gameid").innerText = gameID;
+        document.getElementById("wallet").innerText = balance;
         gameDiv.style.display = "block";
         message.innerText = `✅ Logged in as: ${user.email}`;
       } else {
@@ -98,16 +93,24 @@
       }
     });
 
-    // Generate random 6-digit Game ID
     function generateGameID() {
-      return Math.floor(100000 + Math.random() * 900000);
+      return Math.floor(100000 + Math.random() * 900000).toString();
     }
 
-    // Firebase signup
+    function updateWallet() {
+      if (currentUID) {
+        const gameID = document.getElementById("gameid").innerText;
+        db.ref("users/" + currentUID).set({
+          gameID: gameID,
+          wallet: balance
+        });
+      }
+    }
+
     window.signup = function () {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
-      createUserWithEmailAndPassword(auth, email, password)
+      auth.createUserWithEmailAndPassword(email, password)
         .then(() => {
           document.getElementById("message").innerText = "✅ Sign up successful!";
         })
@@ -116,11 +119,10 @@
         });
     };
 
-    // Firebase login
     window.login = function () {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
-      signInWithEmailAndPassword(auth, email, password)
+      auth.signInWithEmailAndPassword(email, password)
         .then(() => {
           document.getElementById("message").innerText = "✅ Login successful!";
         })
@@ -129,43 +131,28 @@
         });
     };
 
-    // Firebase logout
     window.logout = function () {
-      signOut(auth).then(() => {
+      auth.signOut().then(() => {
         document.getElementById("message").innerText = "✅ Logged out.";
         document.getElementById("game").style.display = "none";
       });
     };
 
-    // Save wallet to Firebase
-    function updateWalletInFirebase() {
-      if (currentUID) {
-        const gameID = document.getElementById("gameid").innerText;
-        const userRef = ref(db, "users/" + currentUID);
-        set(userRef, {
-          gameID: gameID,
-          wallet: balance
-        });
-      }
-    }
-
-    // Select color
     window.selectColor = function (color) {
       selectedColor = color;
     };
 
-    // Place bet logic
     window.placeBet = function () {
-      const betAmount = parseInt(document.getElementById('bet').value);
-      const resultText = document.getElementById('result');
+      const betAmount = parseInt(document.getElementById("bet").value);
+      const resultText = document.getElementById("result");
 
       if (isNaN(betAmount) || betAmount <= 0) {
-        resultText.innerText = "❌ Please enter a valid bet amount.";
+        resultText.innerText = "❌ Invalid bet amount.";
         return;
       }
 
       if (betAmount > balance) {
-        resultText.innerText = "❌ Insufficient wallet balance.";
+        resultText.innerText = "❌ Not enough balance.";
         return;
       }
 
@@ -180,14 +167,13 @@
         resultText.innerText = `😢 You lost! Result was ${resultColor}`;
       }
 
-      document.getElementById('wallet').innerText = balance;
+      document.getElementById("wallet").innerText = balance;
+      updateWallet();
       updateHistory(resultColor);
-      updateWalletInFirebase(); // Save balance to Firebase
     };
 
-    // Show past results
     function updateHistory(result) {
-      const history = document.getElementById('history');
+      const history = document.getElementById("history");
       history.innerText = result + " " + history.innerText;
     }
   </script>
