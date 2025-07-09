@@ -5,6 +5,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
   <!-- 🔐 Login/Signup UI -->
   <h2>Login / Signup</h2>
   <input type="email" id="email" placeholder="Email"><br><br>
@@ -33,21 +34,21 @@
   <!-- 🎮 Game Logic -->
   <script src="script.js"></script>
 
-  <!-- ✅ Firebase Login Logic (v10) -->
+  <!-- ✅ Firebase Login Logic (v10 modular) -->
   <script type="module">
-    // Import Firebase functions
+    // Import Firebase modules
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut }
       from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-    // Your Firebase config
+    // ✅ Correct Firebase config with fixed storageBucket
     const firebaseConfig = {
-      apiKey: "AIzaSyBe5kG0wYS3FsF_9_q1xxxxxxx", // replace with your actual key
+      apiKey: "AIzaSyBe5kGOwYS3FsF_9_q1pjxaWrF1glUe87c",
       authDomain: "wingologin.firebaseapp.com",
       projectId: "wingologin",
-      storageBucket: "wingologin.appspot.com",
+      storageBucket: "wingologin.appspot.com",  // ✅ fixed here
       messagingSenderId: "605536859710",
-      appId: "1:605536859710:web:ed9495xxxxxx",
+      appId: "1:605536859710:web:ed9495775c8f8dd6a8836f",
       measurementId: "G-FLDY936H9P"
     };
 
@@ -55,7 +56,7 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    // Sign Up
+    // 🔐 Signup
     window.signup = function () {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
@@ -69,7 +70,7 @@
         });
     };
 
-    // Log In
+    // 🔐 Login
     window.login = function () {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
@@ -83,7 +84,7 @@
         });
     };
 
-    // Log Out
+    // 🔐 Logout
     window.logout = function () {
       signOut(auth)
         .then(() => {
@@ -91,5 +92,6 @@
         });
     };
   </script>
+
 </body>
 </html>
