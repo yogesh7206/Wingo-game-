@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Wingo Game Login</title>
+  <title>Wingo Login + Game</title>
   <style>
     body { font-family: Arial; text-align: center; background: #f0f0f0; padding: 30px; }
     input, button { padding: 10px; margin: 5px; font-size: 16px; }
@@ -14,21 +14,21 @@
 </head>
 <body>
 
-  <!-- Login Form -->
+  <!-- Login Section -->
   <div id="loginSection">
     <h2>Login</h2>
     <input type="email" id="loginEmail" placeholder="Email"><br>
     <input type="password" id="loginPass" placeholder="Password"><br>
-    <button onclick="login()">Login</button>
+    <button id="loginBtn">Login</button>
     <p>Don't have an account? <a href="#" onclick="toggleRegister()">Register</a></p>
   </div>
 
-  <!-- Register Form -->
+  <!-- Register Section -->
   <div id="registerSection" class="hidden">
     <h2>Register</h2>
     <input type="email" id="regEmail" placeholder="Email"><br>
     <input type="password" id="regPass" placeholder="Password"><br>
-    <button onclick="register()">Register</button>
+    <button id="registerBtn">Register</button>
     <p>Already have an account? <a href="#" onclick="toggleRegister()">Login</a></p>
   </div>
 
@@ -46,11 +46,12 @@
     <button onclick="logout()">Logout</button>
   </div>
 
-  <!-- Firebase SDK via Module -->
   <script type="module">
+    // Import Firebase SDK
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
 
+    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyBe5kGOwYS3FsF_9_q1pjxaWrF1glUe87c",
       authDomain: "wingologin.firebaseapp.com",
@@ -62,65 +63,53 @@
       measurementId: "G-FLDY936H9P"
     };
 
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    function toggleRegister() {
+    // Toggle between login/register
+    window.toggleRegister = function () {
       document.getElementById("loginSection").classList.toggle("hidden");
       document.getElementById("registerSection").classList.toggle("hidden");
-    }
+    };
 
-    window.toggleRegister = toggleRegister;
-
-    function register() {
+    // Register function
+    document.getElementById("registerBtn").onclick = () => {
       const email = document.getElementById("regEmail").value;
       const pass = document.getElementById("regPass").value;
 
-      if (!email || !pass) return alert("Enter email and password");
-
       createUserWithEmailAndPassword(auth, email, pass)
-        .then((userCredential) => {
-          alert("✅ Registered! Please login.");
-          console.log("Registered:", userCredential.user.email);
+        .then(() => {
+          alert("✅ Registration successful!");
           toggleRegister();
         })
-        .catch((error) => {
-          console.error("Registration Error:", error.code, error.message);
-          alert("❌ " + error.message);
-        });
-    }
+        .catch(error => alert("❌ " + error.message));
+    };
 
-    function login() {
+    // Login function
+    document.getElementById("loginBtn").onclick = () => {
       const email = document.getElementById("loginEmail").value;
       const pass = document.getElementById("loginPass").value;
 
-      if (!email || !pass) return alert("Enter email and password");
-
       signInWithEmailAndPassword(auth, email, pass)
-        .then((userCredential) => {
+        .then(() => {
           alert("✅ Login successful!");
-          console.log("Login:", userCredential.user.email);
         })
-        .catch((error) => {
-          console.error("Login Error:", error.code, error.message);
-          alert("❌ " + error.message);
-        });
-    }
+        .catch(error => alert("❌ " + error.message));
+    };
 
-    function logout() {
+    // Logout function
+    window.logout = function () {
       signOut(auth);
-    }
+    };
 
-    window.register = register;
-    window.login = login;
-    window.logout = logout;
-
+    // Show/hide sections on login state
     onAuthStateChanged(auth, (user) => {
       if (user) {
+        document.getElementById("userEmail").innerText = user.email;
         document.getElementById("loginSection").classList.add("hidden");
         document.getElementById("registerSection").classList.add("hidden");
         document.getElementById("gameSection").classList.remove("hidden");
-        document.getElementById("userEmail").innerText = user.email;
         startTimer();
       } else {
         document.getElementById("gameSection").classList.add("hidden");
@@ -132,7 +121,7 @@
     let selectedColor = null;
     let history = [];
 
-    window.selectColor = function(color) {
+    window.selectColor = function (color) {
       selectedColor = color;
       alert("Selected: " + color);
     };
@@ -145,12 +134,22 @@
 
     function placeBet() {
       if (!selectedColor) return alert("Choose color!");
-      const bet = parseInt(document.getElementById("bet").value);
+      const bet = parseFloat(document.getElementById("bet").value);
+      if (isNaN(bet) || bet <= 0) return alert("Enter a valid bet amount");
+
       let num = Math.floor(Math.random() * 10);
       let resultColor = getResultColor(num);
       let win = selectedColor === resultColor;
-      document.getElementById("result").innerText =
-        `Result: ${resultColor} (${num}) → You ${win ? 'Win ₹' + (bet * 2) : 'Lose ₹' + bet}`;
+
+      let resultText = `Result: ${resultColor} (${num}) → `;
+      if (win) {
+        const winAmount = (bet * 1.96).toFixed(2);
+        resultText += `🎉 You Win ₹${winAmount}`;
+      } else {
+        resultText += `😢 You Lose ₹${bet}`;
+      }
+
+      document.getElementById("result").innerText = resultText;
       history.unshift(resultColor);
       document.getElementById("history").innerText = history.slice(0, 5).join(", ");
       startTimer();
