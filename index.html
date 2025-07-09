@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Wingo Login + Game</title>
+  <title>Wingo Login + Wallet Game</title>
   <style>
     body { font-family: Arial; text-align: center; background: #f0f0f0; padding: 30px; }
     input, button { padding: 10px; margin: 5px; font-size: 16px; }
@@ -35,6 +35,7 @@
   <!-- Game Section -->
   <div id="gameSection" class="hidden">
     <h1>Welcome, <span id="userEmail"></span>!</h1>
+    <h2>Balance: ₹<span id="wallet">0</span></h2>
     <h2>Color Prediction Game</h2>
     <button class="red" onclick="selectColor('RED')">Red</button>
     <button class="green" onclick="selectColor('GREEN')">Green</button>
@@ -47,11 +48,10 @@
   </div>
 
   <script type="module">
-    // Import Firebase SDK
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+    import { getDatabase, ref, set, get, update } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 
-    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyBe5kGOwYS3FsF_9_q1pjxaWrF1glUe87c",
       authDomain: "wingologin.firebaseapp.com",
@@ -59,65 +59,76 @@
       projectId: "wingologin",
       storageBucket: "wingologin.appspot.com",
       messagingSenderId: "605536859710",
-      appId: "1:605536859710:web:ed9495775c8f8dd6a8836f",
-      measurementId: "G-FLDY936H9P"
+      appId: "1:605536859710:web:ed9495775c8f8dd6a8836f"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const db = getDatabase(app);
 
-    // Toggle between login/register
+    let currentUser = null;
+    let currentBalance = 0;
+
     window.toggleRegister = function () {
       document.getElementById("loginSection").classList.toggle("hidden");
       document.getElementById("registerSection").classList.toggle("hidden");
     };
 
-    // Register function
     document.getElementById("registerBtn").onclick = () => {
       const email = document.getElementById("regEmail").value;
       const pass = document.getElementById("regPass").value;
 
       createUserWithEmailAndPassword(auth, email, pass)
-        .then(() => {
-          alert("✅ Registration successful!");
+        .then((userCredential) => {
+          const uid = userCredential.user.uid;
+          set(ref(db, "users/" + uid), {
+            email: email,
+            balance: 100
+          });
+          alert("✅ Registered with ₹100 balance!");
           toggleRegister();
         })
         .catch(error => alert("❌ " + error.message));
     };
 
-    // Login function
     document.getElementById("loginBtn").onclick = () => {
       const email = document.getElementById("loginEmail").value;
       const pass = document.getElementById("loginPass").value;
 
       signInWithEmailAndPassword(auth, email, pass)
-        .then(() => {
-          alert("✅ Login successful!");
-        })
+        .then(() => alert("✅ Login successful!"))
         .catch(error => alert("❌ " + error.message));
     };
 
-    // Logout function
     window.logout = function () {
       signOut(auth);
     };
 
-    // Show/hide sections on login state
     onAuthStateChanged(auth, (user) => {
       if (user) {
+        currentUser = user;
         document.getElementById("userEmail").innerText = user.email;
         document.getElementById("loginSection").classList.add("hidden");
         document.getElementById("registerSection").classList.add("hidden");
         document.getElementById("gameSection").classList.remove("hidden");
+
+        // Get user balance
+        get(ref(db, "users/" + user.uid)).then(snapshot => {
+          if (snapshot.exists()) {
+            currentBalance = snapshot.val().balance || 0;
+            document.getElementById("wallet").innerText = currentBalance;
+          }
+        });
+
         startTimer();
       } else {
+        currentUser = null;
         document.getElementById("gameSection").classList.add("hidden");
         document.getElementById("loginSection").classList.remove("hidden");
       }
     });
 
-    // Game Logic
+    // Game logic
     let selectedColor = null;
     let history = [];
 
@@ -135,7 +146,10 @@
     function placeBet() {
       if (!selectedColor) return alert("Choose color!");
       const bet = parseFloat(document.getElementById("bet").value);
-      if (isNaN(bet) || bet <= 0) return alert("Enter a valid bet amount");
+      if (isNaN(bet) || bet <= 0) return alert("Enter valid bet!");
+      if (bet > currentBalance) return alert("❌ Not enough balance!");
+
+      currentBalance -= bet;
 
       let num = Math.floor(Math.random() * 10);
       let resultColor = getResultColor(num);
@@ -143,13 +157,18 @@
 
       let resultText = `Result: ${resultColor} (${num}) → `;
       if (win) {
-        const winAmount = (bet * 1.96).toFixed(2);
+        const winAmount = parseFloat((bet * 1.96).toFixed(2));
+        currentBalance += winAmount;
         resultText += `🎉 You Win ₹${winAmount}`;
       } else {
         resultText += `😢 You Lose ₹${bet}`;
       }
 
+      // Save updated balance
+      update(ref(db, "users/" + currentUser.uid), { balance: currentBalance });
+      document.getElementById("wallet").innerText = currentBalance.toFixed(2);
       document.getElementById("result").innerText = resultText;
+
       history.unshift(resultColor);
       document.getElementById("history").innerText = history.slice(0, 5).join(", ");
       startTimer();
