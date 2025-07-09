@@ -1,197 +1,46 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Color Prediction Game</title>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; background: #f5f5f5; padding: 20px; }
-    .section { margin-bottom: 20px; }
-    .color-btn { padding: 10px 20px; font-size: 16px; margin: 5px; border: none; color: white; cursor: pointer; border-radius: 5px; }
-    .Red { background: red; }
-    .Green { background: green; }
-    .Violet { background: purple; }
-    #game, #logoutBtn { display: none; }
-    input { padding: 10px; font-size: 14px; margin: 5px; }
-  </style>
-</head>
-<body>
+let selectedColor = null;
+let history = [];
 
-  <h2>🎯 Color Prediction Game</h2>
+function selectColor(color) {
+  selectedColor = color;
+  alert("Selected: " + color);
+}
 
-  <!-- Login/Register Section -->
-  <div id="auth">
-    <div class="section">
-      <input type="email" id="email" placeholder="Email"><br>
-      <input type="password" id="password" placeholder="Password"><br>
-      <button onclick="register()">Register</button>
-      <button onclick="login()">Login</button>
-    </div>
-  </div>
+function getResultColor(num) {
+  if (num === 5) return "VIOLET";
+  else if ([1, 3, 7, 9].includes(num)) return "RED";
+  else return "GREEN";
+}
 
-  <!-- Game Section -->
-  <div id="game">
-    <div class="section">
-      <h3>Wallet: ₹<span id="wallet">0</span></h3>
-      <p>Logged in as: <span id="userEmail"></span></p>
-    </div>
+function placeBet() {
+  if (!selectedColor) return alert("Pick a color!");
+  const bet = parseInt(document.getElementById("bet").value);
+  let num = Math.floor(Math.random() * 10);
+  let resultColor = getResultColor(num);
 
-    <div class="section">
-      <input type="number" id="betAmount" placeholder="Enter Bet Amount">
-    </div>
+  let win = selectedColor === resultColor;
+  document.getElementById("result").innerText =
+    `Result: ${resultColor} (${num}) → You ${win ? "Win ₹" + (bet * 2) : "Lose ₹" + bet}`;
 
-    <div class="section">
-      <button class="color-btn Red" onclick="placeBet('Red')">Red</button>
-      <button class="color-btn Green" onclick="placeBet('Green')">Green</button>
-      <button class="color-btn Violet" onclick="placeBet('Violet')">Violet</button>
-    </div>
+  history.unshift(resultColor);
+  document.getElementById("history").innerText = history.slice(0, 5).join(", ");
 
-    <div class="section">
-      <h4>Next Round in: <span id="countdown">--</span> sec</h4>
-      <h4>Last Result: <span id="lastResult">--</span></h4>
-    </div>
+  startTimer(); // Start next round
+}
 
-    <button id="logoutBtn" onclick="logout()">Logout</button>
-  </div>
+let timeLeft = 60;
+let timer;
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-database.js"></script>
-
-  <!-- Firebase Config (YOURS) -->
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyBe5kGOwYS3FsF_9_q1pjxaWrF1glUe87c",
-      authDomain: "wingologin.firebaseapp.com",
-      databaseURL: "https://wingologin-default-rtdb.firebaseio.com",
-      projectId: "wingologin",
-      storageBucket: "wingologin.firebasestorage.app",
-      messagingSenderId: "605536859710",
-      appId: "1:605536859710:web:ed9495775c8f8dd6a8836f",
-      measurementId: "G-FLDY936H9P"
-    };
-    firebase.initializeApp(firebaseConfig);
-  </script>
-
-  <!-- App Logic -->
-  <script>
-    const emailInput = document.getElementById("email");
-    const passwordInput = document.getElementById("password");
-
-    firebase.auth().onAuthStateChanged(user => {
-      if (user) {
-        document.getElementById("auth").style.display = "none";
-        document.getElementById("game").style.display = "block";
-        document.getElementById("userEmail").innerText = user.email;
-        loadWallet();
-        startCountdown();
-        startRoundTimer();
-      } else {
-        document.getElementById("auth").style.display = "block";
-        document.getElementById("game").style.display = "none";
-      }
-    });
-
-    function register() {
-      const email = emailInput.value;
-      const password = passwordInput.value;
-      firebase.auth().createUserWithEmailAndPassword(email, password)
-        .then(userCred => {
-          firebase.database().ref("users/" + userCred.user.uid).set({
-            email: email,
-            wallet: 100
-          });
-          alert("Registered successfully");
-        })
-        .catch(err => alert("Register error: " + err.message));
+function startTimer() {
+  clearInterval(timer);
+  timeLeft = 60;
+  timer = setInterval(() => {
+    timeLeft--;
+    document.getElementById("countdown").innerText = timeLeft;
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      placeBet(); // Auto play if time ends
     }
-
-    function login() {
-      const email = emailInput.value;
-      const password = passwordInput.value;
-      firebase.auth().signInWithEmailAndPassword(email, password)
-        .then(() => alert("Login successful"))
-        .catch(err => alert("Login error: " + err.message));
-    }
-
-    function logout() {
-      firebase.auth().signOut();
-    }
-
-    function loadWallet() {
-      const uid = firebase.auth().currentUser.uid;
-      firebase.database().ref("users/" + uid).on("value", snapshot => {
-        const data = snapshot.val();
-        document.getElementById("wallet").innerText = data?.wallet || 0;
-      });
-    }
-
-    function updateWallet(amount) {
-      const uid = firebase.auth().currentUser.uid;
-      firebase.database().ref("users/" + uid).once("value").then(snapshot => {
-        const wallet = snapshot.val().wallet || 0;
-        firebase.database().ref("users/" + uid).update({ wallet: wallet + amount });
-      });
-    }
-
-    function getCurrentRoundId() {
-      const now = new Date();
-      const minutes = now.getMinutes();
-      const round = Math.floor(minutes / 3); // every 3 min
-      return `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}-${now.getHours()}-${round}`;
-    }
-
-    function placeBet(color) {
-      const amount = parseInt(document.getElementById("betAmount").value);
-      if (!amount || amount <= 0) return alert("Enter a valid amount");
-      const uid = firebase.auth().currentUser.uid;
-      const roundId = getCurrentRoundId();
-      firebase.database().ref("bets/" + roundId + "/" + uid).set({ color, amount });
-      updateWallet(-amount);
-      alert("Bet placed on " + color);
-    }
-
-    function startCountdown() {
-      setInterval(() => {
-        const now = new Date();
-        const seconds = now.getMinutes() * 60 + now.getSeconds();
-        const next = 180 - (seconds % 180); // 3 minutes = 180 seconds
-        document.getElementById("countdown").innerText = next;
-      }, 1000);
-    }
-
-    function startRoundTimer() {
-      setInterval(() => {
-        const roundId = getCurrentRoundId();
-        const colors = ["Red", "Green", "Violet"];
-        const result = colors[Math.floor(Math.random() * colors.length)];
-
-        firebase.database().ref("results/" + roundId).once("value", snapshot => {
-          if (!snapshot.exists()) {
-            firebase.database().ref("results/" + roundId).set({ result });
-            document.getElementById("lastResult").innerText = result;
-
-            firebase.database().ref("bets/" + roundId).once("value").then(betSnap => {
-              betSnap.forEach(userBet => {
-                const { color, amount } = userBet.val();
-                if (color === result) {
-                  firebase.database().ref("users/" + userBet.key).once("value").then(userSnap => {
-                    const wallet = userSnap.val().wallet;
-                    const winAmount = amount * 2;
-                    firebase.database().ref("users/" + userBet.key).update({
-                      wallet: wallet + winAmount
-                    });
-                  });
-                }
-              });
-            });
-          } else {
-            document.getElementById("lastResult").innerText = snapshot.val().result;
-          }
-        });
-      }, 10000); // every 10 sec
-    }
-  </script>
-
-</body>
-</html>
+  }, 1000);
+}
+startTimer();
