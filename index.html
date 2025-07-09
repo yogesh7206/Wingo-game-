@@ -6,7 +6,7 @@
 </head>
 <body>
 
-  <!-- 🔐 Login/Signup Section -->
+  <!-- 🔐 Login / Signup Section -->
   <h2>Login / Signup</h2>
   <input type="email" id="email" placeholder="Email"><br><br>
   <input type="password" id="password" placeholder="Password"><br><br>
@@ -15,7 +15,7 @@
   <button onclick="logout()">Log Out</button>
   <p id="message"></p>
 
-  <!-- 🎮 Game Section (Hidden by default) -->
+  <!-- 🎮 Game Section (Initially Hidden) -->
   <div id="game" style="display: none;">
     <h1>🎯 Wingo Game</h1>
     <p><strong>Game ID:</strong> <span id="gameid">Loading...</span></p>
@@ -35,7 +35,7 @@
     <p>Last Results: <span id="history"></span></p>
   </div>
 
-  <!-- 🎮 Game Logic + Firebase -->
+  <!-- Firebase & Game Logic -->
   <script type="module">
     // Firebase imports
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -59,15 +59,17 @@
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    // Game variables
+    // Global state
     let selectedColor = '';
     let balance = 0;
     let currentUID = null;
 
-    // Auth state listener
+    // Show game after login
     onAuthStateChanged(auth, async (user) => {
       const gameDiv = document.getElementById("game");
       const message = document.getElementById("message");
+      const gameIdSpan = document.getElementById("gameid");
+      const walletSpan = document.getElementById("wallet");
 
       if (user) {
         currentUID = user.uid;
@@ -85,8 +87,8 @@
           await set(userRef, { gameID: gameID, wallet: balance });
         }
 
-        document.getElementById("gameid").innerText = gameID;
-        document.getElementById("wallet").innerText = balance;
+        gameIdSpan.innerText = gameID;
+        walletSpan.innerText = balance;
         gameDiv.style.display = "block";
         message.innerText = `✅ Logged in as: ${user.email}`;
       } else {
@@ -96,7 +98,7 @@
       }
     });
 
-    // Generate 6-digit game ID
+    // Generate random 6-digit Game ID
     function generateGameID() {
       return Math.floor(100000 + Math.random() * 900000);
     }
@@ -138,21 +140,21 @@
     // Save wallet to Firebase
     function updateWalletInFirebase() {
       if (currentUID) {
-        const userRef = ref(db, "users/" + currentUID);
         const gameID = document.getElementById("gameid").innerText;
+        const userRef = ref(db, "users/" + currentUID);
         set(userRef, {
           gameID: gameID,
-          wallet: balance,
+          wallet: balance
         });
       }
     }
 
-    // Pick color
+    // Select color
     window.selectColor = function (color) {
       selectedColor = color;
     };
 
-    // Place bet
+    // Place bet logic
     window.placeBet = function () {
       const betAmount = parseInt(document.getElementById('bet').value);
       const resultText = document.getElementById('result');
@@ -180,10 +182,10 @@
 
       document.getElementById('wallet').innerText = balance;
       updateHistory(resultColor);
-      updateWalletInFirebase(); // Save new balance
+      updateWalletInFirebase(); // Save balance to Firebase
     };
 
-    // Update result history
+    // Show past results
     function updateHistory(result) {
       const history = document.getElementById('history');
       history.innerText = result + " " + history.innerText;
