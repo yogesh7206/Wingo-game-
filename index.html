@@ -15,11 +15,11 @@
   <button onclick="logout()">Log Out</button>
   <p id="message"></p>
 
-  <!-- 🎮 Wingo Game Section (Hidden by default) -->
+  <!-- 🎮 Game Section (Hidden by default) -->
   <div id="game" style="display: none;">
     <h1>🎯 Wingo Game</h1>
     <p><strong>Game ID:</strong> <span id="gameid">Loading...</span></p>
-    <p><strong>Wallet:</strong> ₹<span id="wallet">1000</span></p>
+    <p><strong>Wallet:</strong> ₹<span id="wallet">0</span></p>
     <p>Timer: <span id="countdown">60</span>s</p>
 
     <label>Pick Color:</label><br>
@@ -35,16 +35,125 @@
     <p>Last Results: <span id="history"></span></p>
   </div>
 
-  <!-- 🎮 Local Game Logic -->
-  <script>
-    let selectedColor = '';
-    let balance = 1000;
+  <!-- 🎮 Game Logic + Firebase -->
+  <script type="module">
+    // Firebase imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-    function selectColor(color) {
-      selectedColor = color;
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyBe5kGOwYS3FsF_9_q1pjxaWrF1glUe87c",
+      authDomain: "wingologin.firebaseapp.com",
+      projectId: "wingologin",
+      storageBucket: "wingologin.appspot.com",
+      messagingSenderId: "605536859710",
+      appId: "1:605536859710:web:ed9495775c8f8dd6a8836f",
+      measurementId: "G-FLDY936H9P"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    // Game variables
+    let selectedColor = '';
+    let balance = 0;
+    let currentUID = null;
+
+    // Auth state listener
+    onAuthStateChanged(auth, async (user) => {
+      const gameDiv = document.getElementById("game");
+      const message = document.getElementById("message");
+
+      if (user) {
+        currentUID = user.uid;
+        const userRef = ref(db, "users/" + currentUID);
+        const snapshot = await get(userRef);
+
+        let gameID = "??????";
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          gameID = data.gameID || generateGameID();
+          balance = data.wallet || 1000;
+        } else {
+          gameID = generateGameID();
+          balance = 1000;
+          await set(userRef, { gameID: gameID, wallet: balance });
+        }
+
+        document.getElementById("gameid").innerText = gameID;
+        document.getElementById("wallet").innerText = balance;
+        gameDiv.style.display = "block";
+        message.innerText = `✅ Logged in as: ${user.email}`;
+      } else {
+        currentUID = null;
+        gameDiv.style.display = "none";
+        message.innerText = "🔒 You are logged out.";
+      }
+    });
+
+    // Generate 6-digit game ID
+    function generateGameID() {
+      return Math.floor(100000 + Math.random() * 900000);
     }
 
-    function placeBet() {
+    // Firebase signup
+    window.signup = function () {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      createUserWithEmailAndPassword(auth, email, password)
+        .then(() => {
+          document.getElementById("message").innerText = "✅ Sign up successful!";
+        })
+        .catch((error) => {
+          document.getElementById("message").innerText = "❌ " + error.message;
+        });
+    };
+
+    // Firebase login
+    window.login = function () {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      signInWithEmailAndPassword(auth, email, password)
+        .then(() => {
+          document.getElementById("message").innerText = "✅ Login successful!";
+        })
+        .catch((error) => {
+          document.getElementById("message").innerText = "❌ " + error.message;
+        });
+    };
+
+    // Firebase logout
+    window.logout = function () {
+      signOut(auth).then(() => {
+        document.getElementById("message").innerText = "✅ Logged out.";
+        document.getElementById("game").style.display = "none";
+      });
+    };
+
+    // Save wallet to Firebase
+    function updateWalletInFirebase() {
+      if (currentUID) {
+        const userRef = ref(db, "users/" + currentUID);
+        const gameID = document.getElementById("gameid").innerText;
+        set(userRef, {
+          gameID: gameID,
+          wallet: balance,
+        });
+      }
+    }
+
+    // Pick color
+    window.selectColor = function (color) {
+      selectedColor = color;
+    };
+
+    // Place bet
+    window.placeBet = function () {
       const betAmount = parseInt(document.getElementById('bet').value);
       const resultText = document.getElementById('result');
 
@@ -71,111 +180,14 @@
 
       document.getElementById('wallet').innerText = balance;
       updateHistory(resultColor);
-    }
+      updateWalletInFirebase(); // Save new balance
+    };
 
+    // Update result history
     function updateHistory(result) {
       const history = document.getElementById('history');
       history.innerText = result + " " + history.innerText;
     }
-  </script>
-
-  <!-- ✅ Firebase Auth + Database -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged }
-      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyBe5kGOwYS3FsF_9_q1pjxaWrF1glUe87c",
-      authDomain: "wingologin.firebaseapp.com",
-      projectId: "wingologin",
-      storageBucket: "wingologin.appspot.com",
-      messagingSenderId: "605536859710",
-      appId: "1:605536859710:web:ed9495775c8f8dd6a8836f",
-      measurementId: "G-FLDY936H9P"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-
-    // Auth State Listener
-    onAuthStateChanged(auth, async (user) => {
-      const gameDiv = document.getElementById("game");
-      const message = document.getElementById("message");
-      const gameIdSpan = document.getElementById("gameid");
-      const walletSpan = document.getElementById("wallet");
-
-      if (user) {
-        const uid = user.uid;
-        const userRef = ref(db, "users/" + uid);
-        let gameID;
-        let wallet;
-
-        const snapshot = await get(userRef);
-        if (snapshot.exists()) {
-          const data = snapshot.val();
-          gameID = data.gameID || generateGameID();
-          wallet = data.wallet || 1000;
-        } else {
-          gameID = generateGameID();
-          wallet = 1000;
-        }
-
-        // Save to Firebase if not already there
-        await set(userRef, { gameID: gameID, wallet: wallet });
-
-        balance = wallet; // load into game balance
-
-        // Update UI
-        gameIdSpan.innerText = gameID;
-        walletSpan.innerText = balance;
-        message.innerText = `✅ Logged in as: ${user.email}`;
-        gameDiv.style.display = "block";
-      } else {
-        gameDiv.style.display = "none";
-        message.innerText = "🔒 You are logged out.";
-      }
-    });
-
-    // Random 6-digit ID
-    function generateGameID() {
-      return Math.floor(100000 + Math.random() * 900000);
-    }
-
-    // Signup
-    window.signup = function () {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      createUserWithEmailAndPassword(auth, email, password)
-        .then(() => {
-          document.getElementById("message").innerText = "✅ Sign up successful!";
-        })
-        .catch((error) => {
-          document.getElementById("message").innerText = "❌ " + error.message;
-        });
-    };
-
-    // Login
-    window.login = function () {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      signInWithEmailAndPassword(auth, email, password)
-        .then(() => {
-          document.getElementById("message").innerText = "✅ Login successful!";
-        })
-        .catch((error) => {
-          document.getElementById("message").innerText = "❌ " + error.message;
-        });
-    };
-
-    // Logout
-    window.logout = function () {
-      signOut(auth).then(() => {
-        document.getElementById("message").innerText = "✅ Logged out.";
-      });
-    };
   </script>
 </body>
 </html>
