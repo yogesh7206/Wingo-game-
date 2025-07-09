@@ -38,7 +38,8 @@
     <h2>Balance: ₹<span id="wallet">0</span></h2>
     <h2>Color Prediction Game</h2>
     <div id="countdown"></div>
-    <div id="countDisplay"></div> <!-- Number display fixed -->
+    <div id="countDisplay"></div>
+    <div id="numberBoard" style="margin: 10px;"></div>
     <button class="red" onclick="selectColor('RED')">Red</button>
     <button class="green" onclick="selectColor('GREEN')">Green</button>
     <button class="violet" onclick="selectColor('VIOLET')">Violet</button><br><br>
@@ -182,19 +183,35 @@
 
       timer = setInterval(() => {
         document.getElementById("countdown").innerText = `Time Left: ${timeLeft}s`;
-        document.getElementById("countDisplay").innerText = `Random Number: ${countNum}`; // ✅ Number is visible
+
+        countNum = Math.floor(Math.random() * 10);
+        document.getElementById("countDisplay").innerText = `Random Number: ${countNum}`;
+        showNumberBoard(countNum); // ✅ Show 0-9 numbers with colors
+
         if (timeLeft <= 0) {
           clearInterval(timer);
           placeBet(countNum);
-          startTimer(); // Auto restart
+          startTimer();
         } else {
-          countNum = Math.floor(Math.random() * 10);
           timeLeft--;
         }
       }, 1000);
     }
 
-    // 🔐 Admin check
+    function showNumberBoard(currentNum) {
+      let html = "";
+      for (let i = 0; i <= 9; i++) {
+        let color = getResultColor(i);
+        let highlight = i === currentNum ? "font-weight:bold; border: 2px solid black;" : "";
+        html += `<span style="display:inline-block; width:30px; height:30px; 
+                  line-height:30px; margin:2px; border-radius:5px; 
+                  background:${color.toLowerCase()}; color:white; ${highlight}">
+                  ${i}
+                </span>`;
+      }
+      document.getElementById("numberBoard").innerHTML = html;
+    }
+
     function checkIfAdmin(uid) {
       get(ref(db, "users/" + uid)).then(snapshot => {
         if (snapshot.exists() && snapshot.val().isAdmin === true) {
