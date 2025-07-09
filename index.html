@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Color Prediction Game</title>
+  <title>Wingo Login with Firebase</title>
   <style>
-    body { font-family: Arial; text-align: center; margin-top: 50px; background: #f0f0f0; }
-    button, input { margin: 5px; padding: 10px 20px; font-size: 18px; }
+    body { font-family: Arial; text-align: center; background: #f0f0f0; padding: 30px; }
+    input, button { padding: 10px; margin: 5px; font-size: 16px; }
     .hidden { display: none; }
+    .red { background: red; color: white; }
+    .green { background: green; color: white; }
+    .violet { background: purple; color: white; }
   </style>
 
-  <!-- ✅ Firebase SDKs -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js"></script>
   <script>
-    // ✅ Your Firebase Configuration
     const firebaseConfig = {
       apiKey: "AIzaSyBe5kGOwYS3FsF_9_q1pjxaWrF1glUe87c",
       authDomain: "wingologin.firebaseapp.com",
@@ -29,31 +31,31 @@
 </head>
 <body>
 
-  <!-- 🔐 Login Section -->
+  <!-- LOGIN -->
   <div id="loginSection">
-    <h2>Login to Start</h2>
+    <h2>Login</h2>
     <input type="email" id="loginEmail" placeholder="Email"><br>
     <input type="password" id="loginPass" placeholder="Password"><br>
     <button onclick="login()">Login</button>
     <p>Don't have an account? <a href="#" onclick="toggleRegister()">Register</a></p>
   </div>
 
-  <!-- 📝 Register Section -->
+  <!-- REGISTER -->
   <div id="registerSection" class="hidden">
-    <h2>Create an Account</h2>
+    <h2>Register</h2>
     <input type="email" id="regEmail" placeholder="Email"><br>
     <input type="password" id="regPass" placeholder="Password"><br>
     <button onclick="register()">Register</button>
     <p>Already have an account? <a href="#" onclick="toggleRegister()">Login</a></p>
   </div>
 
-  <!-- 🎮 Game Section -->
+  <!-- GAME -->
   <div id="gameSection" class="hidden">
-    <h1>Color Prediction Game</h1>
-    <p>Welcome: <span id="userEmail"></span></p>
-    <button onclick="selectColor('RED')">Red</button>
-    <button onclick="selectColor('GREEN')">Green</button>
-    <button onclick="selectColor('VIOLET')">Violet</button><br><br>
+    <h1>Welcome, <span id="userEmail"></span>!</h1>
+    <h2>Color Prediction Game</h2>
+    <button class="red" onclick="selectColor('RED')">Red</button>
+    <button class="green" onclick="selectColor('GREEN')">Green</button>
+    <button class="violet" onclick="selectColor('VIOLET')">Violet</button><br><br>
     <input type="number" id="bet" placeholder="Enter Bet ₹">
     <p id="countdown"></p>
     <p id="result"></p>
@@ -62,7 +64,6 @@
   </div>
 
   <script>
-    // Firebase login/register functions
     function toggleRegister() {
       document.getElementById("loginSection").classList.toggle("hidden");
       document.getElementById("registerSection").classList.toggle("hidden");
@@ -72,7 +73,7 @@
       const email = document.getElementById("regEmail").value;
       const pass = document.getElementById("regPass").value;
       auth.createUserWithEmailAndPassword(email, pass)
-        .then(() => alert("Registration successful!"))
+        .then(() => alert("Registered successfully! Now login."))
         .catch(error => alert(error.message));
     }
 
@@ -80,7 +81,7 @@
       const email = document.getElementById("loginEmail").value;
       const pass = document.getElementById("loginPass").value;
       auth.signInWithEmailAndPassword(email, pass)
-        .catch(error => alert(error.message));
+        .catch(error => alert("Login failed: " + error.message));
     }
 
     function logout() {
@@ -93,7 +94,7 @@
         document.getElementById("registerSection").classList.add("hidden");
         document.getElementById("gameSection").classList.remove("hidden");
         document.getElementById("userEmail").innerText = user.email;
-        startTimer(); // start game
+        startTimer();
       } else {
         document.getElementById("gameSection").classList.add("hidden");
         document.getElementById("loginSection").classList.remove("hidden");
@@ -116,7 +117,7 @@
     }
 
     function placeBet() {
-      if (!selectedColor) return alert("Pick a color!");
+      if (!selectedColor) return alert("Choose color!");
       const bet = parseInt(document.getElementById("bet").value);
       let num = Math.floor(Math.random() * 10);
       let resultColor = getResultColor(num);
@@ -128,12 +129,11 @@
       startTimer();
     }
 
-    let timeLeft = 60;
+    let timeLeft = 15;
     let timer;
-
     function startTimer() {
       clearInterval(timer);
-      timeLeft = 60;
+      timeLeft = 15;
       timer = setInterval(() => {
         timeLeft--;
         document.getElementById("countdown").innerText = `Time Left: ${timeLeft}s`;
