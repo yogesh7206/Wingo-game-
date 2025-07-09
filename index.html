@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Wingo Login with Firebase</title>
+  <meta charset="UTF-8">
+  <title>Wingo Game Login</title>
   <style>
     body { font-family: Arial; text-align: center; background: #f0f0f0; padding: 30px; }
     input, button { padding: 10px; margin: 5px; font-size: 16px; }
@@ -10,24 +11,6 @@
     .green { background: green; color: white; }
     .violet { background: purple; color: white; }
   </style>
-
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js"></script>
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyBe5kGOwYS3FsF_9_q1pjxaWrF1glUe87c",
-      authDomain: "wingologin.firebaseapp.com",
-      databaseURL: "https://wingologin-default-rtdb.firebaseio.com",
-      projectId: "wingologin",
-      storageBucket: "wingologin.firebasestorage.app",
-      messagingSenderId: "605536859710",
-      appId: "1:605536859710:web:ed9495775c8f8dd6a8836f",
-      measurementId: "G-FLDY936H9P"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-  </script>
 </head>
 <body>
 
@@ -63,29 +46,47 @@
     <button onclick="logout()">Logout</button>
   </div>
 
-  <script>
+  <!-- Firebase SDK via Module -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBe5kGOwYS3FsF_9_q1pjxaWrF1glUe87c",
+      authDomain: "wingologin.firebaseapp.com",
+      databaseURL: "https://wingologin-default-rtdb.firebaseio.com",
+      projectId: "wingologin",
+      storageBucket: "wingologin.appspot.com",
+      messagingSenderId: "605536859710",
+      appId: "1:605536859710:web:ed9495775c8f8dd6a8836f",
+      measurementId: "G-FLDY936H9P"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
     function toggleRegister() {
       document.getElementById("loginSection").classList.toggle("hidden");
       document.getElementById("registerSection").classList.toggle("hidden");
     }
 
+    window.toggleRegister = toggleRegister;
+
     function register() {
       const email = document.getElementById("regEmail").value;
       const pass = document.getElementById("regPass").value;
 
-      if (!email || !pass) {
-        alert("Please enter both email and password.");
-        return;
-      }
+      if (!email || !pass) return alert("Enter email and password");
 
-      auth.createUserWithEmailAndPassword(email, pass)
+      createUserWithEmailAndPassword(auth, email, pass)
         .then((userCredential) => {
-          console.log("✅ Registration success:", userCredential.user.email);
-          alert("✅ Registered successfully. Now login.");
+          alert("✅ Registered! Please login.");
+          console.log("Registered:", userCredential.user.email);
+          toggleRegister();
         })
         .catch((error) => {
-          console.error("❌ Registration error:", error.code, error.message);
-          alert("Registration failed: " + error.message);
+          console.error("Registration Error:", error.code, error.message);
+          alert("❌ " + error.message);
         });
     }
 
@@ -93,27 +94,28 @@
       const email = document.getElementById("loginEmail").value;
       const pass = document.getElementById("loginPass").value;
 
-      if (!email || !pass) {
-        alert("Please enter both email and password.");
-        return;
-      }
+      if (!email || !pass) return alert("Enter email and password");
 
-      auth.signInWithEmailAndPassword(email, pass)
+      signInWithEmailAndPassword(auth, email, pass)
         .then((userCredential) => {
-          console.log("✅ Login success:", userCredential.user.email);
           alert("✅ Login successful!");
+          console.log("Login:", userCredential.user.email);
         })
         .catch((error) => {
-          console.error("❌ Login error:", error.code, error.message);
-          alert("Login failed: " + error.message);
+          console.error("Login Error:", error.code, error.message);
+          alert("❌ " + error.message);
         });
     }
 
     function logout() {
-      auth.signOut();
+      signOut(auth);
     }
 
-    auth.onAuthStateChanged(user => {
+    window.register = register;
+    window.login = login;
+    window.logout = logout;
+
+    onAuthStateChanged(auth, (user) => {
       if (user) {
         document.getElementById("loginSection").classList.add("hidden");
         document.getElementById("registerSection").classList.add("hidden");
@@ -126,13 +128,14 @@
       }
     });
 
+    // Game Logic
     let selectedColor = null;
     let history = [];
 
-    function selectColor(color) {
+    window.selectColor = function(color) {
       selectedColor = color;
       alert("Selected: " + color);
-    }
+    };
 
     function getResultColor(num) {
       if (num === 5) return "VIOLET";
