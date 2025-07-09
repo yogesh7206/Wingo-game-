@@ -10,6 +10,13 @@
     .red { background: red; color: white; }
     .green { background: green; color: white; }
     .violet { background: purple; color: white; }
+    .number-btns button {
+      width: 40px;
+      margin: 2px;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -48,17 +55,17 @@
     <!-- Number Betting -->
     <div id="numberButtons">
       <h3>Or Bet on Number:</h3>
-      <div>
-        <button onclick="selectNumber(0)">0</button>
-        <button onclick="selectNumber(1)">1</button>
-        <button onclick="selectNumber(2)">2</button>
-        <button onclick="selectNumber(3)">3</button>
-        <button onclick="selectNumber(4)">4</button>
-        <button onclick="selectNumber(5)">5</button>
-        <button onclick="selectNumber(6)">6</button>
-        <button onclick="selectNumber(7)">7</button>
-        <button onclick="selectNumber(8)">8</button>
-        <button onclick="selectNumber(9)">9</button>
+      <div class="number-btns">
+        <button class="green" onclick="selectNumber(0)">0</button>
+        <button class="red" onclick="selectNumber(1)">1</button>
+        <button class="green" onclick="selectNumber(2)">2</button>
+        <button class="red" onclick="selectNumber(3)">3</button>
+        <button class="green" onclick="selectNumber(4)">4</button>
+        <button class="violet" onclick="selectNumber(5)">5</button>
+        <button class="green" onclick="selectNumber(6)">6</button>
+        <button class="red" onclick="selectNumber(7)">7</button>
+        <button class="green" onclick="selectNumber(8)">8</button>
+        <button class="red" onclick="selectNumber(9)">9</button>
       </div>
     </div><br>
 
@@ -202,6 +209,9 @@
 
       selectedColor = null;
       selectedNumber = null;
+
+      // Auto-start next round after 3s delay
+      setTimeout(startTimer, 3000);
     }
 
     let timeLeft = 10;
