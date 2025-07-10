@@ -75,25 +75,33 @@
     .chart-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      gap: 8px;
+      gap: 10px;
       justify-content: center;
     }
     .chart-cell {
-      width: 48px;
-      height: 48px;
+      width: 50px;
+      height: 50px;
       border-radius: 50%;
-      line-height: 48px;
+      line-height: 50px;
       text-align: center;
       font-weight: bold;
-      font-size: 16px;
+      font-size: 18px;
+      border: 2px solid #fff;
+      box-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
     }
-    .red-cell { background: #ff1744; color: white; }
-    .green-cell { background: #00e676; color: black; }
-    .violet-cell { background: #aa00ff; color: white; }
+    .red-cell { background: radial-gradient(circle at top left, #ff5252, #c51162); color: white; }
+    .green-cell { background: radial-gradient(circle at top left, #00e676, #00c853); color: black; }
+    .violet-cell { background: radial-gradient(circle at top left, #aa00ff, #6a1b9a); color: white; }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="container" id="authSection">
+    <h2>Login</h2>
+    <input type="email" id="loginEmail" placeholder="Email" />
+    <input type="password" id="loginPassword" placeholder="Password" />
+    <button onclick="loginUser()">Login</button>
+    <p style="text-align: center; margin-top: 10px;">No account? <a href="#" onclick="registerUser()">Click to register</a></p>
+  </div>  <div class="container hidden" id="gameSection">
     <h1>🎰 Wingo Game - Sikkim Style</h1>
     <p class="balance">💰 Balance: ₹<span id="wallet">100.00</span></p>
     <div class="timer">⏳ Time Left: <span id="countdown">--</span></div>
@@ -137,9 +145,26 @@
     const periodDisplay = document.getElementById("periodDisplay");
     const walletDisplay = document.getElementById("wallet");
     const chartGrid = document.getElementById("chartGrid");
-
     let balance = 100;
     let timerInterval = null;
+
+    function loginUser() {
+      const email = document.getElementById("loginEmail").value;
+      const pass = document.getElementById("loginPassword").value;
+      if (!email || !pass) return alert("Enter email and password");
+      // Simulate login (replace with Firebase in production)
+      if (email === "user@test.com" && pass === "123456") {
+        document.getElementById("authSection").classList.add("hidden");
+        document.getElementById("gameSection").classList.remove("hidden");
+        startTimer();
+      } else {
+        alert("Invalid credentials!");
+      }
+    }
+
+    function registerUser() {
+      alert("Registration not implemented in demo. Use user@test.com / 123456");
+    }
 
     function getPeriodId(seconds, time) {
       const d = time.toISOString().slice(0, 10).replace(/-/g, "");
@@ -198,6 +223,5 @@
     }
 
     document.getElementById("gameType").addEventListener("change", startTimer);
-    startTimer();
   </script></body>
 </html>
