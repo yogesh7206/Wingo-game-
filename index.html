@@ -128,7 +128,37 @@
     };
 
     function logout() {
-      signOut(auth);
+      signOut(auth)
+        .then(() => {
+          alert("👋 Logged out successfully!");
+
+          // Reset interface
+          document.getElementById("gameSection").classList.add("hidden");
+          document.getElementById("loginSection").classList.remove("hidden");
+          document.getElementById("registerSection").classList.add("hidden");
+
+          // Clear all sensitive data and UI
+          document.getElementById("userEmail").innerText = "";
+          document.getElementById("wallet").innerText = "0";
+          document.getElementById("userIdDisplay").innerText = "";
+          document.getElementById("bet").value = "";
+          document.getElementById("result").innerText = "";
+          document.getElementById("historyTable").innerHTML = "";
+          document.getElementById("countdown").innerText = "";
+
+          currentUser = null;
+          currentBalance = 0;
+          selectedColor = null;
+          confirmedBet = null;
+          history = [];
+          roundActive = false;
+
+          clearInterval(window.timer);
+        })
+        .catch((error) => {
+          console.error("Logout Error:", error);
+          alert("❌ Logout failed. Check console.");
+        });
     }
 
     onAuthStateChanged(auth, (user) => {
