@@ -35,7 +35,7 @@
   <!-- Game Section -->
   <div id="gameSection" class="hidden">
     <h1>Welcome, <span id="userEmail"></span>!</h1>
-    <p>User ID: <span id="userIdDisplay"></span></p> <!-- ✅ User ID shown -->
+    <p>User ID: <span id="userIdDisplay"></span></p>
     <h2>Balance: ₹<span id="wallet">0</span></h2>
     <h2>Color Prediction Game</h2>
     <div id="countdown"></div>
@@ -89,7 +89,7 @@
     document.getElementById("registerBtn").onclick = () => {
       const email = document.getElementById("regEmail").value;
       const pass = document.getElementById("regPass").value;
-      const userId = Math.floor(100000 + Math.random() * 900000).toString(); // ✅ 6-digit
+      const userId = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit ID
 
       createUserWithEmailAndPassword(auth, email, pass)
         .then((userCredential) => {
@@ -197,7 +197,7 @@
         if (timeLeft <= 0) {
           clearInterval(timer);
           placeBet(countNum);
-          startTimer();
+          startTimer(); // auto-restart
         } else {
           countNum = Math.floor(Math.random() * 10);
           timeLeft--;
@@ -210,7 +210,12 @@
         if (snapshot.exists()) {
           const users = snapshot.val();
           let html = `<table border="1" cellpadding="5" style="margin:auto;">
-            <tr><th>Email</th><th>Balance (₹)</th><th>User ID</th><th>Update</th></tr>`;
+            <tr>
+              <th>Email</th>
+              <th>Balance (₹)</th>
+              <th>User ID</th>
+              <th>Update</th>
+            </tr>`;
 
           for (const uid in users) {
             const user = users[uid];
