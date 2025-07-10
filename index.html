@@ -127,17 +127,15 @@
       }).catch(error => alert("❌ " + error.message));
     };
 
-    function logout() {
+    // ✅ This works now because it's attached to window!
+    window.logout = function () {
       signOut(auth)
         .then(() => {
           alert("👋 Logged out successfully!");
-
-          // Reset interface
           document.getElementById("gameSection").classList.add("hidden");
           document.getElementById("loginSection").classList.remove("hidden");
           document.getElementById("registerSection").classList.add("hidden");
 
-          // Clear all sensitive data and UI
           document.getElementById("userEmail").innerText = "";
           document.getElementById("wallet").innerText = "0";
           document.getElementById("userIdDisplay").innerText = "";
@@ -156,10 +154,10 @@
           clearInterval(window.timer);
         })
         .catch((error) => {
-          console.error("Logout Error:", error);
-          alert("❌ Logout failed. Check console.");
+          console.error("Logout error:", error);
+          alert("❌ Logout failed. See console.");
         });
-    }
+    };
 
     onAuthStateChanged(auth, (user) => {
       if (user) {
