@@ -1,136 +1,114 @@
 <!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Wingo Game - Realistic UI</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <title>Wingo Game</title>
   <style>
     body {
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(to bottom, #f0f4ff, #d9e2ff);
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .container {
-      max-width: 500px;
-      width: 100%;
+      font-family: Arial;
+      text-align: center;
+      background: #eaf1ff;
       padding: 20px;
-    }
-    .card {
-      background: white;
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
-    }
-    h2, h3 {
-      margin-bottom: 10px;
-      color: #333;
     }
     input, button, select {
-      width: 100%;
       padding: 10px;
-      margin: 5px 0;
+      margin: 5px;
       font-size: 16px;
-      border-radius: 8px;
+      border-radius: 6px;
       border: 1px solid #ccc;
     }
-    button {
-      background: linear-gradient(135deg, #007bff, #00c6ff);
-      color: white;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    button:hover {
-      opacity: 0.9;
-    }
-    .hidden {
-      display: none;
-    }
-    .game-buttons button {
-      width: 30%;
+    .hidden { display: none; }
+    .red { background: #e53935; color: white; }
+    .green { background: #43a047; color: white; }
+    .violet { background: #8e24aa; color: white; }
+    .big, .small { background: #ff9800; color: white; }
+    #chartContainer span {
+      display: inline-block;
       margin: 5px;
-    }
-    .chart-row {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 8px;
-      margin-top: 20px;
-    }
-    .circle {
-      width: 35px;
-      height: 35px;
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
+      line-height: 30px;
+      color: white;
       font-weight: bold;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
-    .red { background-color: #e53935; }
-    .green { background-color: #43a047; }
-    .violet { background-color: #8e24aa; }
+    .circle-red { background: #e53935; }
+    .circle-green { background: #43a047; }
+    .circle-violet { background: #8e24aa; }
+    .circle-gray { background: gray; }
+    #myBetsTable {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+      background: white;
+    }
+    #myBetsTable th, #myBetsTable td {
+      border: 1px solid #ccc;
+      padding: 8px;
+    }
+    #myBetsTable th {
+      background: #0055ff;
+      color: white;
+    }
   </style>
 </head>
-<body>
-  <div class="container">
-    <div id="loginSection" class="card">
-      <h2>Login</h2>
-      <input type="email" id="loginEmail" placeholder="Email">
-      <input type="password" id="loginPass" placeholder="Password">
-      <button id="loginBtn">Login</button>
-      <p>Don't have an account? <a href="#" onclick="toggleRegister()">Register</a></p>
-    </div><div id="registerSection" class="card hidden">
-  <h2>Register</h2>
-  <input type="email" id="regEmail" placeholder="Email">
-  <input type="password" id="regPass" placeholder="Password">
-  <button id="registerBtn">Register</button>
-  <p>Already have an account? <a href="#" onclick="toggleRegister()">Login</a></p>
+<body>  <div id="loginSection">
+    <h2>Login</h2>
+    <input type="email" id="loginEmail" placeholder="Email"><br>
+    <input type="password" id="loginPass" placeholder="Password"><br>
+    <button id="loginBtn">Login</button>
+    <p>Don't have an account? <a href="#" onclick="toggleRegister()">Register</a></p>
+  </div>  <div id="registerSection" class="hidden">
+    <h2>Register</h2>
+    <input type="email" id="regEmail" placeholder="Email"><br>
+    <input type="password" id="regPass" placeholder="Password"><br>
+    <button id="registerBtn">Register</button>
+    <p>Already have an account? <a href="#" onclick="toggleRegister()">Login</a></p>
+  </div>  <div id="gameSection" class="hidden">
+    <h1>Welcome, <span id="userEmail"></span>!</h1>
+    <p>User ID: <span id="userIdDisplay"></span></p>
+    <h2>Balance: ₹<span id="wallet">0</span></h2><h3>Select Game Duration:</h3>
+<select id="gameType">
+  <option value="30">30 Sec</option>
+  <option value="60">1 Min</option>
+  <option value="180">3 Min</option>
+  <option value="300">5 Min</option>
+</select>
+
+<p id="countdown">⏳ Time Left: --</p>
+<p><strong>Current Period:</strong> <span id="periodDisplay">--</span></p>
+
+<div>
+  <button class="red" onclick="selectColor('RED')">Red</button>
+  <button class="green" onclick="selectColor('GREEN')">Green</button>
+  <button class="violet" onclick="selectColor('VIOLET')">Violet</button>
 </div>
+<div>
+  <button class="big" onclick="selectBigSmall('BIG')">Big</button>
+  <button class="small" onclick="selectBigSmall('SMALL')">Small</button>
+</div><br>
 
-<div id="gameSection" class="card hidden">
-  <h2>Welcome, <span id="userEmail"></span></h2>
-  <p>User ID: <span id="userIdDisplay"></span></p>
-  <h3>Balance: ₹<span id="wallet">0</span></h3>
+<input type="number" id="bet" step="0.1" placeholder="Enter Bet ₹">
+<p id="result"></p>
 
-  <h3>Select Game Duration:</h3>
-  <select id="gameType">
-    <option value="30">30 Sec</option>
-    <option value="60">1 Min</option>
-    <option value="180">3 Min</option>
-    <option value="300">5 Min</option>
-  </select>
+<h3>Recent Results</h3>
+<div id="chartContainer"></div>
 
-  <p id="countdown">⏳ Time Left: --</p>
-  <p><strong>Current Period:</strong> <span id="periodDisplay">--</span></p>
+<h3>My Bet History</h3>
+<table id="myBetsTable">
+  <thead>
+    <tr><th>Period</th><th>Choice</th><th>Amount</th><th>Result</th></tr>
+  </thead>
+  <tbody id="myBetsBody"></tbody>
+</table>
 
-  <div class="game-buttons">
-    <button class="red" onclick="selectColor('RED')">Red</button>
-    <button class="green" onclick="selectColor('GREEN')">Green</button>
-    <button class="violet" onclick="selectColor('VIOLET')">Violet</button>
-    <button class="big" onclick="selectBigSmall('BIG')">Big</button>
-    <button class="small" onclick="selectBigSmall('SMALL')">Small</button>
-  </div>
-
-  <input type="number" id="bet" step="0.1" placeholder="Enter Bet ₹">
-  <p id="result"></p>
-
-  <h3>Recent Results</h3>
-  <div id="resultChart" class="chart-row"></div>
-
-  <button onclick="logout()">Logout</button>
-</div>
+<button onclick="logout()">Logout</button>
 
   </div>  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
-    import { getDatabase, ref, set, update, get, onValue } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+    import { getDatabase, ref, set, update, get, onValue, push } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 
-    const firebaseConfig = {
+    const app = initializeApp({
       apiKey: "AIzaSyBe5kGOwYS3FsF_9_q1pjxaWrF1glUe87c",
       authDomain: "wingologin.firebaseapp.com",
       databaseURL: "https://wingologin-default-rtdb.firebaseio.com",
@@ -138,9 +116,8 @@
       storageBucket: "wingologin.appspot.com",
       messagingSenderId: "605536859710",
       appId: "1:605536859710:web:ed9495775c8f8dd6a8836f"
-    };
+    });
 
-    const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
 
@@ -149,6 +126,8 @@
     let selectedColor = null;
     let selectedBigSmall = null;
     let confirmedBet = null;
+    let currentPeriod = "";
+    let currentGameType = 60;
 
     function toggleRegister() {
       document.getElementById("loginSection").classList.toggle("hidden");
@@ -193,22 +172,28 @@
           document.getElementById("userIdDisplay").innerText = data.userId;
         });
 
-        startGameTimer();
+        startRealTimeTimer();
       }
     });
 
     window.selectColor = color => {
+      confirmedBet = parseFloat(document.getElementById("bet").value);
+      if (confirmedBet > currentBalance) return alert("Insufficient Balance");
       selectedColor = color;
       selectedBigSmall = null;
-      confirmedBet = parseFloat(document.getElementById("bet").value);
-      alert(`✅ Bet on ${color}`);
+      currentBalance -= confirmedBet;
+      document.getElementById("wallet").innerText = currentBalance.toFixed(2);
+      document.getElementById("result").innerText = `Placed ₹${confirmedBet} on ${color}`;
     };
 
     window.selectBigSmall = size => {
+      confirmedBet = parseFloat(document.getElementById("bet").value);
+      if (confirmedBet > currentBalance) return alert("Insufficient Balance");
       selectedBigSmall = size;
       selectedColor = null;
-      confirmedBet = parseFloat(document.getElementById("bet").value);
-      alert(`✅ Bet on ${size}`);
+      currentBalance -= confirmedBet;
+      document.getElementById("wallet").innerText = currentBalance.toFixed(2);
+      document.getElementById("result").innerText = `Placed ₹${confirmedBet} on ${size}`;
     };
 
     function getResultColor(num) {
@@ -227,30 +212,39 @@
     function updateChart(gameType) {
       onValue(ref(db, `results/${gameType}`), snap => {
         const data = snap.val();
-        const rows = [];
+        const container = document.getElementById("chartContainer");
+        container.innerHTML = "";
         if (data) {
-          const keys = Object.keys(data).sort().reverse().slice(0, 20);
-          for (const p of keys) {
-            const val = data[p];
-            const className = val.color.toLowerCase();
-            rows.push(`<div class="circle ${className}">${val.number}</div>`);
+          const keys = Object.keys(data).sort().reverse().slice(0, 10);
+          for (const k of keys) {
+            const val = data[k];
+            const color = val.color === "RED" ? "circle-red" : val.color === "GREEN" ? "circle-green" : "circle-violet";
+            const span = document.createElement("span");
+            span.className = color;
+            span.textContent = val.number;
+            container.appendChild(span);
           }
         }
-        document.getElementById("resultChart").innerHTML = rows.join("");
       });
     }
 
-    function startGameTimer() {
+    function recordMyBet(period, choice, amount, result) {
+      const row = `<tr><td>${period}</td><td>${choice}</td><td>₹${amount}</td><td>${result}</td></tr>`;
+      document.getElementById("myBetsBody").innerHTML += row;
+    }
+
+    function startRealTimeTimer() {
       clearInterval(window.timer);
-      const gameType = parseInt(document.getElementById("gameType").value);
-      const nextRound = new Date(Math.ceil(Date.now() / (gameType * 1000)) * (gameType * 1000));
-      updateChart(gameType);
+      currentGameType = parseInt(document.getElementById("gameType").value);
+      const nextRound = new Date(Math.ceil(Date.now() / (currentGameType * 1000)) * (currentGameType * 1000));
+
+      updateChart(currentGameType);
 
       window.timer = setInterval(() => {
         const now = new Date();
         const diff = Math.floor((nextRound - now) / 1000);
-        const period = getPeriodId(gameType, now);
-        document.getElementById("periodDisplay").innerText = period;
+        currentPeriod = getPeriodId(currentGameType, now);
+        document.getElementById("periodDisplay").innerText = currentPeriod;
         document.getElementById("countdown").innerText = `⏳ Time Left: ${diff}s`;
 
         if (diff <= 0) {
@@ -259,12 +253,13 @@
           const color = getResultColor(num);
           const size = num >= 5 ? "BIG" : "SMALL";
 
-          set(ref(db, `results/${gameType}/${period}`), {
+          set(ref(db, `results/${currentGameType}/${currentPeriod}`), {
             number: num,
             color: color,
             timestamp: Date.now()
           });
 
+          let result = "Lose";
           if (confirmedBet && (selectedColor || selectedBigSmall)) {
             let win = false;
             if (selectedColor === color || selectedBigSmall === size) win = true;
@@ -274,21 +269,22 @@
               payout = selectedBigSmall ? confirmedBet * 1.96 : confirmedBet * mult;
               currentBalance += payout;
               document.getElementById("result").innerText = `🎉 You Win ₹${payout.toFixed(2)}`;
+              result = `Win ₹${payout.toFixed(2)}`;
             } else {
-              currentBalance -= confirmedBet;
               document.getElementById("result").innerText = `😥 You Lose ₹${confirmedBet}`;
             }
             update(ref(db, "users/" + currentUser.uid), { balance: currentBalance });
             document.getElementById("wallet").innerText = currentBalance.toFixed(2);
+            recordMyBet(currentPeriod, selectedColor || selectedBigSmall, confirmedBet, result);
             confirmedBet = null;
             selectedColor = null;
             selectedBigSmall = null;
           }
-          setTimeout(startGameTimer, 1000);
+          setTimeout(startRealTimeTimer, 1000);
         }
       }, 1000);
     }
 
-    document.getElementById("gameType").onchange = startGameTimer;
+    document.getElementById("gameType").onchange = startRealTimeTimer;
   </script></body>
 </html>
