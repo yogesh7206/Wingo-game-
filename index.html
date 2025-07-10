@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Wingo Game + Admin Panel</title>
   <style>
     body { font-family: Arial; text-align: center; background: #f0f0f0; padding: 30px; }
@@ -10,12 +10,11 @@
     .red { background: red; color: white; }
     .green { background: green; color: white; }
     .violet { background: purple; color: white; }
-    .number-btn { margin: 2px; padding: 10px 15px; font-size: 16px; }
   </style>
 </head>
 <body>
 
-  <!-- Login -->
+  <!-- Login Section -->
   <div id="loginSection">
     <h2>Login</h2>
     <input type="email" id="loginEmail" placeholder="Email"><br>
@@ -24,7 +23,7 @@
     <p>Don't have an account? <a href="#" onclick="toggleRegister()">Register</a></p>
   </div>
 
-  <!-- Register -->
+  <!-- Register Section -->
   <div id="registerSection" class="hidden">
     <h2>Register</h2>
     <input type="email" id="regEmail" placeholder="Email"><br>
@@ -36,19 +35,17 @@
   <!-- Game Section -->
   <div id="gameSection" class="hidden">
     <h1>Welcome, <span id="userEmail"></span>!</h1>
+    <p>User ID: <span id="userIdDisplay"></span></p> <!-- ✅ User ID shown -->
     <h2>Balance: ₹<span id="wallet">0</span></h2>
     <h2>Color Prediction Game</h2>
     <div id="countdown"></div>
     <div id="countDisplay"></div>
-
-    <button class="red" onclick="selectColor('RED')">Red</button>
-    <button class="green" onclick="selectColor('GREEN')">Green</button>
-    <button class="violet" onclick="selectColor('VIOLET')">Violet</button><br><br>
-
-    <!-- Number Buttons -->
-    <div id="numberButtons"></div>
-
-    <input type="number" id="bet" step="0.1" placeholder="Enter Bet ₹"><br>
+    <div>
+      <button class="red" onclick="selectColor('RED')">Red</button>
+      <button class="green" onclick="selectColor('GREEN')">Green</button>
+      <button class="violet" onclick="selectColor('VIOLET')">Violet</button>
+    </div><br>
+    <input type="number" id="bet" step="0.1" placeholder="Enter Bet ₹">
     <p id="result"></p>
     <p><b>History:</b> <span id="history"></span></p>
     <button onclick="logout()">Logout</button>
@@ -82,7 +79,6 @@
     let currentUser = null;
     let currentBalance = 0;
     let selectedColor = null;
-    let selectedNumber = null;
     let history = [];
 
     window.toggleRegister = function () {
@@ -93,13 +89,15 @@
     document.getElementById("registerBtn").onclick = () => {
       const email = document.getElementById("regEmail").value;
       const pass = document.getElementById("regPass").value;
+      const userId = Math.floor(100000 + Math.random() * 900000).toString(); // ✅ 6-digit
 
       createUserWithEmailAndPassword(auth, email, pass)
         .then((userCredential) => {
           const uid = userCredential.user.uid;
           set(ref(db, "users/" + uid), {
             email: email,
-            balance: 100
+            balance: 100,
+            userId: userId
           });
           alert("✅ Registered with ₹100 balance!");
           toggleRegister();
@@ -133,6 +131,7 @@
             const data = snapshot.val();
             currentBalance = data.balance || 0;
             document.getElementById("wallet").innerText = currentBalance.toFixed(2);
+            document.getElementById("userIdDisplay").innerText = data.userId || "N/A";
 
             if (data.isAdmin === true) {
               document.getElementById("adminPanel").classList.remove("hidden");
@@ -141,32 +140,14 @@
           }
         });
 
-        renderNumberButtons();
         startTimer();
       }
     });
 
     window.selectColor = function (color) {
       selectedColor = color;
-      alert("Selected Color: " + color);
+      alert("Selected: " + color);
     };
-
-    window.selectNumber = function (num) {
-      selectedNumber = num;
-      alert("Selected Number: " + num);
-    };
-
-    function renderNumberButtons() {
-      const div = document.getElementById("numberButtons");
-      div.innerHTML = "";
-      for (let i = 0; i <= 9; i++) {
-        const btn = document.createElement("button");
-        btn.innerText = i;
-        btn.className = "number-btn";
-        btn.onclick = () => selectNumber(i);
-        div.appendChild(btn);
-      }
-    }
 
     function getResultColor(num) {
       if (num === 5) return "VIOLET";
@@ -175,7 +156,7 @@
     }
 
     function placeBet(countNum) {
-      if (!selectedColor && selectedNumber === null) return alert("Select color or number!");
+      if (!selectedColor) return alert("Choose color!");
       const bet = parseFloat(document.getElementById("bet").value);
       if (isNaN(bet) || bet <= 0) return alert("Enter valid bet!");
       if (bet > currentBalance) return alert("❌ Not enough balance!");
@@ -183,21 +164,12 @@
       currentBalance -= bet;
 
       let resultColor = getResultColor(countNum);
+      let win = selectedColor === resultColor;
+
       let resultText = `Result: ${resultColor} (${countNum}) → `;
-
-      let win = false;
-      let winAmount = 0;
-
-      if (selectedColor && selectedColor === resultColor) {
-        win = true;
-        let multiplier = selectedColor === "VIOLET" ? 4.5 : 1.96;
-        winAmount = parseFloat((bet * multiplier).toFixed(2));
-      } else if (selectedNumber !== null && selectedNumber === countNum) {
-        win = true;
-        winAmount = parseFloat((bet * 9).toFixed(2));
-      }
-
       if (win) {
+        let multiplier = selectedColor === "VIOLET" ? 4.5 : 1.96;
+        const winAmount = parseFloat((bet * multiplier).toFixed(2));
         currentBalance += winAmount;
         resultText += `🎉 You Win ₹${winAmount}`;
       } else {
@@ -210,9 +182,6 @@
 
       history.unshift(resultColor);
       document.getElementById("history").innerText = history.slice(0, 5).join(", ");
-
-      selectedColor = null;
-      selectedNumber = null;
     }
 
     let timeLeft = 10;
@@ -228,7 +197,7 @@
         if (timeLeft <= 0) {
           clearInterval(timer);
           placeBet(countNum);
-          startTimer(); // Restart
+          startTimer();
         } else {
           countNum = Math.floor(Math.random() * 10);
           timeLeft--;
@@ -241,7 +210,7 @@
         if (snapshot.exists()) {
           const users = snapshot.val();
           let html = `<table border="1" cellpadding="5" style="margin:auto;">
-            <tr><th>Email</th><th>Balance (₹)</th><th>Update</th></tr>`;
+            <tr><th>Email</th><th>Balance (₹)</th><th>User ID</th><th>Update</th></tr>`;
 
           for (const uid in users) {
             const user = users[uid];
@@ -249,9 +218,9 @@
               <tr>
                 <td>${user.email}</td>
                 <td><input type="number" id="bal-${uid}" value="${user.balance}" style="width:80px;"></td>
+                <td>${user.userId || "N/A"}</td>
                 <td><button onclick="updateBalance('${uid}')">Update</button></td>
-              </tr>
-            `;
+              </tr>`;
           }
 
           html += `</table>`;
