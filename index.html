@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Wingo Game - One Bet per Round</title>
@@ -9,24 +10,27 @@
     .red { background: red; color: white; }
     .green { background: green; color: white; }
     .violet { background: purple; color: white; }
-    table { width: 100%; margin-top: 20px; border-collapse: collapse; }
-    th, td { border: 1px solid #ccc; padding: 8px; }
-    th { background: #0055ff; color: white; }
   </style>
 </head>
-<body>  <div id="loginSection">
+<body>
+
+  <div id="loginSection">
     <h2>Login</h2>
     <input type="email" id="loginEmail" placeholder="Email"><br>
     <input type="password" id="loginPass" placeholder="Password"><br>
     <button id="loginBtn">Login</button>
     <p>Don't have an account? <a href="#" onclick="toggleRegister()">Register</a></p>
-  </div>  <div id="registerSection" class="hidden">
+  </div>
+
+  <div id="registerSection" class="hidden">
     <h2>Register</h2>
     <input type="email" id="regEmail" placeholder="Email"><br>
     <input type="password" id="regPass" placeholder="Password"><br>
     <button id="registerBtn">Register</button>
     <p>Already have an account? <a href="#" onclick="toggleRegister()">Login</a></p>
-  </div>  <div id="gameSection" class="hidden">
+  </div>
+
+  <div id="gameSection" class="hidden">
     <h1>Welcome, <span id="userEmail"></span>!</h1>
     <p>User ID: <span id="userIdDisplay"></span></p>
     <h2>Balance: ₹<span id="wallet">0</span></h2>
@@ -38,27 +42,18 @@
       <option value="5">5 Min Wingo</option>
     </select>
     <div id="countdown"></div>
+    <div id="countDisplay"></div>
     <div>
       <button class="red" onclick="selectColor('RED')">Red</button>
       <button class="green" onclick="selectColor('GREEN')">Green</button>
       <button class="violet" onclick="selectColor('VIOLET')">Violet</button>
     </div><br>
     <input type="number" id="bet" step="0.1" placeholder="Enter Bet ₹">
-    <p id="result"></p><h3>Game History</h3>
-<table>
-  <thead>
-    <tr>
-      <th>Number</th>
-      <th>Big/Small</th>
-      <th>Color</th>
-    </tr>
-  </thead>
-  <tbody id="historyTable"></tbody>
-</table>
+    <p id="result"></p>
+    <button onclick="logout()">Logout</button>
+  </div>
 
-<button onclick="logout()">Logout</button>
-
-  </div><script type="module">
+<script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
 import { getDatabase, ref, set, get, update } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
@@ -79,9 +74,14 @@ const db = getDatabase(app);
 let currentUser = null;
 let currentBalance = 0;
 let selectedColor = null;
-let history = [];
-let betPlaced = false;
+let lastProcessedPeriod = null;
 let globalTimer = null;
+
+function generatePeriodId(durationSec) {
+  const now = new Date();
+  const ymd = now.toISOString().replace(/[-T:.Z]/g, '').slice(0, 14);
+  return ymd + durationSec.toString().padStart(2, '0');
+}
 
 window.toggleRegister = function () {
   document.getElementById("loginSection").classList.toggle("hidden");
@@ -150,9 +150,9 @@ function getResultColor(num) {
   else return "GREEN";
 }
 
-function placeBet(countNum) {
-  if (betPlaced) return;
-  betPlaced = true;
+function placeBet(countNum, period) {
+  if (lastProcessedPeriod === period) return;
+  lastProcessedPeriod = period;
 
   if (!selectedColor) return alert("Choose color!");
   const bet = parseFloat(document.getElementById("bet").value);
@@ -176,13 +176,6 @@ function placeBet(countNum) {
   update(ref(db, "users/" + currentUser.uid), { balance: currentBalance });
   document.getElementById("wallet").innerText = currentBalance.toFixed(2);
   document.getElementById("result").innerText = resultText;
-
-  const bigSmall = countNum >= 5 ? "Big" : "Small";
-  const colorEmoji = resultColor === "RED" ? "🔴" : resultColor === "GREEN" ? "🟢" : "🟣";
-  const row = `<tr><td style="color:${resultColor.toLowerCase()}"><b>${countNum}</b></td><td>${bigSmall}</td><td>${colorEmoji}</td></tr>`;
-
-  history.unshift(row);
-  document.getElementById("historyTable").innerHTML = history.slice(0, 10).join("");
 }
 
 function getNextRoundTime(durationInSeconds) {
@@ -199,8 +192,6 @@ function startRealTimeTimer() {
   const seconds = duration === 30 ? 30 : duration * 60;
   const nextRoundTime = getNextRoundTime(seconds);
 
-  betPlaced = false; // reset flag
-
   globalTimer = setInterval(() => {
     const now = new Date();
     const diff = Math.floor((nextRoundTime.getTime() - now.getTime()) / 1000);
@@ -208,7 +199,8 @@ function startRealTimeTimer() {
     if (diff <= 0) {
       clearInterval(globalTimer);
       const countNum = Math.floor(Math.random() * 10);
-      placeBet(countNum);
+      const period = generatePeriodId(seconds);
+      placeBet(countNum, period);
       startRealTimeTimer();
     } else {
       document.getElementById("countdown").innerText = `⏳ Time Left: ${diff}s`;
@@ -216,6 +208,11 @@ function startRealTimeTimer() {
   }, 1000);
 }
 
-document.getElementById("gameType").onchange = startRealTimeTimer;
-</script></body>
+document.getElementById("gameType").onchange = () => {
+  startRealTimeTimer();
+  lastProcessedPeriod = null;
+};
+</script>
+
+</body>
 </html>
