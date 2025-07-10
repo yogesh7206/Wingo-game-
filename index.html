@@ -2,6 +2,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Wingo Game</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
       font-family: Arial;
@@ -34,6 +35,7 @@
     .scroll-box {
       max-height: 200px;
       overflow-y: auto;
+      text-align: left;
     }
     #gameSection {
       max-width: 600px;
@@ -108,5 +110,56 @@
 
 <button onclick="logout()">Logout</button>
 
-  </div>  <!-- Scripts will be updated in the next step --></body>
+  </div>  <script>
+    const ctx = document.getElementById('colorChart').getContext('2d');
+    const colorChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Red', 'Green', 'Violet'],
+        datasets: [{
+          label: 'Color Frequency',
+          data: [0, 0, 0],
+          backgroundColor: ['#e53935', '#43a047', '#8e24aa']
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+
+    function updateCharts(results) {
+      let colorCounts = { RED: 0, GREEN: 0, VIOLET: 0 };
+      let numberCounts = Array(10).fill(0);
+      let scrollHtml = '';
+
+      const periods = Object.keys(results).sort().reverse().slice(0, 20);
+      for (let key of periods) {
+        const r = results[key];
+        colorCounts[r.color]++;
+        numberCounts[r.number]++;
+        scrollHtml += `<li>🔢 <strong>${key}:</strong> ${r.number} - ${r.color}</li>`;
+      }
+
+      colorChart.data.datasets[0].data = [colorCounts.RED, colorCounts.GREEN, colorCounts.VIOLET];
+      colorChart.update();
+
+      document.getElementById('scrollHistory').innerHTML = scrollHtml;
+
+      const hot = [...numberCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3);
+      const cold = [...numberCounts.entries()].sort((a, b) => a[1] - b[1]).slice(0, 3);
+
+      document.getElementById('trendData').innerHTML = `
+        🔥 Hot: ${hot.map(h => h[0]).join(', ')}<br>
+        🧊 Cold: ${cold.map(c => c[0]).join(', ')}`;
+    }
+
+    // Example Firebase data update simulation:
+    // Replace with actual Firebase result reading logic.
+    // Call updateCharts(resultData) when data is fetched.
+  </script></body>
 </html>
