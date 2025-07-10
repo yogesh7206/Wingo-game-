@@ -1,42 +1,40 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Wingo Game + Admin Panel</title>
   <style>
     body { font-family: Arial; text-align: center; background: #f0f0f0; padding: 30px; }
-    input, button { padding: 10px; margin: 5px; font-size: 16px; }
+    input, button, select { padding: 10px; margin: 5px; font-size: 16px; }
     .hidden { display: none; }
     .red { background: red; color: white; }
     .green { background: green; color: white; }
     .violet { background: purple; color: white; }
   </style>
 </head>
-<body>
-
-  <!-- Login Section -->
-  <div id="loginSection">
+<body>  <!-- Login Section -->  <div id="loginSection">
     <h2>Login</h2>
     <input type="email" id="loginEmail" placeholder="Email"><br>
     <input type="password" id="loginPass" placeholder="Password"><br>
     <button id="loginBtn">Login</button>
     <p>Don't have an account? <a href="#" onclick="toggleRegister()">Register</a></p>
-  </div>
-
-  <!-- Register Section -->
-  <div id="registerSection" class="hidden">
+  </div>  <!-- Register Section -->  <div id="registerSection" class="hidden">
     <h2>Register</h2>
     <input type="email" id="regEmail" placeholder="Email"><br>
     <input type="password" id="regPass" placeholder="Password"><br>
     <button id="registerBtn">Register</button>
     <p>Already have an account? <a href="#" onclick="toggleRegister()">Login</a></p>
-  </div>
-
-  <!-- Game Section -->
-  <div id="gameSection" class="hidden">
+  </div>  <!-- Game Section -->  <div id="gameSection" class="hidden">
     <h1>Welcome, <span id="userEmail"></span>!</h1>
     <p>User ID: <span id="userIdDisplay"></span></p>
     <h2>Balance: ₹<span id="wallet">0</span></h2>
+    <h3>Select Game Timer: 
+      <select id="gameTimer" onchange="startTimer()">
+        <option value="30">30 sec</option>
+        <option value="60">1 min</option>
+        <option value="180">3 min</option>
+        <option value="300">5 min</option>
+      </select>
+    </h3>
     <h2>Color Prediction Game</h2>
     <div id="countdown"></div>
     <div id="countDisplay"></div>
@@ -49,15 +47,10 @@
     <p id="result"></p>
     <p><b>History:</b> <span id="history"></span></p>
     <button onclick="logout()">Logout</button>
-  </div>
-
-  <!-- Admin Panel -->
-  <div id="adminPanel" class="hidden">
+  </div>  <!-- Admin Panel -->  <div id="adminPanel" class="hidden">
     <h2>🛡️ Admin Panel</h2>
     <div id="usersTable"></div>
-  </div>
-
-  <script type="module">
+  </div>  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
     import { getDatabase, ref, set, get, update } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
@@ -129,8 +122,6 @@
         get(ref(db, "users/" + user.uid)).then(snapshot => {
           if (snapshot.exists()) {
             const data = snapshot.val();
-
-            // Auto-generate missing userId
             if (!data.userId) {
               const newUserId = Math.floor(100000 + Math.random() * 900000).toString();
               update(ref(db, "users/" + user.uid), { userId: newUserId });
@@ -170,7 +161,6 @@
       if (bet > currentBalance) return alert("❌ Not enough balance!");
 
       currentBalance -= bet;
-
       let resultColor = getResultColor(countNum);
       let win = selectedColor === resultColor;
 
@@ -192,22 +182,22 @@
       document.getElementById("history").innerText = history.slice(0, 5).join(", ");
     }
 
-    let timeLeft = 10;
     let timer;
     function startTimer() {
       clearInterval(timer);
-      timeLeft = 10;
-      let countNum = 0;
+      let gameDuration = parseInt(document.getElementById("gameTimer").value);
+      let timeLeft = gameDuration;
+      let countNum = Math.floor(Math.random() * 10);
 
       timer = setInterval(() => {
         document.getElementById("countdown").innerText = `Time Left: ${timeLeft}s`;
         document.getElementById("countDisplay").innerText = `Random Number: ${countNum}`;
+
         if (timeLeft <= 0) {
           clearInterval(timer);
           placeBet(countNum);
-          startTimer(); // auto-restart
+          startTimer();
         } else {
-          countNum = Math.floor(Math.random() * 10);
           timeLeft--;
         }
       }, 1000);
@@ -218,30 +208,16 @@
         if (snapshot.exists()) {
           const users = snapshot.val();
           let html = `<table border="1" cellpadding="5" style="margin:auto;">
-            <tr>
-              <th>Email</th>
-              <th>Balance (₹)</th>
-              <th>User ID</th>
-              <th>Update</th>
-            </tr>`;
+            <tr><th>Email</th><th>Balance (₹)</th><th>User ID</th><th>Update</th></tr>`;
 
           for (const uid in users) {
             const user = users[uid];
-
-            // Auto-generate missing userId
             if (!user.userId) {
               const newUserId = Math.floor(100000 + Math.random() * 900000).toString();
               update(ref(db, "users/" + uid), { userId: newUserId });
               user.userId = newUserId;
             }
-
-            html += `
-              <tr>
-                <td>${user.email}</td>
-                <td><input type="number" id="bal-${uid}" value="${user.balance}" style="width:80px;"></td>
-                <td>${user.userId}</td>
-                <td><button onclick="updateBalance('${uid}')">Update</button></td>
-              </tr>`;
+            html += `<tr><td>${user.email}</td><td><input type="number" id="bal-${uid}" value="${user.balance}" style="width:80px;"></td><td>${user.userId}</td><td><button onclick="updateBalance('${uid}')">Update</button></td></tr>`;
           }
 
           html += `</table>`;
@@ -259,6 +235,5 @@
         });
       }
     };
-  </script>
-</body>
+  </script></body>
 </html>
