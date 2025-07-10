@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Wingo Game - Bet Confirmation</title>
+  <title>Wingo Game</title>
   <style>
     body { font-family: Arial; text-align: center; background: #f0f0f0; padding: 30px; }
     input, button, select { padding: 10px; margin: 5px; font-size: 16px; }
@@ -40,10 +40,10 @@
 
     <h3>Select Game Duration:</h3>
     <select id="gameType">
-      <option value="30">30 Sec Wingo</option>
-      <option value="60">1 Min Wingo</option>
-      <option value="180">3 Min Wingo</option>
-      <option value="300">5 Min Wingo</option>
+      <option value="30">30 Sec</option>
+      <option value="60">1 Min</option>
+      <option value="180">3 Min</option>
+      <option value="300">5 Min</option>
     </select>
 
     <p id="countdown">⏳ Time Left: --</p>
@@ -130,10 +130,7 @@
     };
 
     window.logout = function () {
-      signOut(auth).then(() => {
-        alert("👋 Logged out successfully!");
-        location.reload();
-      });
+      signOut(auth).then(() => location.reload());
     };
 
     onAuthStateChanged(auth, (user) => {
@@ -162,8 +159,7 @@
       if (isNaN(bet) || bet <= 0) return alert("Enter valid bet amount.");
       if (bet > currentBalance) return alert("❌ Not enough balance.");
 
-      const confirmMsg = `Confirm ₹${bet} on ${color}?`;
-      if (confirm(confirmMsg)) {
+      if (confirm(`Confirm ₹${bet} on ${color}?`)) {
         selectedColor = color;
         confirmedBet = bet;
         alert(`✅ Bet confirmed on ${color}`);
@@ -176,10 +172,10 @@
       else return "GREEN";
     }
 
-    function getPeriodId(gameType, roundTime) {
-      const date = roundTime.toISOString().slice(0, 10).replace(/-/g, '');
-      const secondsSinceMidnight = roundTime.getHours() * 3600 + roundTime.getMinutes() * 60 + roundTime.getSeconds();
-      const index = Math.floor(secondsSinceMidnight / gameType);
+    function getPeriodId(gameTypeSeconds, time) {
+      const date = time.toISOString().slice(0, 10).replace(/-/g, '');
+      const secondsSinceMidnight = time.getHours() * 3600 + time.getMinutes() * 60 + time.getSeconds();
+      const index = Math.floor(secondsSinceMidnight / gameTypeSeconds);
       return `${date}-${String(index + 1).padStart(3, '0')}`;
     }
 
@@ -215,55 +211,43 @@
       selectedColor = null;
     }
 
-    function getNextRoundTime(durationInSeconds) {
+    function getNextRoundTime(seconds) {
       const now = new Date();
-      const timestamp = now.getTime();
-      const roundTime = Math.ceil(timestamp / (durationInSeconds * 1000)) * (durationInSeconds * 1000);
-      return new Date(roundTime);
+      return new Date(Math.ceil(now.getTime() / (seconds * 1000)) * (seconds * 1000));
     }
 
     function startRealTimeTimer() {
       clearInterval(window.timer);
 
       const gameType = parseInt(document.getElementById("gameType").value);
-      const seconds = gameType;
-      const nextRoundTime = getNextRoundTime(seconds);
-
-      const updatePeriodDisplay = () => {
-        const now = new Date();
-        const period = getPeriodId(seconds, nextRoundTime);
-        document.getElementById("periodDisplay").innerText = period;
-      };
+      const nextRound = getNextRoundTime(gameType);
 
       window.timer = setInterval(() => {
         const now = new Date();
-        const diff = Math.floor((nextRoundTime.getTime() - now.getTime()) / 1000);
-        updatePeriodDisplay();
+        const diff = Math.floor((nextRound.getTime() - now.getTime()) / 1000);
+
+        // ✅ Real-time period number display
+        const currentPeriod = getPeriodId(gameType, now);
+        document.getElementById("periodDisplay").innerText = currentPeriod;
 
         if (diff <= 0) {
           clearInterval(window.timer);
           const countNum = Math.floor(Math.random() * 10);
           const resultColor = getResultColor(countNum);
-          const period = getPeriodId(seconds, nextRoundTime);
 
-          set(ref(db, `results/${seconds}/${period}`), {
+          // Save result
+          set(ref(db, `results/${gameType}/${currentPeriod}`), {
             number: countNum,
             color: resultColor,
             timestamp: Date.now()
           });
 
           placeBet(countNum);
-
-          setTimeout(() => {
-            roundActive = false;
-            startRealTimeTimer();
-          }, 1000);
+          setTimeout(startRealTimeTimer, 1000);
         } else {
           document.getElementById("countdown").innerText = `⏳ Time Left: ${diff}s`;
         }
       }, 1000);
-
-      updatePeriodDisplay();
     }
 
     document.getElementById("gameType").onchange = () => {
