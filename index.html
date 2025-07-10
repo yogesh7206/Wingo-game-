@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Wingo Game - Fixed Timer</title>
+  <title>Wingo Game - Bet Confirmation</title>
   <style>
     body { font-family: Arial; text-align: center; background: #f0f0f0; padding: 30px; }
     input, button, select { padding: 10px; margin: 5px; font-size: 16px; }
@@ -17,56 +17,60 @@
 </head>
 <body>
 
-  <div id="loginSection">
-    <h2>Login</h2>
-    <input type="email" id="loginEmail" placeholder="Email"><br>
-    <input type="password" id="loginPass" placeholder="Password"><br>
-    <button id="loginBtn">Login</button>
-    <p>Don't have an account? <a href="#" onclick="toggleRegister()">Register</a></p>
-  </div>
+<div id="loginSection">
+  <h2>Login</h2>
+  <input type="email" id="loginEmail" placeholder="Email"><br>
+  <input type="password" id="loginPass" placeholder="Password"><br>
+  <button id="loginBtn">Login</button>
+  <p>Don't have an account? <a href="#" onclick="toggleRegister()">Register</a></p>
+</div>
 
-  <div id="registerSection" class="hidden">
-    <h2>Register</h2>
-    <input type="email" id="regEmail" placeholder="Email"><br>
-    <input type="password" id="regPass" placeholder="Password"><br>
-    <button id="registerBtn">Register</button>
-    <p>Already have an account? <a href="#" onclick="toggleRegister()">Login</a></p>
-  </div>
+<div id="registerSection" class="hidden">
+  <h2>Register</h2>
+  <input type="email" id="regEmail" placeholder="Email"><br>
+  <input type="password" id="regPass" placeholder="Password"><br>
+  <button id="registerBtn">Register</button>
+  <p>Already have an account? <a href="#" onclick="toggleRegister()">Login</a></p>
+</div>
 
-  <div id="gameSection" class="hidden">
-    <h1>Welcome, <span id="userEmail"></span>!</h1>
-    <p>User ID: <span id="userIdDisplay"></span></p>
-    <h2>Balance: ₹<span id="wallet">0</span></h2>
-    <h3>Select Game Duration:</h3>
-    <select id="gameType">
-      <option value="1">1 Min Wingo</option>
-      <option value="30">30 Sec Wingo</option>
-      <option value="3">3 Min Wingo</option>
-      <option value="5">5 Min Wingo</option>
-    </select>
-    <div id="countdown"></div>
-    <div>
-      <button class="red" onclick="selectColor('RED')">Red</button>
-      <button class="green" onclick="selectColor('GREEN')">Green</button>
-      <button class="violet" onclick="selectColor('VIOLET')">Violet</button>
-    </div><br>
-    <input type="number" id="bet" step="0.1" placeholder="Enter Bet ₹">
-    <p id="result"></p>
+<div id="gameSection" class="hidden">
+  <h1>Welcome, <span id="userEmail"></span>!</h1>
+  <p>User ID: <span id="userIdDisplay"></span></p>
+  <h2>Balance: ₹<span id="wallet">0</span></h2>
 
-    <h3>Game History</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Number</th>
-          <th>Big/Small</th>
-          <th>Color</th>
-        </tr>
-      </thead>
-      <tbody id="historyTable"></tbody>
-    </table>
+  <h3>Select Game Duration:</h3>
+  <select id="gameType">
+    <option value="1">1 Min Wingo</option>
+    <option value="30">30 Sec Wingo</option>
+    <option value="3">3 Min Wingo</option>
+    <option value="5">5 Min Wingo</option>
+  </select>
 
-    <button onclick="logout()">Logout</button>
-  </div>
+  <div id="countdown"></div>
+
+  <div>
+    <button class="red" onclick="selectColor('RED')">Red</button>
+    <button class="green" onclick="selectColor('GREEN')">Green</button>
+    <button class="violet" onclick="selectColor('VIOLET')">Violet</button>
+  </div><br>
+
+  <input type="number" id="bet" step="0.1" placeholder="Enter Bet ₹">
+  <p id="result"></p>
+
+  <h3>Game History</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Number</th>
+        <th>Big/Small</th>
+        <th>Color</th>
+      </tr>
+    </thead>
+    <tbody id="historyTable"></tbody>
+  </table>
+
+  <button onclick="logout()">Logout</button>
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
@@ -90,7 +94,6 @@ let currentUser = null;
 let currentBalance = 0;
 let selectedColor = null;
 let history = [];
-let globalTimer = null;
 let roundActive = false;
 
 window.toggleRegister = function () {
@@ -169,6 +172,12 @@ function placeBet(countNum) {
   if (isNaN(bet) || bet <= 0) return alert("Enter valid bet!");
   if (bet > currentBalance) return alert("❌ Not enough balance!");
 
+  // 🟡 Confirmation before placing bet
+  if (!confirm(`Confirm your bet: ₹${bet} on ${selectedColor}?`)) {
+    roundActive = false;
+    return;
+  }
+
   currentBalance -= bet;
   const resultColor = getResultColor(countNum);
   const win = selectedColor === resultColor;
@@ -203,30 +212,34 @@ function getNextRoundTime(durationInSeconds) {
 }
 
 function startRealTimeTimer() {
-  if (globalTimer) clearInterval(globalTimer);
+  clearInterval(window.timer);
 
   const duration = parseInt(document.getElementById("gameType").value);
   const seconds = duration === 30 ? 30 : duration * 60;
   const nextRoundTime = getNextRoundTime(seconds);
 
-  roundActive = false;
-
-  globalTimer = setInterval(() => {
+  window.timer = setInterval(() => {
     const now = new Date();
     const diff = Math.floor((nextRoundTime.getTime() - now.getTime()) / 1000);
 
     if (diff <= 0) {
-      clearInterval(globalTimer);
+      clearInterval(window.timer);
       const countNum = Math.floor(Math.random() * 10);
       placeBet(countNum);
-      setTimeout(startRealTimeTimer, 1000);
+      setTimeout(() => {
+        roundActive = false;
+        startRealTimeTimer();
+      }, 1000);
     } else {
       document.getElementById("countdown").innerText = `⏳ Time Left: ${diff}s`;
     }
   }, 1000);
 }
 
-document.getElementById("gameType").onchange = startRealTimeTimer;
+document.getElementById("gameType").onchange = () => {
+  startRealTimeTimer();
+  roundActive = false;
+};
 </script>
 
 </body>
