@@ -1,7 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Wingo Game</title>
   <style>
     body {
@@ -22,51 +21,53 @@
     .green { background: #43a047; color: white; }
     .violet { background: #8e24aa; color: white; }
     .big, .small { background: #ff9800; color: white; }
-    table {
-      width: 100%;
+    .chart-box, .trend-box, .scroll-box {
       margin-top: 20px;
-      border-collapse: collapse;
       background: white;
       border-radius: 10px;
-      overflow: hidden;
+      padding: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 8px;
+    .chart-box canvas {
+      max-width: 100%;
     }
-    th {
-      background: #0055ff;
-      color: white;
+    .scroll-box {
+      max-height: 200px;
+      overflow-y: auto;
     }
     #gameSection {
-      max-width: 500px;
+      max-width: 600px;
       margin: auto;
+    }
+    .number-btn {
+      width: 40px;
+      margin: 2px;
+    }
+    #errorBox {
+      color: red;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-
   <div id="loginSection">
     <h2>Login</h2>
-    <input type="email" id="loginEmail" placeholder="Email"><br>
-    <input type="password" id="loginPass" placeholder="Password"><br>
+    <input type="email" id="loginEmail" placeholder="Email"><br />
+    <input type="password" id="loginPass" placeholder="Password"><br />
     <button id="loginBtn">Login</button>
     <p>Don't have an account? <a href="#" onclick="toggleRegister()">Register</a></p>
-  </div>
-
-  <div id="registerSection" class="hidden">
+    <p id="errorBox"></p>
+  </div>  <div id="registerSection" class="hidden">
     <h2>Register</h2>
-    <input type="email" id="regEmail" placeholder="Email"><br>
-    <input type="password" id="regPass" placeholder="Password"><br>
+    <input type="email" id="regEmail" placeholder="Email"><br />
+    <input type="password" id="regPass" placeholder="Password"><br />
     <button id="registerBtn">Register</button>
     <p>Already have an account? <a href="#" onclick="toggleRegister()">Login</a></p>
-  </div>
-
-  <div id="gameSection" class="hidden">
-    <h1>Welcome, <span id="userEmail"></span>!</h1>
+    <p id="errorBox"></p>
+  </div>  <div id="gameSection" class="hidden">
+    <h2>Welcome, <span id="userEmail"></span>!</h2>
     <p>User ID: <span id="userIdDisplay"></span></p>
-    <h2>Balance: ₹<span id="wallet">0</span></h2>
-
+    <h3>Balance: ₹<span id="wallet">0</span></h3>
     <h3>Select Game Duration:</h3>
     <select id="gameType">
       <option value="30">30 Sec</option>
@@ -74,10 +75,8 @@
       <option value="180">3 Min</option>
       <option value="300">5 Min</option>
     </select>
-
     <p id="countdown">⏳ Time Left: --</p>
     <p><strong>Current Period:</strong> <span id="periodDisplay">--</span></p>
-
     <div>
       <button class="red" onclick="selectColor('RED')">Red</button>
       <button class="green" onclick="selectColor('GREEN')">Green</button>
@@ -86,186 +85,28 @@
     <div>
       <button class="big" onclick="selectBigSmall('BIG')">Big</button>
       <button class="small" onclick="selectBigSmall('SMALL')">Small</button>
-    </div><br>
-
+    </div>
+    <div>
+      <h4>Number (0–9):</h4>
+      <div id="numberOptions"></div>
+    </div>
     <input type="number" id="bet" step="0.1" placeholder="Enter Bet ₹">
-    <p id="result"></p>
+    <p id="result"></p><div class="chart-box">
+  <h4>📈 Color Frequency Chart</h4>
+  <canvas id="colorChart"></canvas>
+</div>
 
-    <button onclick="logout()">Logout</button>
-  </div>
+<div class="trend-box">
+  <h4>🔥 Hot & Cold Numbers</h4>
+  <div id="trendData"></div>
+</div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
-    import { getDatabase, ref, set, update, get, onValue } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+<div class="scroll-box">
+  <h4>📋 Last 20 Results</h4>
+  <ul id="scrollHistory"></ul>
+</div>
 
-    const app = initializeApp({
-      apiKey: "AIzaSyBe5kGOwYS3FsF_9_q1pjxaWrF1glUe87c",
-      authDomain: "wingologin.firebaseapp.com",
-      databaseURL: "https://wingologin-default-rtdb.firebaseio.com",
-      projectId: "wingologin",
-      storageBucket: "wingologin.appspot.com",
-      messagingSenderId: "605536859710",
-      appId: "1:605536859710:web:ed9495775c8f8dd6a8836f"
-    });
+<button onclick="logout()">Logout</button>
 
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-
-    let currentUser = null;
-    let currentBalance = 0;
-    let selectedColor = null;
-    let selectedBigSmall = null;
-    let confirmedBet = null;
-
-    function toggleRegister() {
-      document.getElementById("loginSection").classList.toggle("hidden");
-      document.getElementById("registerSection").classList.toggle("hidden");
-    }
-
-    document.getElementById("registerBtn").onclick = () => {
-      const email = document.getElementById("regEmail").value;
-      const pass = document.getElementById("regPass").value;
-      const userId = Math.floor(100000 + Math.random() * 900000).toString();
-      createUserWithEmailAndPassword(auth, email, pass).then(cred => {
-        set(ref(db, "users/" + cred.user.uid), {
-          email, balance: 100, userId
-        });
-        alert("✅ Registered with ₹100!");
-        toggleRegister();
-      }).catch(err => alert("❌ " + err.message));
-    };
-
-    document.getElementById("loginBtn").onclick = () => {
-      signInWithEmailAndPassword(auth,
-        document.getElementById("loginEmail").value,
-        document.getElementById("loginPass").value
-      ).then(() => alert("✅ Login successful!"))
-        .catch(err => alert("❌ " + err.message));
-    };
-
-    window.logout = () => signOut(auth).then(() => location.reload());
-
-    onAuthStateChanged(auth, user => {
-      if (user) {
-        currentUser = user;
-        document.getElementById("userEmail").innerText = user.email;
-        document.getElementById("loginSection").classList.add("hidden");
-        document.getElementById("registerSection").classList.add("hidden");
-        document.getElementById("gameSection").classList.remove("hidden");
-
-        get(ref(db, "users/" + user.uid)).then(snap => {
-          const data = snap.val();
-          currentBalance = data.balance;
-          document.getElementById("wallet").innerText = currentBalance.toFixed(2);
-          document.getElementById("userIdDisplay").innerText = data.userId;
-        });
-
-        startRealTimeTimer();
-      }
-    });
-
-    window.selectColor = color => {
-      selectedColor = color;
-      selectedBigSmall = null;
-      confirmedBet = parseFloat(document.getElementById("bet").value);
-      alert(`✅ Bet on ${color}`);
-    };
-
-    window.selectBigSmall = size => {
-      selectedBigSmall = size;
-      selectedColor = null;
-      confirmedBet = parseFloat(document.getElementById("bet").value);
-      alert(`✅ Bet on ${size}`);
-    };
-
-    function getResultColor(num) {
-      if (num === 5) return "VIOLET";
-      if ([1, 3, 7, 9, 0].includes(num)) return "RED";
-      return "GREEN";
-    }
-
-    function getPeriodId(seconds, time) {
-      const d = time.toISOString().slice(0, 10).replace(/-/g, '');
-      const s = time.getHours() * 3600 + time.getMinutes() * 60 + time.getSeconds();
-      const index = Math.floor(s / seconds);
-      return `${d}-${String(index + 1).padStart(3, '0')}`;
-    }
-
-    function updateHistory(gameType) {
-      onValue(ref(db, `results/${gameType}`), snap => {
-        const data = snap.val();
-        const rows = [];
-        if (data) {
-          const keys = Object.keys(data).sort().reverse(); // ✅ Show all periods
-          for (const p of keys) {
-            const val = data[p];
-            const emoji = val.color === "RED" ? "🔴" : val.color === "GREEN" ? "🟢" : "🟣";
-            const size = val.number >= 5 ? "Big" : "Small";
-            rows.push(`<tr><td>${p}</td><td>${val.number}</td><td>${size}</td><td>${emoji}</td></tr>`);
-          }
-        }
-
-        if (rows.length === 0) {
-          document.getElementById("historyTable").innerHTML =
-            `<tr><td colspan="4">No results yet for ${gameType}-sec game</td></tr>`;
-        } else {
-          document.getElementById("historyTable").innerHTML = rows.join("");
-        }
-      });
-    }
-
-    function startRealTimeTimer() {
-      clearInterval(window.timer);
-      const gameType = parseInt(document.getElementById("gameType").value);
-      const nextRound = new Date(Math.ceil(Date.now() / (gameType * 1000)) * (gameType * 1000));
-
-      updateHistory(gameType);
-
-      window.timer = setInterval(() => {
-        const now = new Date();
-        const diff = Math.floor((nextRound - now) / 1000);
-        const period = getPeriodId(gameType, now);
-        document.getElementById("periodDisplay").innerText = period;
-        document.getElementById("countdown").innerText = `⏳ Time Left: ${diff}s`;
-
-        if (diff <= 0) {
-          clearInterval(window.timer);
-          const num = Math.floor(Math.random() * 10);
-          const color = getResultColor(num);
-          const size = num >= 5 ? "BIG" : "SMALL";
-
-          set(ref(db, `results/${gameType}/${period}`), {
-            number: num,
-            color: color,
-            timestamp: Date.now()
-          });
-
-          if (confirmedBet && (selectedColor || selectedBigSmall)) {
-            let win = false;
-            if (selectedColor === color || selectedBigSmall === size) win = true;
-            let payout = 0;
-            if (win) {
-              const mult = selectedColor === "VIOLET" ? 4.5 : 1.96;
-              payout = selectedBigSmall ? confirmedBet * 1.96 : confirmedBet * mult;
-              currentBalance += payout;
-              document.getElementById("result").innerText = `🎉 You Win ₹${payout.toFixed(2)}`;
-            } else {
-              currentBalance -= confirmedBet;
-              document.getElementById("result").innerText = `😥 You Lose ₹${confirmedBet}`;
-            }
-            update(ref(db, "users/" + currentUser.uid), { balance: currentBalance });
-            document.getElementById("wallet").innerText = currentBalance.toFixed(2);
-            confirmedBet = null;
-            selectedColor = null;
-            selectedBigSmall = null;
-          }
-          setTimeout(startRealTimeTimer, 1000);
-        }
-      }, 1000);
-    }
-
-    document.getElementById("gameType").onchange = startRealTimeTimer;
-  </script>
-</body>
+  </div>  <!-- Scripts will be updated in the next step --></body>
 </html>
