@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Wingo Game + Admin Panel</title>
   <style>
     body { font-family: Arial; text-align: center; background: #f0f0f0; padding: 30px; }
@@ -10,11 +10,12 @@
     .red { background: red; color: white; }
     .green { background: green; color: white; }
     .violet { background: purple; color: white; }
+    .number-btn { margin: 2px; padding: 10px 15px; font-size: 16px; }
   </style>
 </head>
 <body>
 
-  <!-- Login Section -->
+  <!-- Login -->
   <div id="loginSection">
     <h2>Login</h2>
     <input type="email" id="loginEmail" placeholder="Email"><br>
@@ -23,7 +24,7 @@
     <p>Don't have an account? <a href="#" onclick="toggleRegister()">Register</a></p>
   </div>
 
-  <!-- Register Section -->
+  <!-- Register -->
   <div id="registerSection" class="hidden">
     <h2>Register</h2>
     <input type="email" id="regEmail" placeholder="Email"><br>
@@ -39,11 +40,15 @@
     <h2>Color Prediction Game</h2>
     <div id="countdown"></div>
     <div id="countDisplay"></div>
-    <div id="numberBoard" style="margin: 10px;"></div>
+
     <button class="red" onclick="selectColor('RED')">Red</button>
     <button class="green" onclick="selectColor('GREEN')">Green</button>
     <button class="violet" onclick="selectColor('VIOLET')">Violet</button><br><br>
-    <input type="number" id="bet" step="0.1" placeholder="Enter Bet ₹">
+
+    <!-- Number Buttons -->
+    <div id="numberButtons"></div>
+
+    <input type="number" id="bet" step="0.1" placeholder="Enter Bet ₹"><br>
     <p id="result"></p>
     <p><b>History:</b> <span id="history"></span></p>
     <button onclick="logout()">Logout</button>
@@ -77,6 +82,7 @@
     let currentUser = null;
     let currentBalance = 0;
     let selectedColor = null;
+    let selectedNumber = null;
     let history = [];
 
     window.toggleRegister = function () {
@@ -124,20 +130,43 @@
 
         get(ref(db, "users/" + user.uid)).then(snapshot => {
           if (snapshot.exists()) {
-            currentBalance = snapshot.val().balance || 0;
+            const data = snapshot.val();
+            currentBalance = data.balance || 0;
             document.getElementById("wallet").innerText = currentBalance.toFixed(2);
+
+            if (data.isAdmin === true) {
+              document.getElementById("adminPanel").classList.remove("hidden");
+              loadAllUsers();
+            }
           }
         });
 
+        renderNumberButtons();
         startTimer();
-        checkIfAdmin(user.uid);
       }
     });
 
     window.selectColor = function (color) {
       selectedColor = color;
-      alert("Selected: " + color);
+      alert("Selected Color: " + color);
     };
+
+    window.selectNumber = function (num) {
+      selectedNumber = num;
+      alert("Selected Number: " + num);
+    };
+
+    function renderNumberButtons() {
+      const div = document.getElementById("numberButtons");
+      div.innerHTML = "";
+      for (let i = 0; i <= 9; i++) {
+        const btn = document.createElement("button");
+        btn.innerText = i;
+        btn.className = "number-btn";
+        btn.onclick = () => selectNumber(i);
+        div.appendChild(btn);
+      }
+    }
 
     function getResultColor(num) {
       if (num === 5) return "VIOLET";
@@ -146,7 +175,7 @@
     }
 
     function placeBet(countNum) {
-      if (!selectedColor) return alert("Choose color!");
+      if (!selectedColor && selectedNumber === null) return alert("Select color or number!");
       const bet = parseFloat(document.getElementById("bet").value);
       if (isNaN(bet) || bet <= 0) return alert("Enter valid bet!");
       if (bet > currentBalance) return alert("❌ Not enough balance!");
@@ -154,12 +183,21 @@
       currentBalance -= bet;
 
       let resultColor = getResultColor(countNum);
-      let win = selectedColor === resultColor;
-
       let resultText = `Result: ${resultColor} (${countNum}) → `;
-      if (win) {
+
+      let win = false;
+      let winAmount = 0;
+
+      if (selectedColor && selectedColor === resultColor) {
+        win = true;
         let multiplier = selectedColor === "VIOLET" ? 4.5 : 1.96;
-        const winAmount = parseFloat((bet * multiplier).toFixed(2));
+        winAmount = parseFloat((bet * multiplier).toFixed(2));
+      } else if (selectedNumber !== null && selectedNumber === countNum) {
+        win = true;
+        winAmount = parseFloat((bet * 9).toFixed(2));
+      }
+
+      if (win) {
         currentBalance += winAmount;
         resultText += `🎉 You Win ₹${winAmount}`;
       } else {
@@ -172,6 +210,9 @@
 
       history.unshift(resultColor);
       document.getElementById("history").innerText = history.slice(0, 5).join(", ");
+
+      selectedColor = null;
+      selectedNumber = null;
     }
 
     let timeLeft = 10;
@@ -183,42 +224,16 @@
 
       timer = setInterval(() => {
         document.getElementById("countdown").innerText = `Time Left: ${timeLeft}s`;
-
-        countNum = Math.floor(Math.random() * 10);
         document.getElementById("countDisplay").innerText = `Random Number: ${countNum}`;
-        showNumberBoard(countNum); // ✅ Show 0-9 numbers with colors
-
         if (timeLeft <= 0) {
           clearInterval(timer);
           placeBet(countNum);
-          startTimer();
+          startTimer(); // Restart
         } else {
+          countNum = Math.floor(Math.random() * 10);
           timeLeft--;
         }
       }, 1000);
-    }
-
-    function showNumberBoard(currentNum) {
-      let html = "";
-      for (let i = 0; i <= 9; i++) {
-        let color = getResultColor(i);
-        let highlight = i === currentNum ? "font-weight:bold; border: 2px solid black;" : "";
-        html += `<span style="display:inline-block; width:30px; height:30px; 
-                  line-height:30px; margin:2px; border-radius:5px; 
-                  background:${color.toLowerCase()}; color:white; ${highlight}">
-                  ${i}
-                </span>`;
-      }
-      document.getElementById("numberBoard").innerHTML = html;
-    }
-
-    function checkIfAdmin(uid) {
-      get(ref(db, "users/" + uid)).then(snapshot => {
-        if (snapshot.exists() && snapshot.val().isAdmin === true) {
-          document.getElementById("adminPanel").classList.remove("hidden");
-          loadAllUsers();
-        }
-      });
     }
 
     function loadAllUsers() {
