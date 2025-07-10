@@ -40,12 +40,14 @@
 
     <h3>Select Game Duration:</h3>
     <select id="gameType">
-      <option value="1">1 Min Wingo</option>
       <option value="30">30 Sec Wingo</option>
-      <option value="3">3 Min Wingo</option>
-      <option value="5">5 Min Wingo</option>
+      <option value="60">1 Min Wingo</option>
+      <option value="180">3 Min Wingo</option>
+      <option value="300">5 Min Wingo</option>
     </select>
-    <div id="countdown"></div>
+
+    <p id="countdown">⏳ Time Left: --</p>
+    <p><strong>Current Period:</strong> <span id="periodDisplay">--</span></p>
 
     <div>
       <button class="red" onclick="selectColor('RED')">Red</button>
@@ -130,26 +132,7 @@
     window.logout = function () {
       signOut(auth).then(() => {
         alert("👋 Logged out successfully!");
-        document.getElementById("gameSection").classList.add("hidden");
-        document.getElementById("loginSection").classList.remove("hidden");
-        document.getElementById("registerSection").classList.add("hidden");
-
-        document.getElementById("userEmail").innerText = "";
-        document.getElementById("wallet").innerText = "0";
-        document.getElementById("userIdDisplay").innerText = "";
-        document.getElementById("bet").value = "";
-        document.getElementById("result").innerText = "";
-        document.getElementById("historyTable").innerHTML = "";
-        document.getElementById("countdown").innerText = "";
-
-        currentUser = null;
-        currentBalance = 0;
-        selectedColor = null;
-        confirmedBet = null;
-        history = [];
-        roundActive = false;
-
-        clearInterval(window.timer);
+        location.reload();
       });
     };
 
@@ -201,8 +184,7 @@
     }
 
     function placeBet(countNum) {
-      if (roundActive || !confirmedBet || !selectedColor) return;
-      roundActive = true;
+      if (!confirmedBet || !selectedColor) return;
 
       const bet = confirmedBet;
       currentBalance -= bet;
@@ -243,22 +225,27 @@
     function startRealTimeTimer() {
       clearInterval(window.timer);
 
-      const duration = parseInt(document.getElementById("gameType").value);
-      const seconds = duration === 30 ? 30 : duration * 60;
+      const gameType = parseInt(document.getElementById("gameType").value);
+      const seconds = gameType;
       const nextRoundTime = getNextRoundTime(seconds);
+
+      const updatePeriodDisplay = () => {
+        const now = new Date();
+        const period = getPeriodId(seconds, nextRoundTime);
+        document.getElementById("periodDisplay").innerText = period;
+      };
 
       window.timer = setInterval(() => {
         const now = new Date();
         const diff = Math.floor((nextRoundTime.getTime() - now.getTime()) / 1000);
+        updatePeriodDisplay();
 
         if (diff <= 0) {
           clearInterval(window.timer);
-
           const countNum = Math.floor(Math.random() * 10);
           const resultColor = getResultColor(countNum);
           const period = getPeriodId(seconds, nextRoundTime);
 
-          // ✅ Save result in Firebase by period
           set(ref(db, `results/${seconds}/${period}`), {
             number: countNum,
             color: resultColor,
@@ -275,6 +262,8 @@
           document.getElementById("countdown").innerText = `⏳ Time Left: ${diff}s`;
         }
       }, 1000);
+
+      updatePeriodDisplay();
     }
 
     document.getElementById("gameType").onchange = () => {
@@ -282,6 +271,5 @@
       roundActive = false;
     };
   </script>
-
 </body>
 </html>
