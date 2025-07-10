@@ -1,127 +1,110 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Wingo Game - Sikkim Style</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wingo Game</title>
   <style>
     body {
-      margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #0e0e2c;
-      color: white;
+      font-family: Arial;
       text-align: center;
-    }
-    .card {
-      background: #1e1e3f;
-      margin: 20px auto;
+      background: #eaf1ff;
       padding: 20px;
-      border-radius: 16px;
-      box-shadow: 0 0 10px #222;
-      max-width: 400px;
     }
     input, button, select {
-      padding: 12px;
-      margin: 8px 0;
-      font-size: 16px;
-      width: 90%;
-      border: none;
-      border-radius: 8px;
-    }
-    input {
-      background-color: #2e2e4f;
-      color: white;
-    }
-    button {
-      background-color: #0055ff;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-    button:hover {
-      background-color: #003bbf;
-    }
-    .red { background: red !important; }
-    .green { background: green !important; }
-    .violet { background: purple !important; }
-    .hidden { display: none; }
-    .color-buttons button {
-      width: 30%;
+      padding: 10px;
       margin: 5px;
-      font-size: 18px;
-      border-radius: 12px;
-      box-shadow: 0 0 8px rgba(255,255,255,0.4);
+      font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
     }
+    .hidden { display: none; }
+    .red { background: #e53935; color: white; }
+    .green { background: #43a047; color: white; }
+    .violet { background: #8e24aa; color: white; }
     table {
       width: 100%;
+      margin-top: 20px;
       border-collapse: collapse;
-      margin-top: 15px;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
     }
     th, td {
-      padding: 10px;
-      border-bottom: 1px solid #444;
-      color: white;
+      border: 1px solid #ccc;
+      padding: 8px;
     }
     th {
-      background: #2a2a5f;
+      background: #0055ff;
+      color: white;
     }
-    #countdown, #periodDisplay {
-      font-size: 18px;
-      font-weight: bold;
-      margin: 10px;
+    #gameSection {
+      max-width: 500px;
+      margin: auto;
     }
   </style>
 </head>
 <body>
-  <div class="card" id="loginSection">
+
+  <div id="loginSection">
     <h2>Login</h2>
     <input type="email" id="loginEmail" placeholder="Email"><br>
     <input type="password" id="loginPass" placeholder="Password"><br>
     <button id="loginBtn">Login</button>
     <p>Don't have an account? <a href="#" onclick="toggleRegister()">Register</a></p>
-  </div>  <div class="card hidden" id="registerSection">
+  </div>
+
+  <div id="registerSection" class="hidden">
     <h2>Register</h2>
     <input type="email" id="regEmail" placeholder="Email"><br>
     <input type="password" id="regPass" placeholder="Password"><br>
     <button id="registerBtn">Register</button>
     <p>Already have an account? <a href="#" onclick="toggleRegister()">Login</a></p>
-  </div>  <div class="card hidden" id="gameSection">
-    <h1>🎮 Welcome, <span id="userEmail"></span>!</h1>
+  </div>
+
+  <div id="gameSection" class="hidden">
+    <h1>Welcome, <span id="userEmail"></span>!</h1>
     <p>User ID: <span id="userIdDisplay"></span></p>
-    <h2>Wallet: ₹<span id="wallet">0.00</span></h2><h3>Select Game Duration:</h3>
-<select id="gameType">
-  <option value="30">30 Sec</option>
-  <option value="60">1 Min</option>
-  <option value="180">3 Min</option>
-  <option value="300">5 Min</option>
-</select>
+    <h2>Balance: ₹<span id="wallet">0</span></h2>
 
-<p id="countdown">⏳ Time Left: --</p>
-<p><strong>Period:</strong> <span id="periodDisplay">--</span></p>
+    <h3>Select Game Duration:</h3>
+    <select id="gameType">
+      <option value="30">30 Sec</option>
+      <option value="60">1 Min</option>
+      <option value="180">3 Min</option>
+      <option value="300">5 Min</option>
+    </select>
 
-<div class="color-buttons">
-  <button class="red" onclick="selectColor('RED')">🔴 Red</button>
-  <button class="green" onclick="selectColor('GREEN')">🟢 Green</button>
-  <button class="violet" onclick="selectColor('VIOLET')">🟣 Violet</button>
-</div>
+    <p id="countdown">⏳ Time Left: --</p>
+    <p><strong>Current Period:</strong> <span id="periodDisplay">--</span></p>
 
-<input type="number" id="bet" step="0.1" placeholder="Enter Bet ₹">
-<p id="result"></p>
+    <div>
+      <button class="red" onclick="selectColor('RED')">Red</button>
+      <button class="green" onclick="selectColor('GREEN')">Green</button>
+      <button class="violet" onclick="selectColor('VIOLET')">Violet</button>
+    </div><br>
 
-<h3>📜 Game History</h3>
-<table>
-  <thead>
-    <tr><th>Number</th><th>Big/Small</th><th>Color</th></tr>
-  </thead>
-  <tbody id="historyTable"></tbody>
-</table>
+    <input type="number" id="bet" step="0.1" placeholder="Enter Bet ₹">
+    <p id="result"></p>
 
-<button onclick="logout()">🚪 Logout</button>
+    <h3>Game History</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Number</th>
+          <th>Big/Small</th>
+          <th>Color</th>
+        </tr>
+      </thead>
+      <tbody id="historyTable"></tbody>
+    </table>
 
-  </div>  <script type="module">
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
-    import { getDatabase, ref, set, get, update, onValue } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+    import { getDatabase, ref, set, update, get, onValue } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 
     const app = initializeApp({
       apiKey: "AIzaSyBe5kGOwYS3FsF_9_q1pjxaWrF1glUe87c",
@@ -150,33 +133,26 @@
       const email = document.getElementById("regEmail").value;
       const pass = document.getElementById("regPass").value;
       const userId = Math.floor(100000 + Math.random() * 900000).toString();
-
-      createUserWithEmailAndPassword(auth, email, pass).then(userCredential => {
-        const uid = userCredential.user.uid;
-        set(ref(db, "users/" + uid), {
-          email: email,
-          balance: 100,
-          userId: userId
+      createUserWithEmailAndPassword(auth, email, pass).then(cred => {
+        set(ref(db, "users/" + cred.user.uid), {
+          email, balance: 100, userId
         });
-        alert("✅ Registered with ₹100 balance!");
+        alert("✅ Registered with ₹100!");
         toggleRegister();
-      }).catch(error => alert("❌ " + error.message));
+      }).catch(err => alert("❌ " + err.message));
     };
 
     document.getElementById("loginBtn").onclick = () => {
-      const email = document.getElementById("loginEmail").value;
-      const pass = document.getElementById("loginPass").value;
-
-      signInWithEmailAndPassword(auth, email, pass).then(() => {
-        alert("✅ Login successful!");
-      }).catch(error => alert("❌ " + error.message));
+      signInWithEmailAndPassword(auth,
+        document.getElementById("loginEmail").value,
+        document.getElementById("loginPass").value
+      ).then(() => alert("✅ Login successful!"))
+        .catch(err => alert("❌ " + err.message));
     };
 
-    window.logout = function () {
-      signOut(auth).then(() => location.reload());
-    };
+    window.logout = () => signOut(auth).then(() => location.reload());
 
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, user => {
       if (user) {
         currentUser = user;
         document.getElementById("userEmail").innerText = user.email;
@@ -184,117 +160,104 @@
         document.getElementById("registerSection").classList.add("hidden");
         document.getElementById("gameSection").classList.remove("hidden");
 
-        get(ref(db, "users/" + user.uid)).then(snapshot => {
-          if (snapshot.exists()) {
-            const data = snapshot.val();
-            currentBalance = data.balance || 0;
-            document.getElementById("wallet").innerText = currentBalance.toFixed(2);
-            document.getElementById("userIdDisplay").innerText = data.userId || "N/A";
-          }
+        get(ref(db, "users/" + user.uid)).then(snap => {
+          const data = snap.val();
+          currentBalance = data.balance;
+          document.getElementById("wallet").innerText = currentBalance.toFixed(2);
+          document.getElementById("userIdDisplay").innerText = data.userId;
         });
 
         startRealTimeTimer();
       }
     });
 
-    window.selectColor = function (color) {
+    window.selectColor = (color) => {
       const bet = parseFloat(document.getElementById("bet").value);
-      if (isNaN(bet) || bet <= 0) return alert("Enter valid bet amount.");
-      if (bet > currentBalance) return alert("❌ Not enough balance.");
-
+      if (!bet || bet <= 0 || bet > currentBalance) return alert("Invalid or low balance.");
       if (confirm(`Confirm ₹${bet} on ${color}?`)) {
         selectedColor = color;
         confirmedBet = bet;
-        alert(`✅ Bet confirmed on ${color}`);
+        alert(`✅ Bet placed on ${color}`);
       }
     };
 
     function getResultColor(num) {
       if (num === 5) return "VIOLET";
       else if ([1, 3, 7, 9, 0].includes(num)) return "RED";
-      else return "GREEN";
+      return "GREEN";
     }
 
-    function getPeriodId(gameTypeSeconds, time) {
-      const date = time.toISOString().slice(0, 10).replace(/-/g, '');
-      const secondsSinceMidnight = time.getHours() * 3600 + time.getMinutes() * 60 + time.getSeconds();
-      const index = Math.floor(secondsSinceMidnight / gameTypeSeconds);
-      return `${date}-${String(index + 1).padStart(3, '0')}`;
+    function getPeriodId(seconds, time) {
+      const d = time.toISOString().slice(0, 10).replace(/-/g, '');
+      const s = time.getHours() * 3600 + time.getMinutes() * 60 + time.getSeconds();
+      const index = Math.floor(s / seconds);
+      return `${d}-${String(index + 1).padStart(3, '0')}`;
     }
 
     function updateHistory(gameType) {
-      const historyRef = ref(db, `results/${gameType}`);
-      onValue(historyRef, (snapshot) => {
-        const data = snapshot.val();
+      const refPath = ref(db, `results/${gameType}`);
+      onValue(refPath, snap => {
+        const data = snap.val();
         const rows = [];
         if (data) {
-          const periods = Object.keys(data).sort().reverse().slice(0, 10);
-          for (const period of periods) {
-            const entry = data[period];
-            const bigSmall = entry.number >= 5 ? "Big" : "Small";
-            const colorEmoji = entry.color === "RED" ? "🔴" : entry.color === "GREEN" ? "🟢" : "🟣";
-            rows.push(`<tr><td style="color:${entry.color.toLowerCase()}"><b>${entry.number}</b></td><td>${bigSmall}</td><td>${colorEmoji}</td></tr>`);
+          const keys = Object.keys(data).sort().reverse().slice(0, 10);
+          for (const period of keys) {
+            const val = data[period];
+            const colorEmoji = val.color === "RED" ? "🔴" : val.color === "GREEN" ? "🟢" : "🟣";
+            const bigSmall = val.number >= 5 ? "Big" : "Small";
+            rows.push(`<tr><td style="color:${val.color.toLowerCase()}"><b>${val.number}</b></td><td>${bigSmall}</td><td>${colorEmoji}</td></tr>`);
           }
         }
         document.getElementById("historyTable").innerHTML = rows.join("");
       });
     }
 
-    function getNextRoundTime(seconds) {
-      const now = new Date();
-      return new Date(Math.ceil(now.getTime() / (seconds * 1000)) * (seconds * 1000));
-    }
-
     function startRealTimeTimer() {
       clearInterval(window.timer);
-
       const gameType = parseInt(document.getElementById("gameType").value);
-      const nextRound = getNextRoundTime(gameType);
+      const nextRound = new Date(Math.ceil(Date.now() / (gameType * 1000)) * (gameType * 1000));
 
       updateHistory(gameType);
 
       window.timer = setInterval(() => {
         const now = new Date();
-        const diff = Math.floor((nextRound.getTime() - now.getTime()) / 1000);
-
-        const currentPeriod = getPeriodId(gameType, now);
-        document.getElementById("periodDisplay").innerText = currentPeriod;
+        const diff = Math.floor((nextRound - now) / 1000);
+        const period = getPeriodId(gameType, now);
+        document.getElementById("periodDisplay").innerText = period;
+        document.getElementById("countdown").innerText = `⏳ Time Left: ${diff}s`;
 
         if (diff <= 0) {
           clearInterval(window.timer);
-          const countNum = Math.floor(Math.random() * 10);
-          const resultColor = getResultColor(countNum);
+          const num = Math.floor(Math.random() * 10);
+          const color = getResultColor(num);
 
-          set(ref(db, `results/${gameType}/${currentPeriod}`), {
-            number: countNum,
-            color: resultColor,
+          set(ref(db, `results/${gameType}/${period}`), {
+            number: num,
+            color: color,
             timestamp: Date.now()
           });
 
           if (confirmedBet && selectedColor) {
-            const bet = confirmedBet;
-            currentBalance -= bet;
-            const win = selectedColor === resultColor;
-
-            let resultText = `Result: ${resultColor} (${countNum}) → `;
+            const win = selectedColor === color;
+            let resultText = `Result: ${color} (${num}) → `;
+            let payout = 0;
             if (win) {
-              let multiplier = selectedColor === "VIOLET" ? 4.5 : 1.96;
-              const winAmount = parseFloat((bet * multiplier).toFixed(2));
-              currentBalance += winAmount;
-              resultText += `🎉 You Win ₹${winAmount}`;
+              const multiplier = selectedColor === "VIOLET" ? 4.5 : 1.96;
+              payout = parseFloat((confirmedBet * multiplier).toFixed(2));
+              currentBalance += payout;
+              resultText += `🎉 You Win ₹${payout}`;
             } else {
-              resultText += `😥 You Lose ₹${bet}`;
+              resultText += `😥 You Lose ₹${confirmedBet}`;
+              currentBalance -= confirmedBet;
             }
-
             update(ref(db, "users/" + currentUser.uid), { balance: currentBalance });
             document.getElementById("wallet").innerText = currentBalance.toFixed(2);
             document.getElementById("result").innerText = resultText;
             confirmedBet = null;
             selectedColor = null;
           }
+
           setTimeout(startRealTimeTimer, 1000);
-        } else {
-          document.getElementById("countdown").innerText = `⏳ Time Left: ${diff}s`;
         }
       }, 1000);
     }
@@ -302,5 +265,6 @@
     document.getElementById("gameType").onchange = () => {
       startRealTimeTimer();
     };
-  </script></body>
+  </script>
+</body>
 </html>
