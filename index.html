@@ -95,6 +95,7 @@
     <table>
       <thead>
         <tr>
+          <th>Period</th>
           <th>Number</th>
           <th>Big/Small</th>
           <th>Color</th>
@@ -214,7 +215,7 @@
             const val = data[p];
             const emoji = val.color === "RED" ? "🔴" : val.color === "GREEN" ? "🟢" : "🟣";
             const size = val.number >= 5 ? "Big" : "Small";
-            rows.push(`<tr><td>${val.number}</td><td>${size}</td><td>${emoji}</td></tr>`);
+            rows.push(`<tr><td>${p}</td><td>${val.number}</td><td>${size}</td><td>${emoji}</td></tr>`);
           }
         }
         document.getElementById("historyTable").innerHTML = rows.join("");
