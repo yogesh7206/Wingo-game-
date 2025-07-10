@@ -4,7 +4,7 @@
   <title>Wingo Game + Admin Panel</title>
   <style>
     body { font-family: Arial; text-align: center; background: #f0f0f0; padding: 30px; }
-    input, button, select { padding: 10px; margin: 5px; font-size: 16px; }
+    input, button { padding: 10px; margin: 5px; font-size: 16px; }
     .hidden { display: none; }
     .red { background: red; color: white; }
     .green { background: green; color: white; }
@@ -27,26 +27,25 @@
     <h1>Welcome, <span id="userEmail"></span>!</h1>
     <p>User ID: <span id="userIdDisplay"></span></p>
     <h2>Balance: ₹<span id="wallet">0</span></h2>
-    <h3>Select Game Timer: 
-      <select id="gameTimer" onchange="startTimer()">
-        <option value="30">30 sec</option>
-        <option value="60">1 min</option>
-        <option value="180">3 min</option>
-        <option value="300">5 min</option>
-      </select>
-    </h3>
-    <h2>Color Prediction Game</h2>
-    <div id="countdown"></div>
-    <div id="countDisplay"></div>
-    <div>
-      <button class="red" onclick="selectColor('RED')">Red</button>
-      <button class="green" onclick="selectColor('GREEN')">Green</button>
-      <button class="violet" onclick="selectColor('VIOLET')">Violet</button>
-    </div><br>
-    <input type="number" id="bet" step="0.1" placeholder="Enter Bet ₹">
-    <p id="result"></p>
-    <p><b>History:</b> <span id="history"></span></p>
-    <button onclick="logout()">Logout</button>
+    <h3>Select Game Mode:</h3>
+    <select id="gameMode" onchange="changeGameMode()">
+      <option value="30">30 Seconds</option>
+      <option value="60">1 Minute</option>
+      <option value="180">3 Minutes</option>
+      <option value="300">5 Minutes</option>
+    </select><h2>Color Prediction Game</h2>
+<div id="countdown"></div>
+<div id="countDisplay"></div>
+<div>
+  <button class="red" onclick="selectColor('RED')">Red</button>
+  <button class="green" onclick="selectColor('GREEN')">Green</button>
+  <button class="violet" onclick="selectColor('VIOLET')">Violet</button>
+</div><br>
+<input type="number" id="bet" step="0.1" placeholder="Enter Bet ₹">
+<p id="result"></p>
+<p><b>History (<span id="modeName">30s</span>):</b> <span id="history"></span></p>
+<button onclick="logout()">Logout</button>
+
   </div>  <!-- Admin Panel -->  <div id="adminPanel" class="hidden">
     <h2>🛡️ Admin Panel</h2>
     <div id="usersTable"></div>
@@ -72,7 +71,13 @@
     let currentUser = null;
     let currentBalance = 0;
     let selectedColor = null;
-    let history = [];
+    let historyMap = {
+      "30": [],
+      "60": [],
+      "180": [],
+      "300": []
+    };
+    let currentMode = "30";
 
     window.toggleRegister = function () {
       document.getElementById("loginSection").classList.toggle("hidden");
@@ -122,6 +127,7 @@
         get(ref(db, "users/" + user.uid)).then(snapshot => {
           if (snapshot.exists()) {
             const data = snapshot.val();
+
             if (!data.userId) {
               const newUserId = Math.floor(100000 + Math.random() * 900000).toString();
               update(ref(db, "users/" + user.uid), { userId: newUserId });
@@ -161,6 +167,7 @@
       if (bet > currentBalance) return alert("❌ Not enough balance!");
 
       currentBalance -= bet;
+
       let resultColor = getResultColor(countNum);
       let win = selectedColor === resultColor;
 
@@ -178,37 +185,52 @@
       document.getElementById("wallet").innerText = currentBalance.toFixed(2);
       document.getElementById("result").innerText = resultText;
 
-      history.unshift(resultColor);
-      document.getElementById("history").innerText = history.slice(0, 5).join(", ");
+      historyMap[currentMode].unshift(resultColor);
+      document.getElementById("history").innerText = historyMap[currentMode].slice(0, 5).join(", ");
     }
 
+    let timeLeft = 30;
     let timer;
+    let countNum = 0;
+
     function startTimer() {
       clearInterval(timer);
-      let gameDuration = parseInt(document.getElementById("gameTimer").value);
-      let timeLeft = gameDuration;
-      let countNum = Math.floor(Math.random() * 10);
-
+      timeLeft = parseInt(currentMode);
       timer = setInterval(() => {
         document.getElementById("countdown").innerText = `Time Left: ${timeLeft}s`;
         document.getElementById("countDisplay").innerText = `Random Number: ${countNum}`;
-
         if (timeLeft <= 0) {
           clearInterval(timer);
           placeBet(countNum);
           startTimer();
         } else {
+          countNum = Math.floor(Math.random() * 10);
           timeLeft--;
         }
       }, 1000);
     }
+
+    window.changeGameMode = function () {
+      currentMode = document.getElementById("gameMode").value;
+      document.getElementById("modeName").innerText =
+        currentMode === "30" ? "30s" :
+        currentMode === "60" ? "1m" :
+        currentMode === "180" ? "3m" : "5m";
+      document.getElementById("history").innerText = historyMap[currentMode].slice(0, 5).join(", ");
+      startTimer();
+    };
 
     function loadAllUsers() {
       get(ref(db, "users")).then(snapshot => {
         if (snapshot.exists()) {
           const users = snapshot.val();
           let html = `<table border="1" cellpadding="5" style="margin:auto;">
-            <tr><th>Email</th><th>Balance (₹)</th><th>User ID</th><th>Update</th></tr>`;
+            <tr>
+              <th>Email</th>
+              <th>Balance (₹)</th>
+              <th>User ID</th>
+              <th>Update</th>
+            </tr>`;
 
           for (const uid in users) {
             const user = users[uid];
@@ -217,7 +239,14 @@
               update(ref(db, "users/" + uid), { userId: newUserId });
               user.userId = newUserId;
             }
-            html += `<tr><td>${user.email}</td><td><input type="number" id="bal-${uid}" value="${user.balance}" style="width:80px;"></td><td>${user.userId}</td><td><button onclick="updateBalance('${uid}')">Update</button></td></tr>`;
+
+            html += `
+              <tr>
+                <td>${user.email}</td>
+                <td><input type="number" id="bal-${uid}" value="${user.balance}" style="width:80px;"></td>
+                <td>${user.userId}</td>
+                <td><button onclick="updateBalance('${uid}')">Update</button></td>
+              </tr>`;
           }
 
           html += `</table>`;
