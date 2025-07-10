@@ -210,7 +210,7 @@
         const data = snap.val();
         const rows = [];
         if (data) {
-          const keys = Object.keys(data).sort().reverse().slice(0, 10);
+          const keys = Object.keys(data).sort().reverse(); // ✅ Show all periods
           for (const p of keys) {
             const val = data[p];
             const emoji = val.color === "RED" ? "🔴" : val.color === "GREEN" ? "🟢" : "🟣";
@@ -218,7 +218,13 @@
             rows.push(`<tr><td>${p}</td><td>${val.number}</td><td>${size}</td><td>${emoji}</td></tr>`);
           }
         }
-        document.getElementById("historyTable").innerHTML = rows.join("");
+
+        if (rows.length === 0) {
+          document.getElementById("historyTable").innerHTML =
+            `<tr><td colspan="4">No results yet for ${gameType}-sec game</td></tr>`;
+        } else {
+          document.getElementById("historyTable").innerHTML = rows.join("");
+        }
       });
     }
 
