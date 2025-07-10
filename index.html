@@ -1,227 +1,144 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sikkim2 Style Wingo Game</title>
+  <meta charset="UTF-8">
+  <title>Wingo Game Login</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to bottom, #101820, #1f2c3a);
-      color: #f5f5f5;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      padding: 20px;
+      font-family: Arial;
+      background: #f4f9ff;
+      margin: 0;
+      padding: 0;
+      text-align: center;
     }
     .container {
-      width: 100%;
-      max-width: 480px;
-      background: #18232f;
-      border-radius: 12px;
+      max-width: 400px;
+      margin: 50px auto;
       padding: 20px;
-      box-shadow: 0 0 20px rgba(0, 255, 157, 0.1);
-    }
-    h1, h2, h3 {
-      text-align: center;
-      color: #00ffc3;
-      margin-bottom: 10px;
-    }
-    .timer, .period {
-      font-size: 20px;
-      margin: 10px 0;
-      text-align: center;
-      font-weight: bold;
-    }
-    .balance {
-      font-size: 18px;
-      text-align: center;
-      margin-bottom: 12px;
-    }
-    input, select, button {
-      width: 100%;
-      padding: 12px;
-      margin: 8px 0;
+      background: white;
       border-radius: 10px;
-      border: none;
+      box-shadow: 0 0 10px #ccc;
+    }
+    input, button {
+      width: 90%;
+      padding: 10px;
+      margin: 10px 0;
       font-size: 16px;
     }
-    button { cursor: pointer; transition: 0.3s; font-weight: bold; }
-    button:hover { transform: scale(1.03); opacity: 0.95; }
-    .red { background: #ff1a43; color: white; }
-    .green { background: #00c853; color: white; }
-    .violet { background: #9c27b0; color: white; }
-    .big, .small { background: #ff9100; color: white; }
-    .number-btn {
-      background: #2e7dff;
-      color: white;
-      width: 22%;
-      margin: 4px 1%;
-      border-radius: 20px;
-    }
-    .button-grid {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-    }
-    .chart {
+    .hidden { display: none; }
+    #logoutBtn {
       margin-top: 20px;
-      background: #263544;
-      border-radius: 10px;
-      padding: 10px;
+      background: #d32f2f;
+      color: white;
+      border: none;
     }
-    .chart-title { text-align: center; margin-bottom: 10px; color: #00ffc3; }
-    .chart-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 10px;
-      justify-content: center;
-    }
-    .chart-cell {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      line-height: 50px;
-      text-align: center;
-      font-weight: bold;
-      font-size: 18px;
-      border: 2px solid #fff;
-      box-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
-    }
-    .red-cell { background: radial-gradient(circle at top left, #ff5252, #c51162); color: white; }
-    .green-cell { background: radial-gradient(circle at top left, #00e676, #00c853); color: black; }
-    .violet-cell { background: radial-gradient(circle at top left, #aa00ff, #6a1b9a); color: white; }
   </style>
 </head>
 <body>
-  <div class="container" id="authSection">
+
+  <div class="container" id="loginContainer">
     <h2>Login</h2>
-    <input type="email" id="loginEmail" placeholder="Email" />
-    <input type="password" id="loginPassword" placeholder="Password" />
-    <button onclick="loginUser()">Login</button>
-    <p style="text-align: center; margin-top: 10px;">No account? <a href="#" onclick="registerUser()">Click to register</a></p>
-  </div>  <div class="container hidden" id="gameSection">
-    <h1>🎰 Wingo Game - Sikkim Style</h1>
-    <p class="balance">💰 Balance: ₹<span id="wallet">100.00</span></p>
-    <div class="timer">⏳ Time Left: <span id="countdown">--</span></div>
-    <div class="period">📅 Period: <span id="periodDisplay">--</span></div><select id="gameType">
-  <option value="30">30 Sec</option>
-  <option value="60" selected>1 Min</option>
-  <option value="180">3 Min</option>
-  <option value="300">5 Min</option>
-</select>
+    <input type="email" id="loginEmail" placeholder="Email">
+    <input type="password" id="loginPass" placeholder="Password">
+    <button id="loginBtn">Login</button>
+    <p>Don't have an account? <a href="#" onclick="toggleRegister()">Register here</a></p>
+  </div>
 
-<input type="number" id="betAmount" placeholder="Enter Bet Amount ₹" />
+  <div class="container hidden" id="registerContainer">
+    <h2>Register</h2>
+    <input type="email" id="regEmail" placeholder="Email">
+    <input type="password" id="regPass" placeholder="Password">
+    <button id="registerBtn">Register</button>
+    <p>Already have an account? <a href="#" onclick="toggleRegister()">Login here</a></p>
+  </div>
 
-<div class="button-grid">
-  <button class="red" onclick="placeBet('color', 'RED')">Red</button>
-  <button class="green" onclick="placeBet('color', 'GREEN')">Green</button>
-  <button class="violet" onclick="placeBet('color', 'VIOLET')">Violet</button>
-  <button class="big" onclick="placeBet('size', 'BIG')">Big</button>
-  <button class="small" onclick="placeBet('size', 'SMALL')">Small</button>
-</div>
+  <div class="container hidden" id="gameContainer">
+    <h2>Welcome, <span id="userEmail"></span></h2>
+    <p><strong>User ID:</strong> <span id="userIdDisplay"></span></p>
+    <p><strong>Wallet Balance:</strong> ₹<span id="wallet">0.00</span></p>
+    <button id="logoutBtn">Logout</button>
+  </div>
 
-<div class="button-grid">
-  <button class="number-btn" onclick="placeBet('number', 0)">0</button>
-  <button class="number-btn" onclick="placeBet('number', 1)">1</button>
-  <button class="number-btn" onclick="placeBet('number', 2)">2</button>
-  <button class="number-btn" onclick="placeBet('number', 3)">3</button>
-  <button class="number-btn" onclick="placeBet('number', 4)">4</button>
-  <button class="number-btn" onclick="placeBet('number', 5)">5</button>
-  <button class="number-btn" onclick="placeBet('number', 6)">6</button>
-  <button class="number-btn" onclick="placeBet('number', 7)">7</button>
-  <button class="number-btn" onclick="placeBet('number', 8)">8</button>
-  <button class="number-btn" onclick="placeBet('number', 9)">9</button>
-</div>
+  <!-- Firebase SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+    import {
+      getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+      signOut, onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+    import {
+      getDatabase, ref, set, get
+    } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 
-<div class="chart">
-  <h3 class="chart-title">📊 Recent Results</h3>
-  <div class="chart-grid" id="chartGrid"></div>
-</div>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBe5kGOwYS3FsF_9_q1pjxaWrF1glUe87c",
+      authDomain: "wingologin.firebaseapp.com",
+      databaseURL: "https://wingologin-default-rtdb.firebaseio.com",
+      projectId: "wingologin",
+      storageBucket: "wingologin.appspot.com",
+      messagingSenderId: "605536859710",
+      appId: "1:605536859710:web:ed9495775c8f8dd6a8836f"
+    };
 
-  </div>  <script>
-    const countdown = document.getElementById("countdown");
-    const periodDisplay = document.getElementById("periodDisplay");
-    const walletDisplay = document.getElementById("wallet");
-    const chartGrid = document.getElementById("chartGrid");
-    let balance = 100;
-    let timerInterval = null;
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
 
-    function loginUser() {
+    const loginContainer = document.getElementById("loginContainer");
+    const registerContainer = document.getElementById("registerContainer");
+    const gameContainer = document.getElementById("gameContainer");
+
+    function toggleRegister() {
+      loginContainer.classList.toggle("hidden");
+      registerContainer.classList.toggle("hidden");
+    }
+
+    document.getElementById("registerBtn").onclick = () => {
+      const email = document.getElementById("regEmail").value;
+      const pass = document.getElementById("regPass").value;
+      const userId = Math.floor(100000 + Math.random() * 900000).toString();
+
+      createUserWithEmailAndPassword(auth, email, pass)
+        .then((cred) => {
+          set(ref(db, "users/" + cred.user.uid), {
+            email: email,
+            balance: 100,
+            userId: userId
+          });
+          alert("✅ Registration successful!");
+        })
+        .catch(err => alert("❌ " + err.message));
+    };
+
+    document.getElementById("loginBtn").onclick = () => {
       const email = document.getElementById("loginEmail").value;
-      const pass = document.getElementById("loginPassword").value;
-      if (!email || !pass) return alert("Enter email and password");
-      // Simulate login (replace with Firebase in production)
-      if (email === "user@test.com" && pass === "123456") {
-        document.getElementById("authSection").classList.add("hidden");
-        document.getElementById("gameSection").classList.remove("hidden");
-        startTimer();
-      } else {
-        alert("Invalid credentials!");
+      const pass = document.getElementById("loginPass").value;
+
+      signInWithEmailAndPassword(auth, email, pass)
+        .then(() => alert("✅ Login successful!"))
+        .catch(err => alert("❌ " + err.message));
+    };
+
+    document.getElementById("logoutBtn").onclick = () => {
+      signOut(auth).then(() => location.reload());
+    };
+
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        loginContainer.classList.add("hidden");
+        registerContainer.classList.add("hidden");
+        gameContainer.classList.remove("hidden");
+        document.getElementById("userEmail").textContent = user.email;
+
+        get(ref(db, "users/" + user.uid)).then(snapshot => {
+          const data = snapshot.val();
+          if (data) {
+            document.getElementById("userIdDisplay").textContent = data.userId || "N/A";
+            document.getElementById("wallet").textContent = data.balance.toFixed(2);
+          }
+        });
       }
-    }
-
-    function registerUser() {
-      alert("Registration not implemented in demo. Use user@test.com / 123456");
-    }
-
-    function getPeriodId(seconds, time) {
-      const d = time.toISOString().slice(0, 10).replace(/-/g, "");
-      const s = time.getHours() * 3600 + time.getMinutes() * 60 + time.getSeconds();
-      const index = Math.floor(s / seconds);
-      return `${d}-${String(index + 1).padStart(3, '0')}`;
-    }
-
-    function getColor(num) {
-      if (num === 1 || num === 5) return "violet-cell";
-      if ([2, 4, 6, 8].includes(num)) return "red-cell";
-      return "green-cell";
-    }
-
-    function updateChart(period, number) {
-      const div = document.createElement("div");
-      div.className = `chart-cell ${getColor(number)}`;
-      div.innerText = number;
-      chartGrid.prepend(div);
-      if (chartGrid.childNodes.length > 20) chartGrid.removeChild(chartGrid.lastChild);
-    }
-
-    function startTimer() {
-      clearInterval(timerInterval);
-      const gameType = parseInt(document.getElementById("gameType").value);
-      const next = new Date(Math.ceil(Date.now() / (gameType * 1000)) * gameType * 1000);
-
-      timerInterval = setInterval(() => {
-        const now = new Date();
-        const diff = Math.floor((next - now) / 1000);
-        countdown.innerText = diff > 0 ? `${diff}s` : "0s";
-        const pid = getPeriodId(gameType, now);
-        periodDisplay.innerText = pid;
-
-        if (diff <= 0) {
-          clearInterval(timerInterval);
-          const number = Math.floor(Math.random() * 10);
-          updateChart(pid, number);
-          setTimeout(startTimer, 1000);
-        }
-      }, 1000);
-    }
-
-    function placeBet(type, value) {
-      const amt = parseFloat(document.getElementById("betAmount").value);
-      if (isNaN(amt) || amt <= 0) return alert("Enter valid amount");
-
-      let payout = 0;
-      if (type === "color") payout = value === "VIOLET" ? amt * 4.5 : amt * 1.96;
-      else if (type === "size") payout = amt * 1.96;
-      else if (type === "number") payout = amt * 8.5;
-
-      balance += payout - amt;
-      walletDisplay.innerText = balance.toFixed(2);
-      alert(`✅ Bet on ${value} placed! Possible win: ₹${payout.toFixed(2)}`);
-    }
-
-    document.getElementById("gameType").addEventListener("change", startTimer);
-  </script></body>
+    });
+  </script>
+</body>
 </html>
