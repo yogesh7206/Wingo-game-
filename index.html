@@ -141,11 +141,38 @@
         <td>8</td>
         <td><span class="badge badge-red">RED</span></td>
       </tr>
-      <!-- More rows can be dynamically loaded -->
     </tbody>
   </table>
 </div>
 
-  </div>
-</body>
+  </div>  <script>
+    function getPeriodId(seconds, time) {
+      const d = time.toISOString().slice(0, 10).replace(/-/g, '');
+      const s = time.getHours() * 3600 + time.getMinutes() * 60 + time.getSeconds();
+      const index = Math.floor(s / seconds);
+      return `${d}-${String(index + 1).padStart(3, '0')}`;
+    }
+
+    function startRealTimeTimer() {
+      clearInterval(window.timer);
+      const gameType = parseInt(document.getElementById("gameType").value);
+      const nextRound = new Date(Math.ceil(Date.now() / (gameType * 1000)) * (gameType * 1000));
+
+      window.timer = setInterval(() => {
+        const now = new Date();
+        const diff = Math.floor((nextRound - now) / 1000);
+        const period = getPeriodId(gameType, now);
+        document.getElementById("periodDisplay").innerText = period;
+        document.getElementById("countdown").innerText = `${diff}s`;
+
+        if (diff <= 0) {
+          clearInterval(window.timer);
+          setTimeout(startRealTimeTimer, 1000);
+        }
+      }, 1000);
+    }
+
+    document.getElementById("gameType").onchange = startRealTimeTimer;
+    window.onload = startRealTimeTimer;
+  </script></body>
 </html>
