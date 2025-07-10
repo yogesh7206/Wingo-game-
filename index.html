@@ -6,260 +6,252 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f3faff;
+      background: #f4f6fa;
       margin: 0;
       padding: 20px;
       text-align: center;
     }
-    .container {
-      max-width: 500px;
-      margin: auto;
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
+    .hidden { display: none; }
     input, button, select {
       padding: 10px;
       margin: 8px;
-      font-size: 16px;
       width: 90%;
       max-width: 300px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
     }
-    .hidden { display: none; }
-    .red { background: #e53935; color: #fff; }
-    .green { background: #43a047; color: #fff; }
-    .violet { background: #8e24aa; color: #fff; }
-    .big, .small { background: #ff9800; color: #fff; }
-    .num-btn { background: #1976d2; color: #fff; border-radius: 50%; width: 40px; height: 40px; margin: 3px; }
-    .chart span {
+    #gameSection {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #ccc;
+      padding: 20px;
+    }
+    .btn {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+    }
+    .RED { background: #e53935; }
+    .GREEN { background: #43a047; }
+    .VIOLET { background: #8e24aa; }
+    .BIG, .SMALL { background: #ff9800; }
+    .circle {
       display: inline-block;
-      width: 35px;
-      height: 35px;
-      line-height: 35px;
-      margin: 3px;
+      width: 40px;
+      height: 40px;
+      line-height: 40px;
+      margin: 4px;
       border-radius: 50%;
-      color: #fff;
+      color: white;
       font-weight: bold;
+    }
+    #recentResults {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
-<div class="container" id="authSection">
-  <h2>Login</h2>
-  <input type="email" id="loginEmail" placeholder="Email" />
-  <input type="password" id="loginPass" placeholder="Password" />
-  <button id="loginBtn">Login</button>
-  <p>Don't have an account? <a href="#" onclick="toggleRegister()">Register</a></p>
 
-  <div class="hidden" id="registerSection">
-    <h2>Register</h2>
-    <input type="email" id="regEmail" placeholder="Email" />
-    <input type="password" id="regPass" placeholder="Password" />
-    <button id="registerBtn">Register</button>
-    <p>Already registered? <a href="#" onclick="toggleRegister()">Login</a></p>
-  </div>
-</div>
-
-<div class="container hidden" id="gameSection">
-  <h2>Welcome, <span id="userEmail"></span></h2>
-  <p>User ID: <strong id="userIdDisplay"></strong></p>
-  <h3>Wallet: ₹<span id="wallet">0</span></h3>
-
-  <select id="gameType">
-    <option value="30">30 Seconds</option>
-    <option value="60">1 Minute</option>
-    <option value="180">3 Minutes</option>
-    <option value="300">5 Minutes</option>
-  </select>
-
-  <p>⏳ Time Left: <span id="countdown">--</span></p>
-  <p><strong>Period:</strong> <span id="periodDisplay">--</span></p>
-
-  <div>
-    <button class="red" onclick="betColor('RED')">Red</button>
-    <button class="green" onclick="betColor('GREEN')">Green</button>
-    <button class="violet" onclick="betColor('VIOLET')">Violet</button>
-  </div>
-  <div>
-    <button class="big" onclick="betSize('BIG')">Big</button>
-    <button class="small" onclick="betSize('SMALL')">Small</button>
-  </div>
-  <div>
-    <h4>Number Bet (0–9)</h4>
-    <div id="numberButtons"></div>
+  <div id="authSection">
+    <h2>Login or Register</h2>
+    <input type="email" id="email" placeholder="Email" /><br>
+    <input type="password" id="password" placeholder="Password" /><br>
+    <button onclick="login()">Login</button>
+    <button onclick="register()">Register</button>
   </div>
 
-  <input type="number" id="betAmount" placeholder="Enter Bet ₹" />
-  <p id="result"></p>
-  <button onclick="logout()">Logout</button>
-</div>
+  <div id="gameSection" class="hidden">
+    <h2>Welcome <span id="userEmail"></span></h2>
+    <p>User ID: <span id="userIdDisplay"></span> | Balance: ₹<span id="wallet">0</span></p>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-  import {
-    getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-    onAuthStateChanged, signOut
-  } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
-  import {
-    getDatabase, ref, set, update, get
-  } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+    <label>Select Game Duration:</label>
+    <select id="gameType">
+      <option value="60">1 Minute</option>
+    </select>
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBe5kGOwYS3FsF_9_q1pjxaWrF1glUe87c",
-    authDomain: "wingologin.firebaseapp.com",
-    databaseURL: "https://wingologin-default-rtdb.firebaseio.com",
-    projectId: "wingologin",
-    storageBucket: "wingologin.appspot.com",
-    messagingSenderId: "605536859710",
-    appId: "1:605536859710:web:ed9495775c8f8dd6a8836f"
-  };
+    <p>⏳ Time Left: <span id="countdown">--</span></p>
+    <p>Current Period: <span id="periodDisplay">--</span></p>
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getDatabase(app);
+    <div>
+      <button class="btn RED" onclick="selectBet('RED')">🔴 Red</button>
+      <button class="btn GREEN" onclick="selectBet('GREEN')">🟢 Green</button>
+      <button class="btn VIOLET" onclick="selectBet('VIOLET')">🟣 Violet</button>
+      <button class="btn BIG" onclick="selectBet('BIG')">🔶 Big</button>
+      <button class="btn SMALL" onclick="selectBet('SMALL')">🔹 Small</button>
+    </div>
 
-  let currentUser, currentBalance = 0;
-  let selectedColor = null, selectedSize = null, selectedNumber = null, betAmount = null;
+    <input type="number" id="betAmount" placeholder="Enter Bet ₹" />
+    <p id="result"></p>
 
-  const countdownEl = document.getElementById("countdown");
-  const periodDisplay = document.getElementById("periodDisplay");
+    <h3>Recent Results</h3>
+    <div id="recentResults"></div>
 
-  function toggleRegister() {
-    document.getElementById("registerSection").classList.toggle("hidden");
-  }
+    <button onclick="logout()">Logout</button>
+  </div>
 
-  document.getElementById("loginBtn").onclick = () => {
-    const email = document.getElementById("loginEmail").value;
-    const pass = document.getElementById("loginPass").value;
-    signInWithEmailAndPassword(auth, email, pass)
-      .then(() => alert("✅ Login successful"))
-      .catch(e => alert("❌ " + e.message));
-  };
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+    import { getDatabase, ref, set, get, update, onValue } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 
-  document.getElementById("registerBtn").onclick = () => {
-    const email = document.getElementById("regEmail").value;
-    const pass = document.getElementById("regPass").value;
-    const userId = Math.floor(100000 + Math.random() * 900000);
-    createUserWithEmailAndPassword(auth, email, pass).then(cred => {
-      set(ref(db, "users/" + cred.user.uid), {
-        email, balance: 100, userId
-      });
-      alert("✅ Registered successfully!");
-    }).catch(err => alert("❌ " + err.message));
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyBe5kGOwYS3FsF_9_q1pjxaWrF1glUe87c",
+      authDomain: "wingologin.firebaseapp.com",
+      databaseURL: "https://wingologin-default-rtdb.firebaseio.com",
+      projectId: "wingologin",
+      storageBucket: "wingologin.firebasestorage.app",
+      messagingSenderId: "605536859710",
+      appId: "1:605536859710:web:ed9495775c8f8dd6a8836f",
+      measurementId: "G-FLDY936H9P"
+    };
 
-  onAuthStateChanged(auth, user => {
-    if (user) {
-      currentUser = user;
-      document.getElementById("authSection").classList.add("hidden");
-      document.getElementById("gameSection").classList.remove("hidden");
-      document.getElementById("userEmail").textContent = user.email;
-      get(ref(db, "users/" + user.uid)).then(snap => {
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    let currentUser = null;
+    let currentBalance = 0;
+    let selectedBet = null;
+    let betAmount = 0;
+
+    function login() {
+      signInWithEmailAndPassword(auth,
+        document.getElementById("email").value,
+        document.getElementById("password").value
+      ).catch(e => alert(e.message));
+    }
+
+    function register() {
+      const email = document.getElementById("email").value;
+      const pass = document.getElementById("password").value;
+      const userId = Math.floor(100000 + Math.random() * 900000);
+      createUserWithEmailAndPassword(auth, email, pass).then(cred => {
+        set(ref(db, "users/" + cred.user.uid), {
+          email: email,
+          balance: 100,
+          userId: userId
+        });
+        alert("Registered successfully!");
+      }).catch(e => alert(e.message));
+    }
+
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        currentUser = user;
+        document.getElementById("authSection").classList.add("hidden");
+        document.getElementById("gameSection").classList.remove("hidden");
+        document.getElementById("userEmail").innerText = user.email;
+
+        get(ref(db, "users/" + user.uid)).then(snap => {
+          const data = snap.val();
+          currentBalance = data.balance;
+          document.getElementById("wallet").innerText = currentBalance.toFixed(2);
+          document.getElementById("userIdDisplay").innerText = data.userId;
+        });
+
+        startGame();
+      }
+    });
+
+    function logout() {
+      signOut(auth).then(() => location.reload());
+    }
+
+    window.selectBet = (bet) => {
+      selectedBet = bet;
+      betAmount = parseFloat(document.getElementById("betAmount").value);
+      alert("Selected: " + bet + " | Amount: ₹" + betAmount);
+    };
+
+    function getColor(num) {
+      if (num === 5) return "VIOLET";
+      if ([0, 1, 3, 7, 9].includes(num)) return "RED";
+      return "GREEN";
+    }
+
+    function getPeriodId(seconds, time) {
+      const d = time.toISOString().slice(0, 10).replace(/-/g, '');
+      const s = time.getHours() * 3600 + time.getMinutes() * 60 + time.getSeconds();
+      return `${d}-${String(Math.floor(s / seconds) + 1).padStart(3, '0')}`;
+    }
+
+    function startGame() {
+      const gameType = parseInt(document.getElementById("gameType").value);
+      const nextRound = new Date(Math.ceil(Date.now() / (gameType * 1000)) * (gameType * 1000));
+
+      showResults(gameType);
+
+      window.timer = setInterval(() => {
+        const now = new Date();
+        const diff = Math.floor((nextRound - now) / 1000);
+        const period = getPeriodId(gameType, now);
+        document.getElementById("periodDisplay").innerText = period;
+        document.getElementById("countdown").innerText = `${diff}s`;
+
+        if (diff <= 0) {
+          clearInterval(window.timer);
+          const num = Math.floor(Math.random() * 10);
+          const color = getColor(num);
+          const size = num >= 5 ? "BIG" : "SMALL";
+
+          set(ref(db, `results/${gameType}/${period}`), {
+            number: num,
+            color,
+            size,
+            timestamp: Date.now()
+          });
+
+          if (selectedBet && betAmount) {
+            let won = (selectedBet === color || selectedBet === size);
+            let payout = 0;
+            if (won) {
+              const mult = selectedBet === "VIOLET" ? 4.5 : 1.96;
+              payout = betAmount * mult;
+              currentBalance += payout;
+              document.getElementById("result").innerText = `🎉 You won ₹${payout.toFixed(2)}`;
+            } else {
+              currentBalance -= betAmount;
+              document.getElementById("result").innerText = `❌ You lost ₹${betAmount}`;
+            }
+            update(ref(db, "users/" + currentUser.uid), { balance: currentBalance });
+            document.getElementById("wallet").innerText = currentBalance.toFixed(2);
+            selectedBet = null;
+            betAmount = 0;
+          }
+
+          setTimeout(startGame, 1000);
+        }
+      }, 1000);
+    }
+
+    function showResults(gameType) {
+      const container = document.getElementById("recentResults");
+      onValue(ref(db, `results/${gameType}`), snap => {
+        container.innerHTML = '';
         const data = snap.val();
-        currentBalance = data.balance;
-        document.getElementById("wallet").textContent = currentBalance.toFixed(2);
-        document.getElementById("userIdDisplay").textContent = data.userId;
-        startGameLoop();
+        if (data) {
+          const keys = Object.keys(data).sort().reverse().slice(0, 10);
+          for (let k of keys) {
+            const result = data[k];
+            const div = document.createElement("div");
+            div.className = `circle ${result.color}`;
+            div.textContent = result.number;
+            container.appendChild(div);
+          }
+        }
       });
     }
-  });
+  </script>
 
-  function logout() {
-    signOut(auth).then(() => location.reload());
-  }
-
-  function getResultColor(num) {
-    if (num === 5) return "VIOLET";
-    if ([1,3,7,9,0,2,4,6,8].includes(num)) return [2,4,6,8,1].includes(num) ? "RED" : "GREEN";
-    return "GREEN";
-  }
-
-  function getPeriod(seconds, date) {
-    const d = date.toISOString().slice(0, 10).replace(/-/g, '');
-    const s = date.getHours()*3600 + date.getMinutes()*60 + date.getSeconds();
-    return `${d}-${String(Math.floor(s / seconds) + 1).padStart(3, '0')}`;
-  }
-
-  function startGameLoop() {
-    const gameType = parseInt(document.getElementById("gameType").value);
-    let nextRound = Math.ceil(Date.now() / (gameType * 1000)) * (gameType * 1000);
-
-    const loop = setInterval(() => {
-      const now = Date.now();
-      let diff = Math.floor((nextRound - now) / 1000);
-      countdownEl.textContent = diff > 0 ? `${diff}s` : "0s";
-
-      const period = getPeriod(gameType, new Date());
-      periodDisplay.textContent = period;
-
-      if (diff <= 0) {
-        const num = Math.floor(Math.random() * 10);
-        const color = getResultColor(num);
-        const size = num >= 5 ? "BIG" : "SMALL";
-
-        let win = false;
-        if (selectedColor === color || selectedSize === size || selectedNumber == num) win = true;
-        let payout = 0;
-        betAmount = parseFloat(document.getElementById("betAmount").value || "0");
-
-        if (win) {
-          if (selectedNumber == num) payout = betAmount * 8.5;
-          else if (color === "VIOLET") payout = betAmount * 4.5;
-          else payout = betAmount * 1.96;
-          currentBalance += payout;
-          document.getElementById("result").textContent = `🎉 You Win ₹${payout.toFixed(2)}`;
-        } else {
-          currentBalance -= betAmount;
-          document.getElementById("result").textContent = `😞 You Lose ₹${betAmount.toFixed(2)}`;
-        }
-
-        update(ref(db, "users/" + currentUser.uid), { balance: currentBalance });
-        document.getElementById("wallet").textContent = currentBalance.toFixed(2);
-
-        selectedColor = null;
-        selectedSize = null;
-        selectedNumber = null;
-        nextRound = Date.now() + (gameType * 1000);
-      }
-    }, 1000);
-  }
-
-  document.getElementById("gameType").onchange = () => {
-    clearInterval(window.timer);
-    startGameLoop();
-  };
-
-  window.betColor = (c) => {
-    selectedColor = c;
-    selectedSize = null;
-    selectedNumber = null;
-    alert(`✅ Bet on ${c}`);
-  };
-
-  window.betSize = (s) => {
-    selectedSize = s;
-    selectedColor = null;
-    selectedNumber = null;
-    alert(`✅ Bet on ${s}`);
-  };
-
-  window.betNumber = (n) => {
-    selectedNumber = n;
-    selectedColor = null;
-    selectedSize = null;
-    alert(`✅ Bet on Number ${n}`);
-  };
-
-  // Render number buttons
-  const numBtnDiv = document.getElementById("numberButtons");
-  for (let i = 0; i <= 9; i++) {
-    const btn = document.createElement("button");
-    btn.className = "num-btn";
-    btn.textContent = i;
-    btn.onclick = () => betNumber(i);
-    numBtnDiv.appendChild(btn);
-  }
-</script>
 </body>
 </html>
