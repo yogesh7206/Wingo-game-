@@ -51,6 +51,27 @@
   <button class="violet" onclick="selectColor('VIOLET')">Violet</button>
 </div><br>
 
+<h3>Special Bets</h3>
+<div>
+  <button onclick="selectSpecial('BIG')">Big (5–9)</button>
+  <button onclick="selectSpecial('SMALL')">Small (0–4)</button>
+</div>
+<div>
+  <p>Single Number (0–9)</p>
+  <div>
+    <button onclick="selectSpecial('0')">0</button>
+    <button onclick="selectSpecial('1')">1</button>
+    <button onclick="selectSpecial('2')">2</button>
+    <button onclick="selectSpecial('3')">3</button>
+    <button onclick="selectSpecial('4')">4</button>
+    <button onclick="selectSpecial('5')">5</button>
+    <button onclick="selectSpecial('6')">6</button>
+    <button onclick="selectSpecial('7')">7</button>
+    <button onclick="selectSpecial('8')">8</button>
+    <button onclick="selectSpecial('9')">9</button>
+  </div>
+</div><br>
+
 <input type="number" id="bet" step="0.1" placeholder="Enter Bet ₹">
 <button onclick="placeBet()">Place Bet</button>
 
@@ -64,7 +85,7 @@
 
 <h3>Your Bet History</h3>
 <table>
-  <thead><tr><th>Period</th><th>Color</th><th>Bet ₹</th><th>Result</th></tr></thead>
+  <thead><tr><th>Period</th><th>Type</th><th>Bet ₹</th><th>Result</th></tr></thead>
   <tbody id="yourBetTable"></tbody>
 </table>
 
@@ -88,6 +109,7 @@
     let currentUser = null;
     let currentBalance = 100;
     let selectedColor = null;
+    let selectedSpecial = null;
     let confirmedBet = null;
     let currentPeriod = "";
 
@@ -120,43 +142,54 @@
         const keys = data ? Object.keys(data).sort().reverse().slice(0, 10) : [];
         for (const key of keys) {
           const bet = data[key];
-          rows.push(`<tr><td>${bet.period}</td><td>${bet.color}</td><td>₹${bet.amount}</td><td>${bet.result}</td></tr>`);
+          rows.push(`<tr><td>${bet.period}</td><td>${bet.type}</td><td>₹${bet.amount}</td><td>${bet.result}</td></tr>`);
         }
         document.getElementById("yourBetTable").innerHTML = rows.join("");
       });
     }
 
+    window.selectColor = (c) => {
+      selectedColor = c;
+      selectedSpecial = null;
+    };
+
+    window.selectSpecial = (t) => {
+      selectedSpecial = t;
+      selectedColor = null;
+    };
+
     function placeBet() {
-      if (!selectedColor) return alert("Select a color");
       const amount = parseFloat(document.getElementById("bet").value);
       if (!amount || amount <= 0) return alert("Enter valid bet");
+      if (!selectedColor && !selectedSpecial) return alert("Choose a color or special bet");
 
       const number = Math.floor(Math.random() * 10);
       const resultColor = getResultColor(number);
-      const win = resultColor === selectedColor;
+      const bigSmall = number >= 5 ? "BIG" : "SMALL";
+      const win = (
+        (selectedColor && resultColor === selectedColor) ||
+        (selectedSpecial === bigSmall) ||
+        (selectedSpecial === number.toString())
+      );
       const periodId = new Date().toISOString().slice(0, 19);
 
-      // Save result
       set(ref(db, `results/30/${periodId}`), {
         number,
         color: resultColor,
         timestamp: Date.now()
       });
 
-      // Save personal bet
       push(ref(db, `bets/${currentUser.uid}`), {
         period: periodId,
-        color: selectedColor,
+        type: selectedColor || selectedSpecial,
         amount,
         result: win ? "Win" : "Lose"
       });
 
-      document.getElementById("result").innerText = win ? `✅ You Win! ${resultColor}` : `❌ You Lose! ${resultColor}`;
+      document.getElementById("result").innerText = win ? `✅ You Win! ${number}` : `❌ You Lose! ${number}`;
       updateHistory();
       loadYourBets();
     }
-
-    window.selectColor = (c) => selectedColor = c;
 
     onAuthStateChanged(auth, user => {
       if (user) {
@@ -168,4 +201,4 @@
       }
     });
   </script></body>
-</html>
+  </html>
