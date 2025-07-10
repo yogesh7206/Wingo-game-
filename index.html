@@ -89,7 +89,7 @@
     document.getElementById("registerBtn").onclick = () => {
       const email = document.getElementById("regEmail").value;
       const pass = document.getElementById("regPass").value;
-      const userId = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit ID
+      const userId = Math.floor(100000 + Math.random() * 900000).toString();
 
       createUserWithEmailAndPassword(auth, email, pass)
         .then((userCredential) => {
@@ -129,6 +129,14 @@
         get(ref(db, "users/" + user.uid)).then(snapshot => {
           if (snapshot.exists()) {
             const data = snapshot.val();
+
+            // Auto-generate missing userId
+            if (!data.userId) {
+              const newUserId = Math.floor(100000 + Math.random() * 900000).toString();
+              update(ref(db, "users/" + user.uid), { userId: newUserId });
+              data.userId = newUserId;
+            }
+
             currentBalance = data.balance || 0;
             document.getElementById("wallet").innerText = currentBalance.toFixed(2);
             document.getElementById("userIdDisplay").innerText = data.userId || "N/A";
@@ -219,11 +227,19 @@
 
           for (const uid in users) {
             const user = users[uid];
+
+            // Auto-generate missing userId
+            if (!user.userId) {
+              const newUserId = Math.floor(100000 + Math.random() * 900000).toString();
+              update(ref(db, "users/" + uid), { userId: newUserId });
+              user.userId = newUserId;
+            }
+
             html += `
               <tr>
                 <td>${user.email}</td>
                 <td><input type="number" id="bal-${uid}" value="${user.balance}" style="width:80px;"></td>
-                <td>${user.userId || "N/A"}</td>
+                <td>${user.userId}</td>
                 <td><button onclick="updateBalance('${uid}')">Update</button></td>
               </tr>`;
           }
