@@ -1,24 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Wingo Game</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; text-align: center; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6fa;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
     .hidden { display: none; }
-    input, button, select { padding: 10px; margin: 5px; font-size: 16px; border-radius: 6px; }
-    .red { background: #e53935; color: #fff; }
-    .green { background: #43a047; color: #fff; }
-    .violet { background: #8e24aa; color: #fff; }
-    .big, .small { background: #ff9800; color: #fff; }
-    .number-btn { background: #3949ab; color: #fff; margin: 2px; border-radius: 50%; width: 40px; height: 40px; }
-    table { width: 100%; background: #fff; border-collapse: collapse; margin-top: 20px; }
-    th, td { padding: 8px; border: 1px solid #ccc; }
-    th { background: #0055ff; color: white; }
+    input, button, select {
+      padding: 10px;
+      margin: 5px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    .btn-red { background: #e53935; color: white; }
+    .btn-green { background: #43a047; color: white; }
+    .btn-violet { background: #8e24aa; color: white; }
+    .btn-big, .btn-small { background: #ff9800; color: white; }
+    .number-btn {
+      background: #3949ab;
+      color: white;
+      margin: 2px;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      border: none;
+    }
+    #gameSection {
+      max-width: 600px;
+      margin: auto;
+    }
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+      background: #fff;
+    }
+    th, td {
+      padding: 8px;
+      border: 1px solid #ddd;
+    }
+    th {
+      background-color: #1976d2;
+      color: white;
+    }
+    audio { display: none; }
   </style>
 </head>
 <body>
 
+<!-- Login -->
 <div id="loginSection">
   <h2>Login</h2>
   <input type="email" id="loginEmail" placeholder="Email"><br>
@@ -27,6 +65,7 @@
   <p>Don't have an account? <a href="#" onclick="toggleRegister()">Register</a></p>
 </div>
 
+<!-- Register -->
 <div id="registerSection" class="hidden">
   <h2>Register</h2>
   <input type="email" id="regEmail" placeholder="Email"><br>
@@ -35,6 +74,7 @@
   <p>Already have an account? <a href="#" onclick="toggleRegister()">Login</a></p>
 </div>
 
+<!-- Game -->
 <div id="gameSection" class="hidden">
   <h2>Welcome, <span id="userEmail"></span></h2>
   <p>User ID: <span id="userIdDisplay"></span></p>
@@ -43,20 +83,20 @@
   <p>⏳ Time Left: <span id="countdown">--</span></p>
   <select id="gameType">
     <option value="30">30 Sec</option>
-    <option value="60">1 Min</option>
+    <option value="60" selected>1 Min</option>
     <option value="180">3 Min</option>
     <option value="300">5 Min</option>
   </select><br>
-  <input type="number" id="bet" placeholder="Enter Bet ₹"><br>
+  <input type="number" id="betAmount" placeholder="Enter Bet ₹"><br>
 
   <div>
-    <button class="red" onclick="placeBet('color', 'RED')">Red</button>
-    <button class="green" onclick="placeBet('color', 'GREEN')">Green</button>
-    <button class="violet" onclick="placeBet('color', 'VIOLET')">Violet</button>
+    <button class="btn-red" onclick="placeBet('color', 'RED')">Red</button>
+    <button class="btn-green" onclick="placeBet('color', 'GREEN')">Green</button>
+    <button class="btn-violet" onclick="placeBet('color', 'VIOLET')">Violet</button>
   </div>
   <div>
-    <button class="big" onclick="placeBet('size', 'BIG')">Big</button>
-    <button class="small" onclick="placeBet('size', 'SMALL')">Small</button>
+    <button class="btn-big" onclick="placeBet('size', 'BIG')">Big</button>
+    <button class="btn-small" onclick="placeBet('size', 'SMALL')">Small</button>
   </div>
   <div>
     <p>Numbers:</p>
@@ -72,14 +112,17 @@
     </thead>
     <tbody id="betHistory"></tbody>
   </table>
+
+  <!-- 🎵 Win Sound -->
+  <audio id="winSound" src="https://www.fesliyanstudios.com/play-mp3/387" preload="auto"></audio>
+
 </div>
 
-<audio id="winSound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-notification-2018.mp3"></audio>
-
+<!-- Firebase & Game Logic -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
-import { getDatabase, ref, set, update, push, get, onValue, child } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+import { getDatabase, ref, set, update, push, get, onValue } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBe5kGOwYS3FsF_9_q1pjxaWrF1glUe87c",
@@ -98,24 +141,28 @@ const db = getDatabase(app);
 let currentUser = null;
 let currentBalance = 0;
 let currentPeriod = null;
+let allBets = {};
 
 onAuthStateChanged(auth, user => {
   if (user) {
     currentUser = user;
-    document.getElementById("userEmail").innerText = user.email;
     document.getElementById("loginSection").classList.add("hidden");
     document.getElementById("registerSection").classList.add("hidden");
     document.getElementById("gameSection").classList.remove("hidden");
+    document.getElementById("userEmail").innerText = user.email;
+
     get(ref(db, `users/${user.uid}`)).then(snap => {
       const data = snap.val();
       currentBalance = data.balance;
       document.getElementById("wallet").innerText = currentBalance.toFixed(2);
       document.getElementById("userIdDisplay").innerText = data.userId;
     });
-    loadBetHistory();
+
     startGame();
   }
 });
+
+window.logoutUser = () => signOut(auth).then(() => location.reload());
 
 window.registerUser = () => {
   const email = document.getElementById("regEmail").value;
@@ -136,118 +183,12 @@ window.loginUser = () => {
     .catch(err => alert(err.message));
 };
 
-window.logoutUser = () => signOut(auth).then(() => location.reload());
 window.toggleRegister = () => {
   document.getElementById("loginSection").classList.toggle("hidden");
   document.getElementById("registerSection").classList.toggle("hidden");
 };
 
-function getPeriodId(seconds, time) {
-  const d = time.toISOString().slice(0, 10).replace(/-/g, '');
-  const s = time.getHours() * 3600 + time.getMinutes() * 60 + time.getSeconds();
-  const index = Math.floor(s / seconds);
-  return `${d}-${String(index + 1).padStart(3, '0')}`;
-}
-
-function getResultColor(num) {
-  if (num === 5) return "VIOLET";
-  if ([2, 4, 6, 8].includes(num)) return "RED";
-  return "GREEN";
-}
-
-function startGame() {
-  const gameType = parseInt(document.getElementById("gameType").value);
-  updateTimer(gameType);
-  document.getElementById("gameType").onchange = () => startGame();
-}
-
-function updateTimer(gameType) {
-  clearInterval(window.timer);
-  window.timer = setInterval(() => {
-    const now = new Date();
-    const period = getPeriodId(gameType, now);
-    currentPeriod = period;
-    document.getElementById("periodDisplay").innerText = currentPeriod;
-    const roundEnd = new Date(Math.ceil(Date.now() / (gameType * 1000)) * gameType * 1000);
-    const diff = Math.floor((roundEnd - now) / 1000);
-    document.getElementById("countdown").innerText = diff;
-
-    if (diff <= 1) {
-      clearInterval(window.timer);
-      const number = Math.floor(Math.random() * 10);
-      const color = getResultColor(number);
-      const size = number >= 5 ? "BIG" : "SMALL";
-
-      set(ref(db, `results/${gameType}/${currentPeriod}`), {
-        number, color, size, time: Date.now()
-      });
-
-      evaluateBets(number, color, size);
-      setTimeout(startGame, 1500);
-    }
-  }, 1000);
-}
-
-function evaluateBets(number, color, size) {
-  const sound = document.getElementById("winSound");
-  const uid = currentUser.uid;
-  get(child(ref(db), `bets/${uid}/${currentPeriod}`)).then(snapshot => {
-    const bets = snapshot.val();
-    if (!bets) return;
-    for (let key in bets) {
-      const bet = bets[key];
-      let win = false;
-      if (bet.type === "color" && bet.value === color) win = true;
-      if (bet.type === "size" && bet.value === size) win = true;
-      if (bet.type === "number" && bet.value == number) win = true;
-
-      if (win) {
-        let payout = bet.amount * (bet.type === "number" ? 8.5 : bet.value === "VIOLET" ? 4.5 : 1.96);
-        currentBalance += payout;
-        update(ref(db, `users/${uid}`), { balance: currentBalance });
-        sound.play();
-      }
-
-      update(ref(db, `bets/${uid}/${currentPeriod}/${key}`), { win });
-    }
-    document.getElementById("wallet").innerText = currentBalance.toFixed(2);
-    loadBetHistory(); // Refresh history
-  });
-}
-
-window.placeBet = (type, value) => {
-  const amount = parseFloat(document.getElementById("bet").value);
-  if (!amount || amount <= 0) return alert("Enter a valid amount");
-  if (amount > currentBalance) return alert("Insufficient balance");
-
-  const betData = { type, value, amount, win: null };
-  push(ref(db, `bets/${currentUser.uid}/${currentPeriod}`), betData);
-  currentBalance -= amount;
-  update(ref(db, `users/${currentUser.uid}`), { balance: currentBalance });
-  document.getElementById("wallet").innerText = currentBalance.toFixed(2);
-  loadBetHistory();
-};
-
-function loadBetHistory() {
-  const uid = currentUser.uid;
-  get(ref(db, `bets/${uid}`)).then(snapshot => {
-    const data = snapshot.val();
-    const table = document.getElementById("betHistory");
-    table.innerHTML = "";
-    if (data) {
-      Object.keys(data).reverse().forEach(period => {
-        const bets = data[period];
-        for (let key in bets) {
-          const b = bets[key];
-          const result = b.win === null ? "Pending" : b.win ? "✅ Win" : "❌ Lose";
-          const row = `<tr><td>${period}</td><td>${b.type}</td><td>${b.value}</td><td>${b.amount}</td><td>${result}</td></tr>`;
-          table.innerHTML += row;
-        }
-      });
-    }
-  });
-}
-
+// Generate number buttons 0–9
 for (let i = 0; i <= 9; i++) {
   const btn = document.createElement("button");
   btn.textContent = i;
@@ -255,6 +196,111 @@ for (let i = 0; i <= 9; i++) {
   btn.onclick = () => placeBet("number", i);
   document.getElementById("numberButtons").appendChild(btn);
 }
+  let timerInterval = null;
+
+function startGame() {
+  clearInterval(timerInterval);
+  const gameType = parseInt(document.getElementById("gameType").value);
+  updateTimer(gameType);
+  document.getElementById("gameType").onchange = startGame;
+}
+
+function getCurrentPeriod(gameType, now = new Date()) {
+  const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
+  const secondsToday = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+  const periodIndex = Math.floor(secondsToday / gameType);
+  return `${dateStr}-${String(periodIndex + 1).padStart(4, '0')}`;
+}
+
+function updateTimer(gameType) {
+  timerInterval = setInterval(() => {
+    const now = new Date();
+    const end = new Date(Math.ceil(Date.now() / (gameType * 1000)) * gameType * 1000);
+    const diff = Math.floor((end - now) / 1000);
+    currentPeriod = getCurrentPeriod(gameType, now);
+    document.getElementById("countdown").innerText = diff;
+    document.getElementById("periodDisplay").innerText = currentPeriod;
+
+    if (diff <= 0) {
+      clearInterval(timerInterval);
+      runResult(gameType, currentPeriod);
+      setTimeout(() => updateTimer(gameType), 1000);
+    }
+  }, 1000);
+}
+
+function getColor(num) {
+  if (num === 5) return "VIOLET";
+  if ([1, 3, 7, 9].includes(num)) return "RED";
+  return "GREEN";
+}
+
+function getSize(num) {
+  return num >= 5 ? "BIG" : "SMALL";
+}
+
+function runResult(gameType, period) {
+  const num = Math.floor(Math.random() * 10);
+  const color = getColor(num);
+  const size = getSize(num);
+
+  // Save result to DB
+  set(ref(db, `results/${gameType}/${period}`), {
+    number: num,
+    color: color,
+    size: size,
+    timestamp: Date.now()
+  });
+
+  // Check all users' bets for this period
+  onValue(ref(db, `bets`), snap => {
+    const allUsers = snap.val();
+    if (!allUsers) return;
+
+    Object.entries(allUsers).forEach(([uid, userBets]) => {
+      const bets = userBets?.[period];
+      if (!bets) return;
+
+      Object.entries(bets).forEach(([betId, bet]) => {
+        let win = false;
+        let multiplier = 0;
+
+        if (bet.type === "color" && bet.value === color) {
+          win = true;
+          multiplier = color === "VIOLET" ? 4.5 : 1.96;
+        } else if (bet.type === "size" && bet.value === size) {
+          win = true;
+          multiplier = 1.96;
+        } else if (bet.type === "number" && Number(bet.value) === num) {
+          win = true;
+          multiplier = 8.5;
+        }
+
+        const resultRef = ref(db, `bets/${uid}/${period}/${betId}`);
+        update(resultRef, {
+          win: win,
+          payout: win ? (bet.amount * multiplier).toFixed(2) : 0
+        });
+
+        if (uid === currentUser.uid) {
+          // Animate and update current user's balance and history
+          const audio = document.getElementById("winSound");
+          if (win) {
+            currentBalance += bet.amount * multiplier;
+            document.getElementById("wallet").innerText = currentBalance.toFixed(2);
+            audio.play();
+            alert(`🎉 You won ₹${(bet.amount * multiplier).toFixed(2)}!`);
+          } else {
+            alert(`😥 You lost ₹${bet.amount}`);
+          }
+
+          update(ref(db, `users/${uid}`), { balance: currentBalance });
+
+          const row = `<tr><td>${period}</td><td>${bet.type}</td><td>${bet.value}</td><td>${bet.amount}</td><td>${win ? '✅' : '❌'}</td></tr>`;
+          document.getElementById("betHistory").innerHTML += row;
+        }
+      });
+    });
+  }, { onlyOnce: true });
+}
 </script>
-</body>
-</html>
