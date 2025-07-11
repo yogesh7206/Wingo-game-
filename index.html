@@ -1,14 +1,17 @@
 <!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Wingo Game</title>
   <style>
     body {
-      font-family: Arial;
+      font-family: Arial, sans-serif;
       text-align: center;
-      background: #eaf1ff;
+      background-color: #f4f6fa;
+      margin: 0;
       padding: 20px;
     }
+    .hidden { display: none; }
     input, button, select {
       padding: 10px;
       margin: 5px;
@@ -16,230 +19,179 @@
       border-radius: 6px;
       border: 1px solid #ccc;
     }
-    .hidden { display: none; }
     .red { background: #e53935; color: white; }
     .green { background: #43a047; color: white; }
     .violet { background: #8e24aa; color: white; }
     .big, .small { background: #ff9800; color: white; }
-    #chart {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-top: 20px;
-    }
-    .circle {
+    .number-btn {
+      background: #3949ab;
+      color: white;
+      margin: 2px;
+      border-radius: 50%;
       width: 40px;
       height: 40px;
-      border-radius: 50%;
-      line-height: 40px;
-      color: white;
-      font-weight: bold;
-      margin: 5px;
-      font-size: 18px;
     }
-    #gameSection {
-      max-width: 500px;
-      margin: auto;
-    }
+    #gameSection { max-width: 600px; margin: auto; }
+    #myBetsTable { width: 100%; margin-top: 20px; border-collapse: collapse; background: #fff; }
+    #myBetsTable th, #myBetsTable td { padding: 8px; border: 1px solid #ddd; }
   </style>
 </head>
-<body>  <div id="loginSection">
-    <h2>Login</h2>
-    <input type="email" id="loginEmail" placeholder="Email"><br>
-    <input type="password" id="loginPass" placeholder="Password"><br>
-    <button id="loginBtn">Login</button>
-    <p>Don't have an account? <a href="#" onclick="toggleRegister()">Register</a></p>
-  </div>  <div id="registerSection" class="hidden">
-    <h2>Register</h2>
-    <input type="email" id="regEmail" placeholder="Email"><br>
-    <input type="password" id="regPass" placeholder="Password"><br>
-    <button id="registerBtn">Register</button>
-    <p>Already have an account? <a href="#" onclick="toggleRegister()">Login</a></p>
-  </div>  <div id="gameSection" class="hidden">
-    <h1>Welcome, <span id="userEmail"></span>!</h1>
-    <h2>Balance: ₹<span id="wallet">0</span></h2><h3>Select Game Duration:</h3>
-<select id="gameType">
-  <option value="30">30 Sec</option>
-  <option value="60">1 Min</option>
-  <option value="180">3 Min</option>
-  <option value="300">5 Min</option>
-</select>
+<body><div id="loginSection">
+  <h2>Login</h2>
+  <input type="email" id="loginEmail" placeholder="Email"><br>
+  <input type="password" id="loginPass" placeholder="Password"><br>
+  <button onclick="loginUser()">Login</button>
+  <p>Don't have an account? <a href="#" onclick="toggleRegister()">Register</a></p>
+</div><div id="registerSection" class="hidden">
+  <h2>Register</h2>
+  <input type="email" id="regEmail" placeholder="Email"><br>
+  <input type="password" id="regPass" placeholder="Password"><br>
+  <button onclick="registerUser()">Register</button>
+  <p>Already have an account? <a href="#" onclick="toggleRegister()">Login</a></p>
+</div><div id="gameSection" class="hidden">
+  <h2>Welcome, <span id="userEmail"></span></h2>
+  <p>User ID: <span id="userIdDisplay"></span></p>
+  <p>Balance: ₹<span id="wallet">0</span></p>
+  <p>Period: <span id="periodDisplay">--</span></p>
+  <p>⏳ Time Left: <span id="countdown">--</span></p>  <select id="gameType">
+    <option value="30">30 Sec</option>
+    <option value="60">1 Min</option>
+    <option value="180">3 Min</option>
+    <option value="300">5 Min</option>
+  </select><br><input type="number" id="bet" placeholder="Enter Bet ₹"><br>
 
-<p id="countdown">⏳ Time Left: --</p>
-<p><strong>Period:</strong> <span id="periodDisplay">--</span></p>
+  <div>
+    <button class="red" onclick="placeBet('color', 'RED')">Red</button>
+    <button class="green" onclick="placeBet('color', 'GREEN')">Green</button>
+    <button class="violet" onclick="placeBet('color', 'VIOLET')">Violet</button>
+  </div>
+  <div>
+    <button class="big" onclick="placeBet('size', 'BIG')">Big</button>
+    <button class="small" onclick="placeBet('size', 'SMALL')">Small</button>
+  </div>
+  <div>
+    <p>Numbers:</p>
+    <div id="numberButtons"></div>
+  </div><button onclick="logoutUser()">Logout</button>
 
-<div>
-  <button class="red" onclick="placeBet('color', 'RED')">Red</button>
-  <button class="green" onclick="placeBet('color', 'GREEN')">Green</button>
-  <button class="violet" onclick="placeBet('color', 'VIOLET')">Violet</button>
-</div>
-<div>
-  <button class="big" onclick="placeBet('size', 'BIG')">Big</button>
-  <button class="small" onclick="placeBet('size', 'SMALL')">Small</button>
-</div>
-<div>
-  0-9:
-  <button onclick="placeBet('number', 0)">0</button>
-  <button onclick="placeBet('number', 1)">1</button>
-  <button onclick="placeBet('number', 2)">2</button>
-  <button onclick="placeBet('number', 3)">3</button>
-  <button onclick="placeBet('number', 4)">4</button>
-  <button onclick="placeBet('number', 5)">5</button>
-  <button onclick="placeBet('number', 6)">6</button>
-  <button onclick="placeBet('number', 7)">7</button>
-  <button onclick="placeBet('number', 8)">8</button>
-  <button onclick="placeBet('number', 9)">9</button>
-</div><br>
+  <h3>My Bet History</h3>
+  <table id="myBetsTable">
+    <thead>
+      <tr><th>Period</th><th>Type</th><th>Bet</th><th>Amount</th><th>Win</th></tr>
+    </thead>
+    <tbody id="betHistory"></tbody>
+  </table>
+</div><script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+  import { getDatabase, ref, set, update, push, get, onValue } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 
-<input type="number" id="betAmount" placeholder="Enter Bet ₹"><br>
-<button onclick="logout()">Logout</button>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBe5kGOwYS3FsF_9_q1pjxaWrF1glUe87c",
+    authDomain: "wingologin.firebaseapp.com",
+    databaseURL: "https://wingologin-default-rtdb.firebaseio.com",
+    projectId: "wingologin",
+    storageBucket: "wingologin.appspot.com",
+    messagingSenderId: "605536859710",
+    appId: "1:605536859710:web:ed9495775c8f8dd6a8836f"
+  };
 
-<h3>My Bet History</h3>
-<ul id="myBets"></ul>
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getDatabase(app);
 
-<h3>Game Chart</h3>
-<div id="chart"></div>
+  let currentUser = null;
+  let currentBalance = 0;
+  let currentPeriod = null;
 
-  </div>  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
-    import { getDatabase, ref, set, push, onValue, get, update } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyBe5kGOwYS3FsF_9_q1pjxaWrF1glUe87c",
-      authDomain: "wingologin.firebaseapp.com",
-      databaseURL: "https://wingologin-default-rtdb.firebaseio.com",
-      projectId: "wingologin",
-      storageBucket: "wingologin.appspot.com",
-      messagingSenderId: "605536859710",
-      appId: "1:605536859710:web:ed9495775c8f8dd6a8836f"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-
-    let currentUser = null;
-    let currentBalance = 0;
-    let bets = [];
-
-    function toggleRegister() {
-      document.getElementById("loginSection").classList.toggle("hidden");
-      document.getElementById("registerSection").classList.toggle("hidden");
-    }
-
-    document.getElementById("registerBtn").onclick = () => {
-      const email = document.getElementById("regEmail").value;
-      const pass = document.getElementById("regPass").value;
-      createUserWithEmailAndPassword(auth, email, pass).then(cred => {
-        set(ref(db, "users/" + cred.user.uid), { email, balance: 100 });
-        alert("Registered!");
-        toggleRegister();
-      }).catch(err => alert(err.message));
-    };
-
-    document.getElementById("loginBtn").onclick = () => {
-      signInWithEmailAndPassword(auth, document.getElementById("loginEmail").value, document.getElementById("loginPass").value)
-        .catch(err => alert(err.message));
-    };
-
-    onAuthStateChanged(auth, user => {
-      if (user) {
-        currentUser = user;
-        document.getElementById("userEmail").innerText = user.email;
-        document.getElementById("loginSection").classList.add("hidden");
-        document.getElementById("registerSection").classList.add("hidden");
-        document.getElementById("gameSection").classList.remove("hidden");
-
-        get(ref(db, "users/" + user.uid)).then(snap => {
-          currentBalance = snap.val().balance;
-          document.getElementById("wallet").innerText = currentBalance.toFixed(2);
-        });
-
-        startGameTimer();
-      }
-    });
-
-    function logout() {
-      signOut(auth).then(() => location.reload());
-    }
-
-    function placeBet(type, value) {
-      const amount = parseFloat(document.getElementById("betAmount").value);
-      if (isNaN(amount) || amount <= 0) return alert("Enter valid amount");
-      if (currentBalance < amount) return alert("Insufficient balance");
-
-      const gameType = document.getElementById("gameType").value;
-      const period = document.getElementById("periodDisplay").innerText;
-
-      const betRef = push(ref(db, `bets/${gameType}/${period}/${currentUser.uid}`));
-      set(betRef, {
-        type,
-        value,
-        amount,
-        timestamp: Date.now()
-      });
-
-      currentBalance -= amount;
-      update(ref(db, "users/" + currentUser.uid), { balance: currentBalance });
-      document.getElementById("wallet").innerText = currentBalance.toFixed(2);
-      alert(`Bet placed on ${value}`);
-      document.getElementById("myBets").innerHTML += `<li>${type.toUpperCase()}: ${value} - ₹${amount}</li>`;
-    }
-
-    function startGameTimer() {
-      const gameType = parseInt(document.getElementById("gameType").value);
-      const now = Date.now();
-      const next = Math.ceil(now / (gameType * 1000)) * (gameType * 1000);
-      const period = new Date(next).toISOString().slice(0,19).replace(/[-T:]/g,"");
-      document.getElementById("periodDisplay").innerText = period;
-
-      const countdownEl = document.getElementById("countdown");
-
-      const timer = setInterval(() => {
-        const diff = Math.floor((next - Date.now()) / 1000);
-        countdownEl.innerText = `⏳ Time Left: ${diff}s`;
-        if (diff <= 0) {
-          clearInterval(timer);
-          const num = Math.floor(Math.random() * 10);
-          const color = num === 5 ? 'VIOLET' : [1,3,7,9,0].includes(num) ? 'RED' : 'GREEN';
-          const size = num >= 5 ? 'BIG' : 'SMALL';
-
-          push(ref(db, `results/${gameType}`), {
-            period,
-            number: num,
-            color,
-            size,
-            timestamp: Date.now()
-          });
-
-          updateChart(gameType);
-          setTimeout(startGameTimer, 1000);
-        }
-      }, 1000);
-    }
-
-    function updateChart(gameType) {
-      const chart = document.getElementById("chart");
-      chart.innerHTML = "";
-      onValue(ref(db, `results/${gameType}`), snap => {
+  onAuthStateChanged(auth, user => {
+    if (user) {
+      currentUser = user;
+      document.getElementById("userEmail").innerText = user.email;
+      document.getElementById("loginSection").classList.add("hidden");
+      document.getElementById("registerSection").classList.add("hidden");
+      document.getElementById("gameSection").classList.remove("hidden");
+      get(ref(db, `users/${user.uid}`)).then(snap => {
         const data = snap.val();
-        if (!data) return;
-        const results = Object.values(data).slice(-10);
-        results.reverse().forEach(r => {
-          const div = document.createElement("div");
-          div.className = "circle";
-          div.innerText = r.number;
-          if (r.color === "RED") div.style.background = "#e53935";
-          else if (r.color === "GREEN") div.style.background = "#43a047";
-          else div.style.background = "#8e24aa";
-          chart.appendChild(div);
-        });
+        currentBalance = data.balance;
+        document.getElementById("wallet").innerText = currentBalance.toFixed(2);
+        document.getElementById("userIdDisplay").innerText = data.userId;
       });
+      startGame();
     }
+  });
 
-    document.getElementById("gameType").onchange = () => {
-      startGameTimer();
-    };
-  </script></body>
+  window.registerUser = () => {
+    const email = document.getElementById("regEmail").value;
+    const pass = document.getElementById("regPass").value;
+    const userId = Math.floor(100000 + Math.random() * 900000).toString();
+    createUserWithEmailAndPassword(auth, email, pass).then(cred => {
+      set(ref(db, `users/${cred.user.uid}`), { email, balance: 100, userId });
+      alert("Registered!");
+      toggleRegister();
+    }).catch(err => alert(err.message));
+  };
+
+  window.loginUser = () => {
+    const email = document.getElementById("loginEmail").value;
+    const pass = document.getElementById("loginPass").value;
+    signInWithEmailAndPassword(auth, email, pass)
+      .then(() => alert("Logged in!"))
+      .catch(err => alert(err.message));
+  };
+
+  window.logoutUser = () => signOut(auth).then(() => location.reload());
+
+  window.toggleRegister = () => {
+    document.getElementById("loginSection").classList.toggle("hidden");
+    document.getElementById("registerSection").classList.toggle("hidden");
+  };
+
+  function startGame() {
+    const gameType = parseInt(document.getElementById("gameType").value);
+    updateTimer(gameType);
+    document.getElementById("gameType").onchange = () => startGame();
+  }
+
+  function updateTimer(gameType) {
+    clearInterval(window.timer);
+    window.timer = setInterval(() => {
+      const now = new Date();
+      const s = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+      const periodIndex = Math.floor(s / gameType);
+      currentPeriod = `${now.toISOString().slice(0, 10).replace(/-/g, '')}-${String(periodIndex + 1).padStart(3, '0')}`;
+      document.getElementById("periodDisplay").innerText = currentPeriod;
+      const roundEnd = new Date(Math.ceil(Date.now() / (gameType * 1000)) * gameType * 1000);
+      const diff = Math.floor((roundEnd - now) / 1000);
+      document.getElementById("countdown").innerText = diff;
+    }, 1000);
+  }
+
+  window.placeBet = (type, value) => {
+    const amount = parseFloat(document.getElementById("bet").value);
+    if (!amount || amount <= 0) return alert("Enter a valid amount");
+    if (amount > currentBalance) return alert("Insufficient balance");
+    const betRef = ref(db, `bets/${currentUser.uid}/${currentPeriod}`);
+    const newBet = { type, value, amount, win: null };
+    push(betRef, newBet);
+    currentBalance -= amount;
+    update(ref(db, `users/${currentUser.uid}`), { balance: currentBalance });
+    document.getElementById("wallet").innerText = currentBalance.toFixed(2);
+    addBetToHistory(currentPeriod, type, value, amount);
+  };
+
+  function addBetToHistory(period, type, value, amount) {
+    const row = `<tr><td>${period}</td><td>${type}:${value}</td><td>${amount}</td><td>Pending</td><td>--</td></tr>`;
+    document.getElementById("betHistory").innerHTML += row;
+  }
+
+  // Generate number buttons 0–9
+  for (let i = 0; i <= 9; i++) {
+    const btn = document.createElement("button");
+    btn.textContent = i;
+    btn.className = "number-btn";
+    btn.onclick = () => placeBet("number", i);
+    document.getElementById("numberButtons").appendChild(btn);
+  }
+</script></body>
 </html>
