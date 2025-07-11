@@ -1,197 +1,211 @@
 <!DOCTYPE html><html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Wingo Game</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background-color: #f4f6fa;
-      margin: 0;
-      padding: 20px;
-    }
+    body { font-family: Arial; background: #f4f6fa; padding: 10px; text-align: center; }
     .hidden { display: none; }
     input, button, select {
-      padding: 10px;
-      margin: 5px;
-      font-size: 16px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
+      padding: 10px; margin: 5px; font-size: 16px;
+      border-radius: 6px; border: 1px solid #ccc;
     }
-    .red { background: #e53935; color: white; }
-    .green { background: #43a047; color: white; }
-    .violet { background: #8e24aa; color: white; }
-    .big, .small { background: #ff9800; color: white; }
+    button.red { background: #e53935; color: white; }
+    button.green { background: #43a047; color: white; }
+    button.violet { background: #8e24aa; color: white; }
+    button.big, button.small { background: #ff9800; color: white; }
     .number-btn {
-      background: #3949ab;
-      color: white;
-      margin: 2px;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
+      background: #3949ab; color: white; margin: 2px;
+      border-radius: 50%; width: 40px; height: 40px;
     }
-    #gameSection { max-width: 600px; margin: auto; }
-    #myBetsTable { width: 100%; margin-top: 20px; border-collapse: collapse; background: #fff; }
-    #myBetsTable th, #myBetsTable td { padding: 8px; border: 1px solid #ddd; }
+    table { margin: auto; margin-top: 20px; width: 90%; border-collapse: collapse; background: white; }
+    th, td { padding: 8px; border: 1px solid #ccc; }
+    th { background: #0055ff; color: white; }
+    #sound { display: none; }
   </style>
 </head>
-<body><div id="loginSection">
-  <h2>Login</h2>
-  <input type="email" id="loginEmail" placeholder="Email"><br>
-  <input type="password" id="loginPass" placeholder="Password"><br>
-  <button onclick="loginUser()">Login</button>
-  <p>Don't have an account? <a href="#" onclick="toggleRegister()">Register</a></p>
-</div><div id="registerSection" class="hidden">
-  <h2>Register</h2>
-  <input type="email" id="regEmail" placeholder="Email"><br>
-  <input type="password" id="regPass" placeholder="Password"><br>
-  <button onclick="registerUser()">Register</button>
-  <p>Already have an account? <a href="#" onclick="toggleRegister()">Login</a></p>
-</div><div id="gameSection" class="hidden">
-  <h2>Welcome, <span id="userEmail"></span></h2>
-  <p>User ID: <span id="userIdDisplay"></span></p>
-  <p>Balance: ₹<span id="wallet">0</span></p>
-  <p>Period: <span id="periodDisplay">--</span></p>
-  <p>⏳ Time Left: <span id="countdown">--</span></p>  <select id="gameType">
-    <option value="30">30 Sec</option>
-    <option value="60">1 Min</option>
-    <option value="180">3 Min</option>
-    <option value="300">5 Min</option>
-  </select><br><input type="number" id="bet" placeholder="Enter Bet ₹"><br>
+<body>
+  <audio id="sound" src="https://www.soundjay.com/button/sounds/button-3.mp3"></audio>
+  <div id="loginSection">
+    <h2>Login</h2>
+    <input type="email" id="loginEmail" placeholder="Email"><br>
+    <input type="password" id="loginPass" placeholder="Password"><br>
+    <button onclick="loginUser()">Login</button>
+    <p>Don't have an account? <a href="#" onclick="toggleRegister()">Register</a></p>
+  </div>  <div id="registerSection" class="hidden">
+    <h2>Register</h2>
+    <input type="email" id="regEmail" placeholder="Email"><br>
+    <input type="password" id="regPass" placeholder="Password"><br>
+    <button onclick="registerUser()">Register</button>
+    <p>Already have an account? <a href="#" onclick="toggleRegister()">Login</a></p>
+  </div>  <div id="gameSection" class="hidden">
+    <h2>Welcome, <span id="userEmail"></span></h2>
+    <p>User ID: <span id="userIdDisplay"></span></p>
+    <p>Balance: ₹<span id="wallet">0</span></p>
+    <p>⏳ Time Left: <span id="countdown">--</span></p>
+    <p>Period: <span id="periodDisplay">--</span></p>
+    <select id="gameType">
+      <option value="30">30 Sec</option>
+      <option value="60">1 Min</option>
+      <option value="180">3 Min</option>
+      <option value="300">5 Min</option>
+    </select><br>
+    <input type="number" id="betAmount" placeholder="Enter Bet ₹"><br><div>
+  <button class="red" onclick="placeBet('color', 'RED')">Red</button>
+  <button class="green" onclick="placeBet('color', 'GREEN')">Green</button>
+  <button class="violet" onclick="placeBet('color', 'VIOLET')">Violet</button>
+</div>
+<div>
+  <button class="big" onclick="placeBet('size', 'BIG')">Big</button>
+  <button class="small" onclick="placeBet('size', 'SMALL')">Small</button>
+</div>
+<div>
+  <p>Numbers:</p>
+  <div id="numberButtons"></div>
+</div>
 
-  <div>
-    <button class="red" onclick="placeBet('color', 'RED')">Red</button>
-    <button class="green" onclick="placeBet('color', 'GREEN')">Green</button>
-    <button class="violet" onclick="placeBet('color', 'VIOLET')">Violet</button>
-  </div>
-  <div>
-    <button class="big" onclick="placeBet('size', 'BIG')">Big</button>
-    <button class="small" onclick="placeBet('size', 'SMALL')">Small</button>
-  </div>
-  <div>
-    <p>Numbers:</p>
-    <div id="numberButtons"></div>
-  </div><button onclick="logoutUser()">Logout</button>
+<button onclick="logoutUser()">Logout</button>
 
-  <h3>My Bet History</h3>
-  <table id="myBetsTable">
-    <thead>
-      <tr><th>Period</th><th>Type</th><th>Bet</th><th>Amount</th><th>Win</th></tr>
-    </thead>
-    <tbody id="betHistory"></tbody>
-  </table>
-</div><script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
-  import { getDatabase, ref, set, update, push, get, onValue } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+<h3>My Bet History</h3>
+<table>
+  <thead>
+    <tr><th>Period</th><th>Type</th><th>Value</th><th>Amount</th><th>Result</th></tr>
+  </thead>
+  <tbody id="betHistory"></tbody>
+</table>
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBe5kGOwYS3FsF_9_q1pjxaWrF1glUe87c",
-    authDomain: "wingologin.firebaseapp.com",
-    databaseURL: "https://wingologin-default-rtdb.firebaseio.com",
-    projectId: "wingologin",
-    storageBucket: "wingologin.appspot.com",
-    messagingSenderId: "605536859710",
-    appId: "1:605536859710:web:ed9495775c8f8dd6a8836f"
-  };
+  </div>  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+    import { getDatabase, ref, set, update, push, get, onValue } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getDatabase(app);
+    const firebaseConfig = {
+      apiKey: "AIzaSyBe5kGOwYS3FsF_9_q1pjxaWrF1glUe87c",
+      authDomain: "wingologin.firebaseapp.com",
+      databaseURL: "https://wingologin-default-rtdb.firebaseio.com",
+      projectId: "wingologin",
+      storageBucket: "wingologin.appspot.com",
+      messagingSenderId: "605536859710",
+      appId: "1:605536859710:web:ed9495775c8f8dd6a8836f"
+    };
 
-  let currentUser = null;
-  let currentBalance = 0;
-  let currentPeriod = null;
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
 
-  onAuthStateChanged(auth, user => {
-    if (user) {
-      currentUser = user;
-      document.getElementById("userEmail").innerText = user.email;
-      document.getElementById("loginSection").classList.add("hidden");
-      document.getElementById("registerSection").classList.add("hidden");
-      document.getElementById("gameSection").classList.remove("hidden");
-      get(ref(db, `users/${user.uid}`)).then(snap => {
-        const data = snap.val();
-        currentBalance = data.balance;
-        document.getElementById("wallet").innerText = currentBalance.toFixed(2);
-        document.getElementById("userIdDisplay").innerText = data.userId;
-      });
-      startGame();
+    let currentUser = null, currentBalance = 0, currentPeriod = null;
+
+    const sound = document.getElementById("sound");
+
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        currentUser = user;
+        document.getElementById("userEmail").innerText = user.email;
+        document.getElementById("loginSection").classList.add("hidden");
+        document.getElementById("registerSection").classList.add("hidden");
+        document.getElementById("gameSection").classList.remove("hidden");
+        get(ref(db, `users/${user.uid}`)).then(snap => {
+          const data = snap.val();
+          currentBalance = data.balance;
+          document.getElementById("wallet").innerText = currentBalance.toFixed(2);
+          document.getElementById("userIdDisplay").innerText = data.userId;
+        });
+        initGame();
+      }
+    });
+
+    window.registerUser = () => {
+      const email = document.getElementById("regEmail").value;
+      const pass = document.getElementById("regPass").value;
+      const userId = Math.floor(100000 + Math.random() * 900000);
+      createUserWithEmailAndPassword(auth, email, pass).then(cred => {
+        set(ref(db, `users/${cred.user.uid}`), { email, balance: 100, userId });
+        alert("Registered!");
+        toggleRegister();
+      }).catch(e => alert(e.message));
+    };
+
+    window.loginUser = () => {
+      const email = document.getElementById("loginEmail").value;
+      const pass = document.getElementById("loginPass").value;
+      signInWithEmailAndPassword(auth, email, pass).then(() => alert("Logged in"))
+        .catch(e => alert(e.message));
+    };
+
+    window.logoutUser = () => signOut(auth).then(() => location.reload());
+
+    window.toggleRegister = () => {
+      document.getElementById("loginSection").classList.toggle("hidden");
+      document.getElementById("registerSection").classList.toggle("hidden");
+    };
+
+    function initGame() {
+      for (let i = 0; i <= 9; i++) {
+        const btn = document.createElement("button");
+        btn.className = "number-btn";
+        btn.innerText = i;
+        btn.onclick = () => placeBet('number', i);
+        document.getElementById("numberButtons").appendChild(btn);
+      }
+      document.getElementById("gameType").onchange = startTimer;
+      startTimer();
     }
-  });
 
-  window.registerUser = () => {
-    const email = document.getElementById("regEmail").value;
-    const pass = document.getElementById("regPass").value;
-    const userId = Math.floor(100000 + Math.random() * 900000).toString();
-    createUserWithEmailAndPassword(auth, email, pass).then(cred => {
-      set(ref(db, `users/${cred.user.uid}`), { email, balance: 100, userId });
-      alert("Registered!");
-      toggleRegister();
-    }).catch(err => alert(err.message));
-  };
+    function startTimer() {
+      const gameType = parseInt(document.getElementById("gameType").value);
+      clearInterval(window.timer);
+      window.timer = setInterval(() => {
+        const now = new Date();
+        const seconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+        const index = Math.floor(seconds / gameType);
+        currentPeriod = `${now.toISOString().slice(0,10).replace(/-/g,'')}-${String(index+1).padStart(3,'0')}`;
+        document.getElementById("periodDisplay").innerText = currentPeriod;
+        const roundEnd = new Date(Math.ceil(Date.now() / (gameType * 1000)) * gameType * 1000);
+        const diff = Math.floor((roundEnd - now) / 1000);
+        document.getElementById("countdown").innerText = diff;
+        if (diff <= 0) {
+          resolveBets(gameType);
+        }
+      }, 1000);
+    }
 
-  window.loginUser = () => {
-    const email = document.getElementById("loginEmail").value;
-    const pass = document.getElementById("loginPass").value;
-    signInWithEmailAndPassword(auth, email, pass)
-      .then(() => alert("Logged in!"))
-      .catch(err => alert(err.message));
-  };
+    function resolveBets(gameType) {
+      const num = Math.floor(Math.random() * 10);
+      const color = num === 5 ? 'VIOLET' : [0, 2, 4, 6, 8].includes(num) ? 'RED' : 'GREEN';
+      const size = num >= 5 ? 'BIG' : 'SMALL';
 
-  window.logoutUser = () => signOut(auth).then(() => location.reload());
+      get(ref(db, `bets/${currentUser.uid}/${currentPeriod}`)).then(snap => {
+        if (snap.exists()) {
+          const bets = snap.val();
+          let winTotal = 0;
+          for (const key in bets) {
+            const b = bets[key];
+            let win = false;
+            let mult = 0;
+            if (b.type === 'color' && b.value === color) { mult = color === 'VIOLET' ? 4.5 : 1.96; win = true; }
+            else if (b.type === 'size' && b.value === size) { mult = 1.96; win = true; }
+            else if (b.type === 'number' && b.value == num) { mult = 8.5; win = true; }
+            if (win) winTotal += b.amount * mult;
+            document.getElementById("betHistory").innerHTML += `<tr><td>${currentPeriod}</td><td>${b.type}</td><td>${b.value}</td><td>${b.amount}</td><td>${win ? '✅' : '❌'}</td></tr>`;
+          }
+          if (winTotal > 0) {
+            currentBalance += winTotal;
+            document.getElementById("wallet").innerText = currentBalance.toFixed(2);
+            update(ref(db, `users/${currentUser.uid}`), { balance: currentBalance });
+            sound.play();
+          }
+        }
+      });
+    }
 
-  window.toggleRegister = () => {
-    document.getElementById("loginSection").classList.toggle("hidden");
-    document.getElementById("registerSection").classList.toggle("hidden");
-  };
-
-  function startGame() {
-    const gameType = parseInt(document.getElementById("gameType").value);
-    updateTimer(gameType);
-    document.getElementById("gameType").onchange = () => startGame();
-  }
-
-  function updateTimer(gameType) {
-    clearInterval(window.timer);
-    window.timer = setInterval(() => {
-      const now = new Date();
-      const s = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-      const periodIndex = Math.floor(s / gameType);
-      currentPeriod = `${now.toISOString().slice(0, 10).replace(/-/g, '')}-${String(periodIndex + 1).padStart(3, '0')}`;
-      document.getElementById("periodDisplay").innerText = currentPeriod;
-      const roundEnd = new Date(Math.ceil(Date.now() / (gameType * 1000)) * gameType * 1000);
-      const diff = Math.floor((roundEnd - now) / 1000);
-      document.getElementById("countdown").innerText = diff;
-    }, 1000);
-  }
-
-  window.placeBet = (type, value) => {
-    const amount = parseFloat(document.getElementById("bet").value);
-    if (!amount || amount <= 0) return alert("Enter a valid amount");
-    if (amount > currentBalance) return alert("Insufficient balance");
-    const betRef = ref(db, `bets/${currentUser.uid}/${currentPeriod}`);
-    const newBet = { type, value, amount, win: null };
-    push(betRef, newBet);
-    currentBalance -= amount;
-    update(ref(db, `users/${currentUser.uid}`), { balance: currentBalance });
-    document.getElementById("wallet").innerText = currentBalance.toFixed(2);
-    addBetToHistory(currentPeriod, type, value, amount);
-  };
-
-  function addBetToHistory(period, type, value, amount) {
-    const row = `<tr><td>${period}</td><td>${type}:${value}</td><td>${amount}</td><td>Pending</td><td>--</td></tr>`;
-    document.getElementById("betHistory").innerHTML += row;
-  }
-
-  // Generate number buttons 0–9
-  for (let i = 0; i <= 9; i++) {
-    const btn = document.createElement("button");
-    btn.textContent = i;
-    btn.className = "number-btn";
-    btn.onclick = () => placeBet("number", i);
-    document.getElementById("numberButtons").appendChild(btn);
-  }
-</script></body>
+    window.placeBet = (type, value) => {
+      const amt = parseFloat(document.getElementById("betAmount").value);
+      if (!amt || amt <= 0 || amt > currentBalance) return alert("Invalid Amount");
+      const bet = { type, value, amount: amt };
+      push(ref(db, `bets/${currentUser.uid}/${currentPeriod}`), bet);
+      currentBalance -= amt;
+      update(ref(db, `users/${currentUser.uid}`), { balance: currentBalance });
+      document.getElementById("wallet").innerText = currentBalance.toFixed(2);
+    }
+  </script></body>
 </html>
