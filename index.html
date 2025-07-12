@@ -9,12 +9,8 @@
       font-family: Arial, sans-serif;
       background: #f4f6fa;
       margin: 0;
-      padding: 0;
-    }
-    .container {
-      padding: 20px;
-      max-width: 1000px;
-      margin: auto;
+      padding: 10px;
+      text-align: center;
     }
     .hidden { display: none; }
     input, button, select {
@@ -37,28 +33,23 @@
       height: 40px;
       border: none;
     }
-    .columns {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
+    #sections {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 10px;
     }
-    .column {
-      flex: 1;
-      min-width: 300px;
-      margin: 10px;
+    section {
       background: white;
-      border-radius: 8px;
       padding: 10px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      border-radius: 8px;
     }
     table {
       width: 100%;
       margin-top: 10px;
       border-collapse: collapse;
-      background: #fff;
     }
     th, td {
-      padding: 8px;
+      padding: 6px;
       border: 1px solid #ddd;
       font-size: 14px;
     }
@@ -67,350 +58,89 @@
       color: white;
     }
     audio { display: none; }
-    h2 { margin-top: 0; }
   </style>
 </head>
 <body>
 
-<div class="container">
-
-  <!-- Login -->
-  <div id="loginSection">
-    <h2>Login</h2>
-    <input type="email" id="loginEmail" placeholder="Email"><br>
-    <input type="password" id="loginPass" placeholder="Password"><br>
-    <button onclick="loginUser()">Login</button>
-    <p>Don't have an account? <a href="#" onclick="toggleRegister()">Register</a></p>
-  </div>
-
-  <!-- Register -->
-  <div id="registerSection" class="hidden">
-    <h2>Register</h2>
-    <input type="email" id="regEmail" placeholder="Email"><br>
-    <input type="password" id="regPass" placeholder="Password"><br>
-    <input type="text" id="referralCodeInput" placeholder="Referral Code (optional)"><br>
-    <button onclick="registerUser()">Register</button>
-    <p>Already have an account? <a href="#" onclick="toggleRegister()">Login</a></p>
-  </div>
-
-  <!-- Game Section -->
-  <div id="gameSection" class="hidden">
-    <h2>Welcome, <span id="userEmail"></span></h2>
-    <p>User ID: <span id="userIdDisplay"></span></p>
-    <p>Balance: ₹<span id="wallet">0</span></p>
-    <p>Referral Earnings: ₹<span id="referralEarnings">0</span></p>
-    <p>Total Commission: ₹<span id="totalCommission">0</span></p>
-    <p>Period: <span id="periodDisplay">--</span></p>
-    <p>⏳ Time Left: <span id="countdown">--</span></p>
-    <select id="gameType">
-      <option value="30">30 Sec</option>
-      <option value="60" selected>1 Min</option>
-      <option value="180">3 Min</option>
-      <option value="300">5 Min</option>
-    </select><br>
-    <input type="number" id="betAmount" placeholder="Enter Bet ₹"><br>
-    <div>
-      <button class="btn-red" onclick="placeBet('color', 'RED')">Red</button>
-      <button class="btn-green" onclick="placeBet('color', 'GREEN')">Green</button>
-      <button class="btn-violet" onclick="placeBet('color', 'VIOLET')">Violet</button>
-    </div>
-    <div>
-      <button class="btn-big" onclick="placeBet('size', 'BIG')">Big</button>
-      <button class="btn-small" onclick="placeBet('size', 'SMALL')">Small</button>
-    </div>
-    <div>
-      <p>Numbers:</p>
-      <div id="numberButtons"></div>
-    </div>
-    <button onclick="logoutUser()">Logout</button>
-
-    <div class="columns">
-      <div class="column">
-        <h3>My Bet History</h3>
-        <table>
-          <thead>
-            <tr><th>Period</th><th>Type</th><th>Value</th><th>Amount</th><th>Result</th></tr>
-          </thead>
-          <tbody id="betHistory"></tbody>
-        </table>
-      </div>
-      <div class="column">
-        <h3>Referral Stats</h3>
-        <p>Referral Code: <span id="myReferralCode">--</span></p>
-        <p>Total Referred Users: <span id="refCount">0</span></p>
-        <p>Commission Earned (Credited): ₹<span id="creditedCommission">0</span></p>
-      </div>
-    </div>
-    <audio id="winSound" src="https://www.fesliyanstudios.com/play-mp3/387" preload="auto"></audio>
-  </div>
-
+<!-- Login/Register -->
+<div id="loginSection">
+  <h2>Login</h2>
+  <input type="email" id="loginEmail" placeholder="Email"><br>
+  <input type="password" id="loginPass" placeholder="Password"><br>
+  <button onclick="loginUser()">Login</button>
+  <p>Don't have an account? <a href="#" onclick="toggleRegister()">Register</a></p>
 </div>
 
-<script type="module">
-// Next part contains Firebase config and game logic
-</script>
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-import {
-  getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-  signOut, onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
-import {
-  getDatabase, ref, set, push, update, onValue, get, child
-} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+<div id="registerSection" class="hidden">
+  <h2>Register</h2>
+  <input type="email" id="regEmail" placeholder="Email"><br>
+  <input type="password" id="regPass" placeholder="Password"><br>
+  <input type="text" id="refCode" placeholder="Referral Code (optional)"><br>
+  <button onclick="registerUser()">Register</button>
+  <p>Already have an account? <a href="#" onclick="toggleRegister()">Login</a></p>
+</div>
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBe5kGOwYS3FsF_9_q1pjxaWrF1glUe87c",
-  authDomain: "wingologin.firebaseapp.com",
-  databaseURL: "https://wingologin-default-rtdb.firebaseio.com",
-  projectId: "wingologin",
-  storageBucket: "wingologin.appspot.com",
-  messagingSenderId: "605536859710",
-  appId: "1:605536859710:web:ed9495775c8f8dd6a8836f"
-};
+<!-- Game UI -->
+<div id="gameSection" class="hidden">
+  <h2>Welcome, <span id="userEmail"></span></h2>
+  <p>User ID: <span id="userIdDisplay"></span></p>
+  <p>Balance: ₹<span id="wallet">0</span></p>
+  <p>Referral Earnings: ₹<span id="referralEarnings">0</span></p>
+  <p>Total Commission: ₹<span id="totalCommission">0</span></p>
+  <button onclick="logoutUser()">Logout</button>
+  <hr/>
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
+  <div id="sections">
+    <!-- Game Section -->
+    <section>
+      <h3>Wingo Game</h3>
+      <p>Period: <span id="periodDisplay">--</span></p>
+      <p>⏳ Time Left: <span id="countdown">--</span></p>
+      <select id="gameType">
+        <option value="30">30 Sec</option>
+        <option value="60" selected>1 Min</option>
+        <option value="180">3 Min</option>
+        <option value="300">5 Min</option>
+      </select><br>
+      <input type="number" id="betAmount" placeholder="Enter Bet ₹"><br>
+      <div>
+        <button class="btn-red" onclick="placeBet('color', 'RED')">Red</button>
+        <button class="btn-green" onclick="placeBet('color', 'GREEN')">Green</button>
+        <button class="btn-violet" onclick="placeBet('color', 'VIOLET')">Violet</button>
+      </div>
+      <div>
+        <button class="btn-big" onclick="placeBet('size', 'BIG')">Big</button>
+        <button class="btn-small" onclick="placeBet('size', 'SMALL')">Small</button>
+      </div>
+      <div>
+        <p>Numbers:</p>
+        <div id="numberButtons"></div>
+      </div>
+    </section>
 
-let currentUser = null;
-let currentBalance = 0;
-let currentPeriod = null;
-let timerInterval = null;
-let myReferralCode = null;
+    <!-- Bet History -->
+    <section>
+      <h3>My Bet History</h3>
+      <table>
+        <thead>
+          <tr><th>Period</th><th>Type</th><th>Value</th><th>Amount</th><th>Result</th></tr>
+        </thead>
+        <tbody id="betHistory"></tbody>
+      </table>
+    </section>
 
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    currentUser = user;
-    document.getElementById("loginSection").classList.add("hidden");
-    document.getElementById("registerSection").classList.add("hidden");
-    document.getElementById("gameSection").classList.remove("hidden");
-    document.getElementById("userEmail").innerText = user.email;
+    <!-- Referral Info -->
+    <section>
+      <h3>Referral Info</h3>
+      <p>Your Referral Code: <b id="userReferralCode">Loading...</b></p>
+      <p>Share this code to earn commission!</p>
+    </section>
+  </div>
 
-    const userSnap = await get(ref(db, `users/${user.uid}`));
-    const userData = userSnap.val();
-    currentBalance = userData.balance || 0;
-    myReferralCode = userData.userId;
-    document.getElementById("wallet").innerText = currentBalance.toFixed(2);
-    document.getElementById("userIdDisplay").innerText = myReferralCode;
-    document.getElementById("myReferralCode").innerText = myReferralCode;
+  <audio id="winSound" src="https://www.fesliyanstudios.com/play-mp3/387" preload="auto"></audio>
+</div>
 
-    get(ref(db, `referrals/${myReferralCode}`)).then(r => {
-      const data = r.val();
-      const count = data ? Object.keys(data).length : 0;
-      document.getElementById("refCount").innerText = count;
-    });
-
-    get(ref(db, `commissions/${user.uid}`)).then(snap => {
-      const all = snap.val();
-      let credited = 0;
-      if (all) {
-        Object.entries(all).forEach(([period, value]) => {
-          if (value.credited === true) credited += value.amount;
-        });
-      }
-      document.getElementById("creditedCommission").innerText = credited.toFixed(2);
-    });
-
-    loadUserBetHistory();
-    startGame();
-  }
-});
-
-window.toggleRegister = () => {
-  document.getElementById("loginSection").classList.toggle("hidden");
-  document.getElementById("registerSection").classList.toggle("hidden");
-};
-
-window.loginUser = () => {
-  const email = document.getElementById("loginEmail").value;
-  const pass = document.getElementById("loginPass").value;
-  signInWithEmailAndPassword(auth, email, pass)
-    .then(() => alert("Logged in!"))
-    .catch(err => alert(err.message));
-};
-
-window.registerUser = () => {
-  const email = document.getElementById("regEmail").value;
-  const pass = document.getElementById("regPass").value;
-  const refCode = document.getElementById("referralCodeInput").value.trim();
-  const newUserId = Math.floor(100000 + Math.random() * 900000).toString();
-
-  createUserWithEmailAndPassword(auth, email, pass)
-    .then(cred => {
-      const uid = cred.user.uid;
-      const userData = { email, balance: 58, userId: newUserId, referrer: refCode || null };
-      set(ref(db, `users/${uid}`), userData);
-      if (refCode) {
-        set(ref(db, `referrals/${refCode}/${uid}`), { referred: true });
-      }
-      alert("Registered successfully!");
-    })
-    .catch(err => alert(err.message));
-};
-
-window.logoutUser = () => signOut(auth).then(() => location.reload());
-
-// continue...
-</script>
-function startGame() {
-  clearInterval(timerInterval);
-  const gameType = parseInt(document.getElementById("gameType").value);
-  updateTimer(gameType);
-  document.getElementById("gameType").onchange = startGame;
-}
-
-function getCurrentPeriod(gameType, now = new Date()) {
-  const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
-  const secondsToday = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-  const periodIndex = Math.floor(secondsToday / gameType);
-  return `${dateStr}-${String(periodIndex + 1).padStart(4, '0')}`;
-}
-
-function updateTimer(gameType) {
-  timerInterval = setInterval(() => {
-    const now = new Date();
-    const end = new Date(Math.ceil(Date.now() / (gameType * 1000)) * gameType * 1000);
-    const diff = Math.floor((end - now) / 1000);
-    currentPeriod = getCurrentPeriod(gameType, now);
-    document.getElementById("countdown").innerText = diff;
-    document.getElementById("periodDisplay").innerText = currentPeriod;
-
-    if (diff <= 0) {
-      clearInterval(timerInterval);
-      runResult(gameType, currentPeriod);
-      setTimeout(() => updateTimer(gameType), 1000);
-    }
-  }, 1000);
-}
-
-function getColor(num) {
-  if (num === 5) return "VIOLET";
-  if ([1, 3, 7, 9].includes(num)) return "RED";
-  return "GREEN";
-}
-
-function getSize(num) {
-  return num >= 5 ? "BIG" : "SMALL";
-}
-
-function runResult(gameType, period) {
-  const num = Math.floor(Math.random() * 10);
-  const color = getColor(num);
-  const size = getSize(num);
-
-  set(ref(db, `results/${gameType}/${period}`), {
-    number: num,
-    color: color,
-    size: size,
-    timestamp: Date.now()
-  });
-
-  onValue(ref(db, `bets`), snap => {
-    const allUsers = snap.val();
-    if (!allUsers) return;
-
-    Object.entries(allUsers).forEach(([uid, userBets]) => {
-      const bets = userBets?.[period];
-      if (!bets) return;
-
-      let totalWin = 0;
-      let refEarn = 0;
-
-      Object.entries(bets).forEach(([betId, bet]) => {
-        let win = false;
-        let multiplier = 0;
-
-        if (bet.type === "color" && bet.value === color) {
-          win = true;
-          multiplier = color === "VIOLET" ? 4.5 : 1.96;
-        } else if (bet.type === "size" && bet.value === size) {
-          win = true;
-          multiplier = 1.96;
-        } else if (bet.type === "number" && Number(bet.value) === num) {
-          win = true;
-          multiplier = 8.5;
-        }
-
-        const payout = win ? parseFloat((bet.amount * multiplier).toFixed(2)) : 0;
-        update(ref(db, `bets/${uid}/${period}/${betId}`), {
-          win: win,
-          payout: payout
-        });
-
-        if (uid === currentUser.uid) {
-          const row = `<tr><td>${period}</td><td>${bet.type}</td><td>${bet.value}</td><td>${bet.amount}</td><td>${win ? '✅' : '❌'}</td></tr>`;
-          document.getElementById("betHistory").innerHTML += row;
-        }
-
-        if (uid === currentUser.uid && win) {
-          totalWin += payout;
-        }
-
-        // Referral commission: 0.06% of bet amount
-        get(ref(db, `users/${uid}`)).then(snap => {
-          const userData = snap.val();
-          const referrer = userData?.referrer;
-          if (referrer) {
-            const commission = parseFloat((bet.amount * 0.0006).toFixed(2));
-            update(ref(db, `commissions/${referrer}/${period}`), {
-              amount: (commission),
-              credited: false
-            });
-          }
-        });
-      });
-
-      if (uid === currentUser.uid && totalWin > 0) {
-        currentBalance += totalWin;
-        update(ref(db, `users/${uid}`), { balance: currentBalance });
-        document.getElementById("wallet").innerText = currentBalance.toFixed(2);
-        document.getElementById("winSound").play();
-        alert(`🎉 You won ₹${totalWin.toFixed(2)} this round!`);
-      }
-    });
-  }, { onlyOnce: true });
-}
-
-window.placeBet = (type, value) => {
-  const amount = parseFloat(document.getElementById("betAmount").value);
-  if (!amount || amount <= 0) return alert("Enter valid amount");
-  if (amount > currentBalance) return alert("Insufficient balance");
-
-  const betRef = ref(db, `bets/${currentUser.uid}/${currentPeriod}`);
-  const newBet = { type, value, amount, win: null };
-  push(betRef, newBet);
-
-  currentBalance -= amount;
-  update(ref(db, `users/${currentUser.uid}`), { balance: currentBalance });
-  document.getElementById("wallet").innerText = currentBalance.toFixed(2);
-
-  const row = `<tr><td>${currentPeriod}</td><td>${type}</td><td>${value}</td><td>${amount}</td><td>Pending</td></tr>`;
-  document.getElementById("betHistory").innerHTML += row;
-};
-
-function loadUserBetHistory() {
-  onValue(ref(db, `bets/${auth.currentUser.uid}`), snap => {
-    const data = snap.val();
-    document.getElementById("betHistory").innerHTML = "";
-    if (!data) return;
-    Object.entries(data).forEach(([period, bets]) => {
-      Object.values(bets).forEach(bet => {
-        const row = `<tr><td>${period}</td><td>${bet.type}</td><td>${bet.value}</td><td>${bet.amount}</td><td>${bet.win === null ? "Pending" : bet.win ? '✅' : '❌'}</td></tr>`;
-        document.getElementById("betHistory").innerHTML += row;
-      });
-    });
-  });
-}
-
-// Generate number buttons 0–9
-for (let i = 0; i <= 9; i++) {
-  const btn = document.createElement("button");
-  btn.textContent = i;
-  btn.className = "number-btn";
-  btn.onclick = () => placeBet("number", i);
-  document.getElementById("numberButtons").appendChild(btn);}
-  </script>
-
+<!-- Scripts -->
+<script type="module" src="main.js"></script>
 </body>
 </html>
