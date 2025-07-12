@@ -1,17 +1,43 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Wingo Game</title>
   <style>
     body {
+      margin: 0;
       font-family: Arial, sans-serif;
       background: #f4f6fa;
-      margin: 0;
-      padding-bottom: 60px;
-      text-align: center;
     }
     .hidden { display: none; }
+    .nav {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: #fff;
+      display: flex;
+      border-top: 1px solid #ccc;
+    }
+    .nav button {
+      flex: 1;
+      padding: 15px;
+      font-size: 16px;
+      border: none;
+      background: #eee;
+    }
+    .active-nav {
+      background: #1976d2;
+      color: white;
+    }
+    section {
+      display: none;
+      padding: 20px;
+      margin-bottom: 60px;
+    }
+    section.active {
+      display: block;
+    }
     input, button, select {
       padding: 10px;
       margin: 5px;
@@ -19,85 +45,113 @@
       border-radius: 6px;
       border: 1px solid #ccc;
     }
-    .nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background: #fff;
-      display: flex;
-      justify-content: space-around;
-      border-top: 1px solid #ccc;
-    }
-    .nav button {
-      flex: 1;
-      padding: 15px;
-      background: none;
+    .btn-red { background: #e53935; color: white; }
+    .btn-green { background: #43a047; color: white; }
+    .btn-violet { background: #8e24aa; color: white; }
+    .btn-big, .btn-small { background: #ff9800; color: white; }
+    .number-btn {
+      background: #3949ab;
+      color: white;
+      margin: 2px;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
       border: none;
-      font-weight: bold;
-      font-size: 16px;
     }
-    .section {
-      display: none;
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+      background: #fff;
     }
-    .section.active {
-      display: block;
+    th, td {
+      padding: 8px;
+      border: 1px solid #ddd;
+    }
+    th {
+      background-color: #1976d2;
+      color: white;
+    }
+    .wallet-info {
+      font-size: 18px;
+      margin-top: 20px;
     }
   </style>
 </head>
-<body><!-- Login Section --><div id="loginSection">
-  <h2>Login</h2>
-  <input type="email" id="loginEmail" placeholder="Email"><br>
-  <input type="password" id="loginPass" placeholder="Password"><br>
-  <button onclick="loginUser()">Login</button>
-  <p>Don't have an account? <a href="#" onclick="toggleRegister()">Register</a></p>
-</div><!-- Register Section --><div id="registerSection" class="hidden">
-  <h2>Register</h2>
-  <input type="email" id="regEmail" placeholder="Email"><br>
-  <input type="password" id="regPass" placeholder="Password"><br>
-  <input type="text" id="referralCode" placeholder="Referral Code (optional)"><br>
-  <button onclick="registerUser()">Register</button>
-  <p>Already have an account? <a href="#" onclick="toggleRegister()">Login</a></p>
-</div><!-- Game Section --><div id="gameSection" class="section">
-  <h2>Game</h2>
-  <p>User: <span id="userEmail"></span></p>
-  <p>Balance: ₹<span id="wallet">0</span></p>
-  <p>Period: <span id="periodDisplay"></span> | Time Left: <span id="countdown"></span></p>
-  <input type="number" id="betAmount" placeholder="Bet Amount ₹"><br>
-  <button onclick="placeBet('RED')">Red</button>
-  <button onclick="placeBet('GREEN')">Green</button>
-  <button onclick="placeBet('VIOLET')">Violet</button>
-</div><!-- Wallet Section --><div id="walletSection" class="section">
-  <h2>Wallet</h2>
-  <p>Balance: ₹<span id="wallet2">0</span></p>
-  <p>Your User ID: <span id="userIdDisplay"></span></p>
-</div><!-- Referral Section --><div id="referralSection" class="section">
-  <h2>Referral</h2>
-  <p>Your Code: <span id="userIdDisplay2"></span></p>
-  <p>Total Referral Earnings: ₹<span id="referralEarnings">0</span></p>
-</div><!-- Navigation Bar --><div class="nav">
-  <button onclick="showSection('gameSection')">Game</button>
-  <button onclick="showSection('walletSection')">Wallet</button>
-  <button onclick="showSection('referralSection')">Promotion</button>
-</div><script>
-function toggleRegister() {
-  document.getElementById("loginSection").classList.toggle("hidden");
-  document.getElementById("registerSection").classList.toggle("hidden");
-}
-function showSection(id) {
-  document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-function loginUser() {
-  alert("Login logic here");
-  showSection('gameSection');
-}
-function registerUser() {
-  alert("Register logic here");
-  showSection('gameSection');
-}
-function placeBet(color) {
-  alert("Bet on: " + color);
-}
-</script></body>
+<body>
+
+<!-- Login/Register Section -->
+<div id="authSection">
+  <div id="loginSection">
+    <h2>Login</h2>
+    <input type="email" id="loginEmail" placeholder="Email"><br>
+    <input type="password" id="loginPass" placeholder="Password"><br>
+    <button onclick="loginUser()">Login</button>
+    <p>Don't have an account? <a href="#" onclick="toggleRegister()">Register</a></p>
+  </div>
+
+  <div id="registerSection" class="hidden">
+    <h2>Register</h2>
+    <input type="email" id="regEmail" placeholder="Email"><br>
+    <input type="password" id="regPass" placeholder="Password"><br>
+    <input type="text" id="referralCode" placeholder="Referral Code (optional)"><br>
+    <button onclick="registerUser()">Register</button>
+    <p>Already have an account? <a href="#" onclick="toggleRegister()">Login</a></p>
+  </div>
+</div>
+
+<!-- Game Section -->
+<div id="mainSection" class="hidden">
+  <div class="wallet-info">
+    Welcome, <span id="userEmail"></span><br>
+    User ID: <span id="userIdDisplay"></span><br>
+    Balance: ₹<span id="wallet">0</span>
+  </div>
+
+  <section id="gameTab" class="active">
+    <h2>Game</h2>
+    <p>Period: <span id="periodDisplay">--</span> ⏳ <span id="countdown">--</span></p>
+    <select id="gameType">
+      <option value="30">30 Sec</option>
+      <option value="60" selected>1 Min</option>
+      <option value="180">3 Min</option>
+      <option value="300">5 Min</option>
+    </select><br>
+    <input type="number" id="betAmount" placeholder="Enter Bet ₹"><br>
+    <button class="btn-red" onclick="placeBet('color', 'RED')">Red</button>
+    <button class="btn-green" onclick="placeBet('color', 'GREEN')">Green</button>
+    <button class="btn-violet" onclick="placeBet('color', 'VIOLET')">Violet</button><br>
+    <button class="btn-big" onclick="placeBet('size', 'BIG')">Big</button>
+    <button class="btn-small" onclick="placeBet('size', 'SMALL')">Small</button><br>
+    <div id="numberButtons"></div>
+    <h3>My Bet History</h3>
+    <table><thead><tr><th>Period</th><th>Type</th><th>Value</th><th>Amount</th><th>Result</th></tr></thead>
+    <tbody id="betHistory"></tbody></table>
+  </section>
+
+  <section id="walletTab">
+    <h2>Wallet</h2>
+    <p>Your current balance: ₹<span id="walletBalance">0</span></p>
+    <p>Winnings and referral commission updates shown here.</p>
+  </section>
+
+  <section id="promoTab">
+    <h2>Referral</h2>
+    <p>Your Referral Code: <span id="myReferralCode">--</span></p>
+    <p>Share and earn 0.06% commission from your referred users' bets!</p>
+    <p>Total Referral Earnings: ₹<span id="refEarnings">0</span></p>
+  </section>
+
+  <button onclick="logoutUser()">Logout</button>
+</div>
+
+<!-- Navigation -->
+<div class="nav">
+  <button onclick="switchTab('walletTab', this)">Wallet</button>
+  <button onclick="switchTab('promoTab', this)">Promotion</button>
+  <button class="active-nav" onclick="switchTab('gameTab', this)">Game</button>
+</div>
+
+<script type="module" src="main.js"></script>
+</body>
 </html>
