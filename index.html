@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Wingo Game with Referral</title>
+  <title>Wingo Game</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -52,17 +52,11 @@
       color: white;
     }
     audio { display: none; }
-    .referral-info {
-      margin: 20px auto;
-      padding: 10px;
-      border: 1px solid #ccc;
-      background: #fff;
-    }
   </style>
 </head>
 <body>
 
-<!-- Login Section -->
+<!-- Login -->
 <div id="loginSection">
   <h2>Login</h2>
   <input type="email" id="loginEmail" placeholder="Email"><br>
@@ -71,7 +65,7 @@
   <p>Don't have an account? <a href="#" onclick="toggleRegister()">Register</a></p>
 </div>
 
-<!-- Register Section -->
+<!-- Register -->
 <div id="registerSection" class="hidden">
   <h2>Register</h2>
   <input type="email" id="regEmail" placeholder="Email"><br>
@@ -81,11 +75,13 @@
   <p>Already have an account? <a href="#" onclick="toggleRegister()">Login</a></p>
 </div>
 
-<!-- Game Section -->
+<!-- Game -->
 <div id="gameSection" class="hidden">
   <h2>Welcome, <span id="userEmail"></span></h2>
   <p>User ID: <span id="userIdDisplay"></span></p>
   <p>Balance: ₹<span id="wallet">0</span></p>
+  <p>Your Referral Code: <span id="myReferralCode"></span></p>
+  <p>Referral Earnings: ₹<span id="referralEarnings">0.00</span></p>
   <p>Period: <span id="periodDisplay">--</span></p>
   <p>⏳ Time Left: <span id="countdown">--</span></p>
   <select id="gameType">
@@ -108,12 +104,6 @@
     <p>Numbers:</p>
     <div id="numberButtons"></div>
   </div>
-  <div class="referral-info">
-    <h4>Referral Info</h4>
-    <p>Your Referral Code: <strong id="myRefCode">--</strong></p>
-    <p>Referral Earnings: ₹<span id="referralEarnings">0.00</span></p>
-    <p>Total Commission: ₹<span id="totalCommission">0.00</span></p>
-  </div>
   <button onclick="logoutUser()">Logout</button>
   <h3>My Bet History</h3>
   <table>
@@ -124,8 +114,395 @@
   </table>
   <audio id="winSound" src="https://www.fesliyanstudios.com/play-mp3/387" preload="auto"></audio>
 </div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+import {
+  getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+  signOut, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+import {
+  getDatabase, ref, set, get, update, push, onValue
+} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 
-<script type="module" src="https://cdn.jsdelivr.net/gh/YOUR_REPO/full-game-with-referral.js"></script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBe5kGOwYS3FsF_9_q1pjxaWrF1glUe87c",
+  authDomain: "wingologin.firebaseapp.com",
+  databaseURL: "https://wingologin-default-rtdb.firebaseio.com",
+  projectId: "wingologin",
+  storageBucket: "wingologin.appspot.com",
+  messagingSenderId: "605536859710",
+  appId: "1:605536859710:web:ed9495775c8f8dd6a8836f"
+};
 
-</body>
-</html>
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+let currentUser = null;
+let currentBalance = 0;
+let currentPeriod = null;
+let timerInterval = null;
+let myReferralCode = '';
+let referralEarnings = 0;
+
+// Auth state
+onAuthStateChanged(auth, user => {
+  if (user) {
+    currentUser = user;
+    document.getElementById("loginSection").classList.add("hidden");
+    document.getElementById("registerSection").classList.add("hidden");
+    document.getElementById("gameSection").classList.remove("hidden");
+    document.getElementById("userEmail").innerText = user.email;
+
+    get(ref(db, `users/${user.uid}`)).then(snap => {
+      const data = snap.val();
+      currentBalance = data.balance || 0;
+      myReferralCode = data.userId;
+      referralEarnings = data.referralEarnings || 0;
+      document.getElementById("wallet").innerText = currentBalance.toFixed(2);
+      document.getElementById("userIdDisplay").innerText = data.userId;
+      document.getElementById("myReferralCode").innerText = myReferralCode;
+      document.getElementById("referralEarnings").innerText = referralEarnings.toFixed(2);
+    });
+
+    loadUserBetHistory();
+    startGame();
+  }
+});
+
+window.loginUser = () => {
+  const email = document.getElementById("loginEmail").value;
+  const pass = document.getElementById("loginPass").value;
+  signInWithEmailAndPassword(auth, email, pass)
+    .then(() => alert("Logged in!"))
+    .catch(err => alert(err.message));
+};
+
+window.registerUser = () => {
+  const email = document.getElementById("regEmail").value;
+  const pass = document.getElementById("regPass").value;
+  const referredBy = document.getElementById("referralCode").value.trim();
+  const userId = Math.floor(100000 + Math.random() * 900000).toString();
+
+  createUserWithEmailAndPassword(auth, email, pass).then(cred => {
+    const newUserData = {
+      email,
+      balance: 58,
+      userId,
+      referredBy: referredBy || null,
+      referralEarnings: 0
+    };
+    set(ref(db, `users/${cred.user.uid}`), newUserData);
+
+    if (referredBy) {
+      // Save referral link
+      push(ref(db, `referrals/${referredBy}`), {
+        referredUid: cred.user.uid,
+        date: Date.now()
+      });
+    }
+
+    alert("Registered! ₹58 added to your wallet.");
+    toggleRegister();
+  }).catch(err => alert(err.message));
+};
+
+window.logoutUser = () => signOut(auth).then(() => location.reload());
+
+window.toggleRegister = () => {
+  document.getElementById("loginSection").classList.toggle("hidden");
+  document.getElementById("registerSection").classList.toggle("hidden");
+};
+  function startGame() {
+  clearInterval(timerInterval);
+  const gameType = parseInt(document.getElementById("gameType").value);
+  updateTimer(gameType);
+  document.getElementById("gameType").onchange = startGame;
+}
+
+function getCurrentPeriod(gameType, now = new Date()) {
+  const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
+  const secondsToday = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+  const periodIndex = Math.floor(secondsToday / gameType);
+  return `${dateStr}-${String(periodIndex + 1).padStart(4, '0')}`;
+}
+
+function updateTimer(gameType) {
+  timerInterval = setInterval(() => {
+    const now = new Date();
+    const end = new Date(Math.ceil(Date.now() / (gameType * 1000)) * gameType * 1000);
+    const diff = Math.floor((end - now) / 1000);
+    currentPeriod = getCurrentPeriod(gameType, now);
+    document.getElementById("countdown").innerText = diff;
+    document.getElementById("periodDisplay").innerText = currentPeriod;
+
+    if (diff <= 0) {
+      clearInterval(timerInterval);
+      runResult(gameType, currentPeriod);
+      setTimeout(() => updateTimer(gameType), 1000);
+    }
+  }, 1000);
+}
+
+function getColor(num) {
+  if (num === 5) return "VIOLET";
+  if ([1, 3, 7, 9].includes(num)) return "RED";
+  return "GREEN";
+}
+
+function getSize(num) {
+  return num >= 5 ? "BIG" : "SMALL";
+}
+
+function runResult(gameType, period) {
+  const num = Math.floor(Math.random() * 10);
+  const color = getColor(num);
+  const size = getSize(num);
+
+  set(ref(db, `results/${gameType}/${period}`), {
+    number: num,
+    color: color,
+    size: size,
+    timestamp: Date.now()
+  });
+
+  onValue(ref(db, `bets`), snap => {
+    const allUsers = snap.val();
+    if (!allUsers) return;
+
+    Object.entries(allUsers).forEach(([uid, userBets]) => {
+      const bets = userBets?.[period];
+      if (!bets) return;
+
+      let totalWin = 0;
+      let totalBetAmount = 0;
+
+      Object.entries(bets).forEach(([betId, bet]) => {
+        let win = false;
+        let multiplier = 0;
+
+        if (bet.type === "color" && bet.value === color) {
+          win = true;
+          multiplier = color === "VIOLET" ? 4.5 : 1.96;
+        } else if (bet.type === "size" && bet.value === size) {
+          win = true;
+          multiplier = 1.96;
+        } else if (bet.type === "number" && Number(bet.value) === num) {
+          win = true;
+          multiplier = 8.5;
+        }
+
+        const payout = win ? parseFloat((bet.amount * multiplier).toFixed(2)) : 0;
+        update(ref(db, `bets/${uid}/${period}/${betId}`), {
+          win: win,
+          payout: payout
+        });
+
+        totalBetAmount += parseFloat(bet.amount);
+        if (uid === currentUser.uid) {
+          const row = `<tr><td>${period}</td><td>${bet.type}</td><td>${bet.value}</td><td>${bet.amount}</td><td>${win ? '✅' : '❌'}</td></tr>`;
+          document.getElementById("betHistory").innerHTML += row;
+        }
+
+        if (uid === currentUser.uid && win) {
+          totalWin += payout;
+        }
+      });
+
+      // Add winnings
+      if (uid === currentUser.uid && totalWin > 0) {
+        currentBalance += totalWin;
+        update(ref(db, `users/${uid}`), { balance: currentBalance });
+        document.getElementById("wallet").innerText = currentBalance.toFixed(2);
+        document.getElementById("winSound").play();
+        alert(`🎉 You won ₹${totalWin.toFixed(2)} this round!`);
+      }
+
+      // Save referral commission stats
+      get(ref(db, `users/${uid}`)).then(snap => {
+        const udata = snap.val();
+        if (udata?.referredBy && totalBetAmount > 0) {
+          const commission = parseFloat((totalBetAmount * 0.0006).toFixed(2));
+          const refLogRef = ref(db, `referralCommissionLogs/${udata.referredBy}/${period}`);
+          set(refLogRef, {
+            amount: commission,
+            from: uid,
+            scheduledPayout: getNext1AMTimestamp()
+          });
+        }
+      });
+    });
+  }, { onlyOnce: true });
+}
+
+function getNext1AMTimestamp() {
+  const now = new Date();
+  now.setHours(1, 0, 0, 0);
+  if (now < new Date()) now.setDate(now.getDate() + 1);
+  return now.getTime();
+    }
+  window.placeBet = (type, value) => {
+  const amount = parseFloat(document.getElementById("betAmount").value);
+  if (!amount || amount <= 0) return alert("Enter valid amount");
+  if (amount > currentBalance) return alert("Insufficient balance");
+
+  const betRef = ref(db, `bets/${currentUser.uid}/${currentPeriod}`);
+  const newBet = { type, value, amount, win: null };
+  push(betRef, newBet);
+
+  currentBalance -= amount;
+  update(ref(db, `users/${currentUser.uid}`), { balance: currentBalance });
+  document.getElementById("wallet").innerText = currentBalance.toFixed(2);
+
+  const row = `<tr><td>${currentPeriod}</td><td>${type}</td><td>${value}</td><td>${amount}</td><td>Pending</td></tr>`;
+  document.getElementById("betHistory").innerHTML += row;
+};
+
+function loadUserBetHistory() {
+  onValue(ref(db, `bets/${auth.currentUser.uid}`), snap => {
+    const data = snap.val();
+    document.getElementById("betHistory").innerHTML = "";
+    if (!data) return;
+    Object.entries(data).forEach(([period, bets]) => {
+      Object.values(bets).forEach(bet => {
+        const row = `<tr><td>${period}</td><td>${bet.type}</td><td>${bet.value}</td><td>${bet.amount}</td><td>${bet.win === null ? "Pending" : bet.win ? '✅' : '❌'}</td></tr>`;
+        document.getElementById("betHistory").innerHTML += row;
+      });
+    });
+  });
+}
+
+// Referral Stats UI
+function loadReferralStats() {
+  const statsDiv = document.createElement("div");
+  statsDiv.innerHTML = `
+    <h3>Referral Earnings</h3>
+    <p>Total Earnings: ₹<span id="totalReferralEarnings">0.00</span></p>
+    <table>
+      <thead><tr><th>From User</th><th>Amount</th><th>Status</th></tr></thead>
+      <tbody id="refEarningsTable"></tbody>
+    </table>
+  `;
+  document.getElementById("gameSection").appendChild(statsDiv);
+
+  const refLogsRef = ref(db, `referralCommissionLogs/${auth.currentUser.uid}`);
+  onValue(refLogsRef, snap => {
+    const logs = snap.val();
+    let total = 0;
+    let table = "";
+    const now = Date.now();
+
+    if (logs) {
+      Object.values(logs).forEach(entry => {
+        const { from, amount, scheduledPayout } = entry;
+        const status = now >= scheduledPayout ? "✅ Credited" : "⏳ Pending";
+        table += `<tr><td>${from}</td><td>₹${amount.toFixed(2)}</td><td>${status}</td></tr>`;
+        if (now >= scheduledPayout) total += amount;
+      });
+    }
+
+    document.getElementById("totalReferralEarnings").innerText = total.toFixed(2);
+    document.getElementById("refEarningsTable").innerHTML = table;
+  });
+}
+  function generateNumberButtons() {
+  const container = document.getElementById("numberButtons");
+  for (let i = 0; i <= 9; i++) {
+    const btn = document.createElement("button");
+    btn.textContent = i;
+    btn.className = "number-btn";
+    btn.onclick = () => placeBet("number", i);
+    container.appendChild(btn);
+  }
+}
+
+function giveReferralCommission(referrerId, amount) {
+  const commission = parseFloat((amount * 0.0006).toFixed(2));
+  const nextDay1AM = new Date();
+  nextDay1AM.setUTCHours(19, 0, 0, 0); // 1 AM IST = 19:00 UTC
+  if (Date.now() >= nextDay1AM.getTime()) {
+    nextDay1AM.setUTCDate(nextDay1AM.getUTCDate() + 1);
+  }
+
+  const logRef = push(ref(db, `referralCommissionLogs/${referrerId}`));
+  set(logRef, {
+    from: auth.currentUser.email,
+    amount: commission,
+    scheduledPayout: nextDay1AM.getTime()
+  });
+}
+
+// Update placeBet to also give ref commission:
+window.placeBet = (type, value) => {
+  const amount = parseFloat(document.getElementById("betAmount").value);
+  if (!amount || amount <= 0) return alert("Enter valid amount");
+  if (amount > currentBalance) return alert("Insufficient balance");
+
+  const betRef = ref(db, `bets/${currentUser.uid}/${currentPeriod}`);
+  const newBet = { type, value, amount, win: null };
+  push(betRef, newBet);
+
+  currentBalance -= amount;
+  update(ref(db, `users/${currentUser.uid}`), { balance: currentBalance });
+  document.getElementById("wallet").innerText = currentBalance.toFixed(2);
+
+  const row = `<tr><td>${currentPeriod}</td><td>${type}</td><td>${value}</td><td>${amount}</td><td>Pending</td></tr>`;
+  document.getElementById("betHistory").innerHTML += row;
+
+  get(ref(db, `users/${currentUser.uid}`)).then(snap => {
+    const referrer = snap.val().referredBy;
+    if (referrer) {
+      giveReferralCommission(referrer, amount);
+    }
+  });
+};
+
+// Add referral input in register HTML:
+document.getElementById("registerSection").innerHTML += `
+  <input type="text" id="referralCode" placeholder="Referral Code (optional)"><br>
+`;
+
+// Update registerUser to handle referrer and bonus:
+window.registerUser = () => {
+  const email = document.getElementById("regEmail").value;
+  const pass = document.getElementById("regPass").value;
+  const userId = Math.floor(100000 + Math.random() * 900000).toString();
+  const referralCode = document.getElementById("referralCode").value;
+
+  createUserWithEmailAndPassword(auth, email, pass).then(cred => {
+    const newUserData = {
+      email,
+      balance: 58,
+      userId,
+    };
+    if (referralCode) newUserData.referredBy = referralCode;
+
+    set(ref(db, `users/${cred.user.uid}`), newUserData);
+    alert("Registered with ₹58 bonus!");
+    toggleRegister();
+  }).catch(err => alert(err.message));
+};
+
+// OnAuth load referral stats
+onAuthStateChanged(auth, user => {
+  if (user) {
+    currentUser = user;
+    document.getElementById("loginSection").classList.add("hidden");
+    document.getElementById("registerSection").classList.add("hidden");
+    document.getElementById("gameSection").classList.remove("hidden");
+    document.getElementById("userEmail").innerText = user.email;
+
+    get(ref(db, `users/${user.uid}`)).then(snap => {
+      const data = snap.val();
+      currentBalance = data.balance || 0;
+      document.getElementById("wallet").innerText = currentBalance.toFixed(2);
+      document.getElementById("userIdDisplay").innerText = data.userId;
+    });
+
+    loadUserBetHistory();
+    loadReferralStats();
+    generateNumberButtons();
+    startGame();
+  }
+};
+  
