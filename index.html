@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Wingo Game</title>
+  <title>Wingo Color Game</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -20,10 +20,6 @@
       border-radius: 6px;
       border: 1px solid #ccc;
     }
-    .btn-red { background: #e53935; color: white; }
-    .btn-green { background: #43a047; color: white; }
-    .btn-violet { background: #8e24aa; color: white; }
-    .btn-big, .btn-small { background: #ff9800; color: white; }
     .number-btn {
       background: #3949ab;
       color: white;
@@ -33,50 +29,17 @@
       height: 40px;
       border: none;
     }
-    #gameSection {
-      max-width: 600px;
-      margin: auto;
-    }
-    table {
-      width: 100%;
-      margin-top: 20px;
-      border-collapse: collapse;
-      background: #fff;
-    }
-    th, td {
-      padding: 8px;
-      border: 1px solid #ddd;
-    }
-    th {
-      background-color: #1976d2;
-      color: white;
-    }
-    audio { display: none; }
-    .nav-bar {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      background: #fff;
-      border-top: 1px solid #ccc;
-      display: flex;
-      justify-content: space-around;
-      padding: 10px 0;
-      box-shadow: 0 -1px 5px rgba(0,0,0,0.1);
-    }
-    .nav-bar button {
-      flex: 1;
-      background: none;
-      border: none;
-      font-size: 16px;
-      color: #333;
-    }
     .section { display: none; }
     .section.active { display: block; }
+    .btn-red { background: #e53935; color: white; }
+    .btn-green { background: #43a047; color: white; }
+    .btn-violet { background: #8e24aa; color: white; }
+    .btn-big, .btn-small { background: #ff9800; color: white; }
   </style>
 </head>
 <body>
 
-<!-- Login -->
+<!-- Login Section -->
 <div id="loginSection" class="section active">
   <h2>Login</h2>
   <input type="email" id="loginEmail" placeholder="Email"><br>
@@ -85,7 +48,7 @@
   <p>Don't have an account? <a href="#" onclick="toggleRegister()">Register</a></p>
 </div>
 
-<!-- Register -->
+<!-- Register Section -->
 <div id="registerSection" class="section">
   <h2>Register</h2>
   <input type="email" id="regEmail" placeholder="Email"><br>
@@ -95,8 +58,14 @@
   <p>Already have an account? <a href="#" onclick="toggleRegister()">Login</a></p>
 </div>
 
-<!-- Sections below only visible after login -->
-
+<!-- Promotion Section -->
+<div id="promotionSection" class="section">
+  <h2>Referral</h2>
+  <p>Your Referral Code: <span id="myReferralCode">--</span></p>
+  <p>Your Referral Link: <span id="referralLinkText">--</span></p>
+  <p><img id="refQr" src="" width="150" alt="Referral QR Code"></p>
+  <p><button onclick="shareReferral()">Share My Referral Link</button></p>
+</div>
 <!-- Game Section -->
 <div id="gameSection" class="section">
   <h2>Welcome, <span id="userEmail"></span></h2>
@@ -104,13 +73,16 @@
   <p>Balance: ₹<span id="wallet">0</span></p>
   <p>Period: <span id="periodDisplay">--</span></p>
   <p>⏳ Time Left: <span id="countdown">--</span></p>
+
   <select id="gameType">
     <option value="30">30 Sec</option>
     <option value="60" selected>1 Min</option>
     <option value="180">3 Min</option>
     <option value="300">5 Min</option>
   </select><br>
+
   <input type="number" id="betAmount" placeholder="Enter Bet ₹"><br>
+
   <div>
     <button class="btn-red" onclick="placeBet('color', 'RED')">Red</button>
     <button class="btn-green" onclick="placeBet('color', 'GREEN')">Green</button>
@@ -120,10 +92,12 @@
     <button class="btn-big" onclick="placeBet('size', 'BIG')">Big</button>
     <button class="btn-small" onclick="placeBet('size', 'SMALL')">Small</button>
   </div>
+
   <div>
     <p>Numbers:</p>
     <div id="numberButtons"></div>
   </div>
+
   <h3>My Bet History</h3>
   <table>
     <thead>
@@ -141,42 +115,15 @@
   <button onclick="deposit()">Deposit</button><br>
   <input type="number" id="withdrawAmount" placeholder="Withdraw ₹">
   <button onclick="withdraw()">Withdraw</button><br><br>
-  
-  <!-- 🔓 Logout Button -->
   <button onclick="logoutUser()" style="background:red; color:white;">Logout</button>
 </div>
-<!-- Referral Section -->
-<div id="promotionSection" class="section">
-  <h2>Referral</h2>
-  <p>Your Referral Code: <span id="myReferralCode">--</span></p>
-  <p>Referral Earnings: ₹<span id="referralEarnings">0</span></p>
-<p>Your Referral Link: <span id="referralLinkText"></span></p>
-  <p>Or scan this QR to invite:</p>
-  <img id="refQr" src="" width="150" alt="Referral QR Code" />
-  <p>Total Users Referred: <span id="referralCount">0</span></p>
-  
-  <!-- 🔗 Share Link Section -->
-  <p>
-    <button onclick="shareReferral()">Share Invitation Link</button>
-  </p>
 
-  <h3>Referral History</h3>
-  <table>
-    <thead>
-      <tr><th>User</th><th>Date</th><th>Commission ₹</th></tr>
-    </thead>
-    <tbody id="referralHistory"></tbody>
-  </table>
-</div>
-
-<!-- Navigation Bar -->
-<div class="nav-bar" id="bottomNav" style="display: none;">
+<!-- Bottom Navigation Bar -->
+<div style="position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; justify-content: space-around; border-top: 1px solid #ccc; padding: 10px 0;">
   <button onclick="showSection('gameSection')">Game</button>
   <button onclick="showSection('walletSection')">Wallet</button>
   <button onclick="showSection('promotionSection')">Promotion</button>
 </div>
-
-<!-- Firebase Script Starts -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
 import {
@@ -194,8 +141,7 @@ const firebaseConfig = {
   projectId: "wingologin",
   storageBucket: "wingologin.appspot.com",
   messagingSenderId: "605536859710",
-  appId: "1:605536859710:web:ed9495775c8f8dd6a8836f",
-  measurementId: "G-FLDY936H9P"
+  appId: "1:605536859710:web:ed9495775c8f8dd6a8836f"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -206,29 +152,28 @@ let currentUser = null;
 let currentBalance = 0;
 let currentPeriod = null;
 let timerInterval = null;
-let myReferralCode = "";
-let referralEarnings = 0;
+let referralCode = null;
 
 onAuthStateChanged(auth, (user) => {
   if (user) {
     currentUser = user;
-    document.getElementById("loginSection").classList.remove("active");
-    document.getElementById("registerSection").classList.remove("active");
-    document.getElementById("gameSection").classList.add("active");
-    document.getElementById("bottomNav").style.display = "flex";
+    showSection('gameSection');
     document.getElementById("userEmail").innerText = user.email;
 
     get(ref(db, `users/${user.uid}`)).then((snap) => {
       const data = snap.val();
       currentBalance = data.balance || 0;
-      myReferralCode = data.userId;
-      referralEarnings = data.referralEarnings || 0;
+      referralCode = data.userId;
       document.getElementById("wallet").innerText = currentBalance.toFixed(2);
       document.getElementById("wallet2").innerText = currentBalance.toFixed(2);
-      document.getElementById("userIdDisplay").innerText = myReferralCode;
-      document.getElementById("myReferralCode").innerText = myReferralCode;
-      document.getElementById("referralEarnings").innerText = referralEarnings.toFixed(2);
-      loadReferralHistory();
+      document.getElementById("userIdDisplay").innerText = referralCode;
+      document.getElementById("myReferralCode").innerText = referralCode;
+
+      const refLink = `${window.location.origin}?ref=${referralCode}`;
+      document.getElementById("referralLinkText").innerText = refLink;
+
+      document.getElementById("refQr").src =
+        `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(refLink)}&size=150x150`;
     });
 
     startGame();
@@ -262,25 +207,16 @@ window.registerUser = () => {
 
   createUserWithEmailAndPassword(auth, email, pass).then(cred => {
     set(ref(db, `users/${cred.user.uid}`), {
-      email, userId, balance: 58, referredBy: refCode || null,
-      referralEarnings: 0
+      email, userId, balance: 100, referredBy: refCode || null
     });
-    if (refCode) {
-      const log = {
-        from: cred.user.uid,
-        date: new Date().toLocaleDateString(),
-        commission: 0
-      };
-      const historyRef = ref(db, `referrals/${refCode}`);
-      push(historyRef, log);
-    }
-    alert("Registered successfully!");
+    alert("Registered!");
     toggleRegister();
   }).catch(err => alert(err.message));
 };
 
 window.logoutUser = () => signOut(auth).then(() => location.reload());
-  function getCurrentPeriod(gameType, now = new Date()) {
+
+function getCurrentPeriod(gameType, now = new Date()) {
   const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
   const secondsToday = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
   const periodIndex = Math.floor(secondsToday / gameType);
@@ -305,107 +241,12 @@ function updateTimer(gameType) {
 
     if (diff <= 0) {
       clearInterval(timerInterval);
-      runResult(gameType, currentPeriod);
       setTimeout(() => updateTimer(gameType), 1000);
     }
   }, 1000);
 }
 
-function getColor(num) {
-  if (num === 5) return "VIOLET";
-  if ([1, 3, 7, 9].includes(num)) return "RED";
-  return "GREEN";
-}
-
-function getSize(num) {
-  return num >= 5 ? "BIG" : "SMALL";
-}
-
-function runResult(gameType, period) {
-  const num = Math.floor(Math.random() * 10);
-  const color = getColor(num);
-  const size = getSize(num);
-
-  set(ref(db, `results/${gameType}/${period}`), {
-    number: num,
-    color: color,
-    size: size,
-    timestamp: Date.now()
-  });
-
-  onValue(ref(db, `bets`), snap => {
-    const allUsers = snap.val();
-    if (!allUsers) return;
-
-    Object.entries(allUsers).forEach(([uid, userBets]) => {
-      const bets = userBets?.[period];
-      if (!bets) return;
-
-      let totalWin = 0;
-
-      Object.entries(bets).forEach(([betId, bet]) => {
-        let win = false;
-        let multiplier = 0;
-
-        if (bet.type === "color" && bet.value === color) {
-          win = true;
-          multiplier = color === "VIOLET" ? 4.5 : 1.96;
-        } else if (bet.type === "size" && bet.value === size) {
-          win = true;
-          multiplier = 1.96;
-        } else if (bet.type === "number" && Number(bet.value) === num) {
-          win = true;
-          multiplier = 8.5;
-        }
-
-        const payout = win ? parseFloat((bet.amount * multiplier).toFixed(2)) : 0;
-
-        update(ref(db, `bets/${uid}/${period}/${betId}`), {
-          win: win,
-          payout: payout
-        });
-
-        if (uid === currentUser.uid && win) {
-          totalWin += payout;
-        }
-      });
-
-      if (uid === currentUser.uid && totalWin > 0) {
-        currentBalance += totalWin;
-        update(ref(db, `users/${uid}`), { balance: currentBalance });
-        document.getElementById("wallet").innerText = currentBalance.toFixed(2);
-        document.getElementById("wallet2").innerText = currentBalance.toFixed(2);
-        document.getElementById("winSound").play();
-        alert(`🎉 You won ₹${totalWin.toFixed(2)} this round!`);
-      }
-
-      // Handle referral commission logic
-      get(ref(db, `users/${uid}`)).then(userSnap => {
-        const userData = userSnap.val();
-        const referrer = userData.referredBy;
-        if (referrer) {
-          const commission = parseFloat((totalWin * 0.0006).toFixed(2));
-          if (commission > 0) {
-            const log = {
-              from: uid,
-              date: new Date().toLocaleDateString(),
-              commission: commission
-            };
-            push(ref(db, `referrals/${referrer}`), log);
-
-            get(ref(db, `users/${referrer}/referralEarnings`)).then(snap => {
-              const old = snap.val() || 0;
-              update(ref(db, `users/${referrer}`), {
-                referralEarnings: parseFloat((old + commission).toFixed(2))
-              });
-            });
-          }
-        }
-      });
-    });
-  }, { onlyOnce: true });
-}
-  window.placeBet = (type, value) => {
+window.placeBet = (type, value) => {
   const amount = parseFloat(document.getElementById("betAmount").value);
   if (!amount || amount <= 0) return alert("Enter valid amount");
   if (amount > currentBalance) return alert("Insufficient balance");
@@ -437,31 +278,41 @@ function loadUserBetHistory() {
   });
 }
 
-function loadReferralStats() {
-  const uid = currentUser.uid;
-  get(ref(db, `users/${uid}/referralEarnings`)).then(snap => {
-    document.getElementById("referralTotal").innerText = (snap.val() || 0).toFixed(2);
-  });
-
-  onValue(ref(db, `referrals/${uid}`), snap => {
-    const data = snap.val();
-    const logDiv = document.getElementById("referralLog");
-    logDiv.innerHTML = "";
-    if (data) {
-      Object.values(data).forEach(log => {
-        logDiv.innerHTML += `<p>From ${log.from}: ₹${log.commission} on ${log.date}</p>`;
-      });
-    }
-  });
+// Auto-fill referral code if URL contains ?ref=
+const urlParams = new URLSearchParams(window.location.search);
+const refFromURL = urlParams.get("ref");
+if (refFromURL) {
+  document.getElementById("referralCode").value = refFromURL;
 }
 
-function showSection(sectionId) {
-  document.getElementById("gameSection").classList.add("hidden");
-  document.getElementById("walletSection").classList.add("hidden");
-  document.getElementById("promoSection").classList.add("hidden");
-  document.getElementById(sectionId).classList.remove("hidden");
-}
+// Share Referral
+window.shareReferral = () => {
+  const link = `${window.location.origin}?ref=${referralCode}`;
+  navigator.clipboard.writeText(link).then(() => {
+    alert("Referral link copied!");
+  });
+};
 
+// Dummy Wallet Actions
+window.deposit = () => {
+  const amt = parseFloat(document.getElementById("depositAmount").value);
+  if (!amt || amt <= 0) return;
+  currentBalance += amt;
+  update(ref(db, `users/${currentUser.uid}`), { balance: currentBalance });
+  document.getElementById("wallet").innerText = currentBalance.toFixed(2);
+  document.getElementById("wallet2").innerText = currentBalance.toFixed(2);
+};
+
+window.withdraw = () => {
+  const amt = parseFloat(document.getElementById("withdrawAmount").value);
+  if (!amt || amt <= 0 || amt > currentBalance) return;
+  currentBalance -= amt;
+  update(ref(db, `users/${currentUser.uid}`), { balance: currentBalance });
+  document.getElementById("wallet").innerText = currentBalance.toFixed(2);
+  document.getElementById("wallet2").innerText = currentBalance.toFixed(2);
+};
+
+// Number buttons (0-9)
 for (let i = 0; i <= 9; i++) {
   const btn = document.createElement("button");
   btn.textContent = i;
@@ -470,30 +321,3 @@ for (let i = 0; i <= 9; i++) {
   document.getElementById("numberButtons").appendChild(btn);
 }
 </script>
-
-</body>
-</html>
-<!-- Wallet Section -->
-<div id="walletSection" class="hidden">
-  <h2>Wallet</h2>
-  <p>Current Balance: ₹<span id="wallet2">0</span></p>
-  <button onclick="showSection('gameSection')">Back to Game</button>
-</div>
-
-<!-- Referral Section -->
-<div id="promoSection" class="hidden">
-  <h2>Referral System</h2>
-  <p>Your Referral Code: <span id="referralCodeText"></span></p>
-  <p>Referral Link: <span id="referralLinkText"></span></p>
-  <p>Total Referral Commission: ₹<span id="referralTotal">0</span></p>
-  <h4>Referral Earnings Log:</h4>
-  <div id="referralLog"></div>
-  <button onclick="showSection('gameSection')">Back to Game</button>
-</div>
-
-<!-- Bottom Navigation -->
-<div style="position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; background: #1976d2; padding: 10px;">
-  <button onclick="showSection('gameSection')" style="color: white; background: transparent; border: none;">Game</button>
-  <button onclick="showSection('walletSection')" style="color: white; background: transparent; border: none;">Wallet</button>
-  <button onclick="showSection('promoSection')" style="color: white; background: transparent; border: none;">Promotion</button>
-</div>
