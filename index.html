@@ -12,10 +12,7 @@
       padding-bottom: 80px;
       text-align: center;
     }
-    .hidden { display: none; }
-    .section { display: none; }
-    .section.active { display: block; }
-
+    .hidden { display: none !important; }
     input, button, select {
       padding: 10px;
       margin: 5px;
@@ -23,7 +20,6 @@
       border-radius: 6px;
       border: 1px solid #ccc;
     }
-
     .btn-red { background: #e53935; color: white; }
     .btn-green { background: #43a047; color: white; }
     .btn-violet { background: #8e24aa; color: white; }
@@ -37,29 +33,28 @@
       height: 40px;
       border: none;
     }
-
-    #gameSection {
+    #gameSection, #walletSection, #promotionSection {
       max-width: 600px;
       margin: auto;
+      display: none;
     }
-
+    #gameSection.active, #walletSection.active, #promotionSection.active {
+      display: block;
+    }
     table {
       width: 100%;
       margin-top: 20px;
       border-collapse: collapse;
       background: #fff;
     }
-
     th, td {
       padding: 8px;
       border: 1px solid #ddd;
     }
-
     th {
       background-color: #1976d2;
       color: white;
     }
-
     .nav-bar {
       position: fixed;
       bottom: 0;
@@ -71,20 +66,19 @@
       padding: 10px 0;
       box-shadow: 0 -1px 5px rgba(0,0,0,0.1);
     }
-
     .nav-bar button {
       flex: 1;
       background: none;
       border: none;
       font-size: 16px;
-      color: #333;
+      color: #1976d2;
     }
   </style>
 </head>
 <body>
 
-<!-- Login Section -->
-<div id="loginSection" class="section active">
+<!-- Login -->
+<div id="loginSection">
   <h2>Login</h2>
   <input type="email" id="loginEmail" placeholder="Email"><br>
   <input type="password" id="loginPass" placeholder="Password"><br>
@@ -92,8 +86,8 @@
   <p>Don't have an account? <a href="#" onclick="toggleRegister()">Register</a></p>
 </div>
 
-<!-- Register Section -->
-<div id="registerSection" class="section">
+<!-- Register -->
+<div id="registerSection" class="hidden">
   <h2>Register</h2>
   <input type="email" id="regEmail" placeholder="Email"><br>
   <input type="password" id="regPass" placeholder="Password"><br>
@@ -103,7 +97,7 @@
 </div>
 
 <!-- Game Section -->
-<div id="gameSection" class="section">
+<div id="gameSection">
   <h2>Welcome, <span id="userEmail"></span></h2>
   <p>User ID: <span id="userIdDisplay"></span></p>
   <p>Balance: ₹<span id="wallet">0</span></p>
@@ -139,11 +133,43 @@
 </div>
 
 <!-- Navigation Bar -->
-<div class="nav-bar" id="bottomNav" style="display: none;">
-  <button onclick="showSection('gameSection')">Game</button>
-  <button onclick="showSection('walletSection')">Wallet</button>
-  <button onclick="showSection('promotionSection')">Promotion</button>
+<div class="nav-bar" id="bottomNav" style="display:none;">
+  <button onclick="switchSection('gameSection')">Game</button>
+  <button onclick="switchSection('walletSection')">Wallet</button>
+  <button onclick="switchSection('promotionSection')">Referral</button>
 </div>
+<!-- Wallet Section -->
+<div id="walletSection">
+  <h2>Wallet</h2>
+  <p>Balance: ₹<span id="wallet2">0</span></p>
+  <input type="number" id="depositAmount" placeholder="Deposit ₹">
+  <button onclick="deposit()">Deposit</button><br>
+  <input type="number" id="withdrawAmount" placeholder="Withdraw ₹">
+  <button onclick="withdraw()">Withdraw</button><br><br>
+  <button onclick="logoutUser()" style="background:red; color:white;">Logout</button>
+</div>
+
+<!-- Referral Section -->
+<div id="promotionSection">
+  <h2>Referral</h2>
+  <p>Your Referral Code: <span id="myReferralCode">--</span></p>
+  <p>Referral Link: <span id="referralLinkText"></span></p>
+  <p>Referral Earnings: ₹<span id="referralEarnings">0</span></p>
+  <p>Total Users Referred: <span id="referralCount">0</span></p>
+  <p>
+    <button onclick="shareReferral()">Share Link</button>
+  </p>
+  <img id="refQr" src="" width="150" alt="Referral QR Code" />
+  <h3>Referral History</h3>
+  <table>
+    <thead>
+      <tr><th>User</th><th>Date</th><th>Commission ₹</th></tr>
+    </thead>
+    <tbody id="referralHistory"></tbody>
+  </table>
+</div>
+
+<!-- Firebase Script Starts -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
 import {
@@ -171,97 +197,69 @@ const db = getDatabase(app);
 let currentUser = null;
 let currentBalance = 0;
 let currentPeriod = null;
-let timerInterval = null;
+let myReferralCode = "";
+let referralEarnings = 0;
 
-function showSection(id) {
-  document.querySelectorAll(".section").forEach((sec) => sec.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
+function toggleRegister() {
+  document.getElementById("loginSection").classList.toggle("hidden");
+  document.getElementById("registerSection").classList.toggle("hidden");
 }
 
-window.toggleRegister = () => {
-  document.getElementById("loginSection").classList.toggle("active");
-  document.getElementById("registerSection").classList.toggle("active");
-};
-
-window.loginUser = () => {
-  const email = document.getElementById("loginEmail").value;
-  const pass = document.getElementById("loginPass").value;
-  signInWithEmailAndPassword(auth, email, pass)
-    .then(() => alert("Logged in!"))
-    .catch(err => alert(err.message));
-};
-
-window.registerUser = () => {
-  const email = document.getElementById("regEmail").value;
-  const pass = document.getElementById("regPass").value;
-  const refCode = document.getElementById("referralCode").value.trim();
-  const userId = Math.floor(100000 + Math.random() * 900000).toString();
-
-  createUserWithEmailAndPassword(auth, email, pass).then(cred => {
-    set(ref(db, `users/${cred.user.uid}`), {
-      email, userId, balance: 58, referredBy: refCode || null,
-      referralEarnings: 0
-    });
-    if (refCode) {
-      const log = {
-        from: cred.user.uid,
-        date: new Date().toLocaleDateString(),
-        commission: 0
-      };
-      push(ref(db, `referrals/${refCode}`), log);
-    }
-    alert("Registered successfully!");
-    toggleRegister();
-  }).catch(err => alert(err.message));
-};
-
-window.logoutUser = () => signOut(auth).then(() => location.reload());
-
-onAuthStateChanged(auth, (user) => {
+function switchSection(sectionId) {
+  document.getElementById("gameSection").classList.remove("active");
+  document.getElementById("walletSection").classList.remove("active");
+  document.getElementById("promotionSection").classList.remove("active");
+  document.getElementById(sectionId).classList.add("active");
+}
+  onAuthStateChanged(auth, (user) => {
   if (user) {
     currentUser = user;
-    showSection("gameSection");
+    document.getElementById("loginSection").classList.add("hidden");
+    document.getElementById("registerSection").classList.add("hidden");
+    document.getElementById("gameSection").classList.add("active");
     document.getElementById("bottomNav").style.display = "flex";
     document.getElementById("userEmail").innerText = user.email;
 
     get(ref(db, `users/${user.uid}`)).then((snap) => {
       const data = snap.val();
       currentBalance = data.balance || 0;
-      const userId = data.userId;
+      myReferralCode = data.userId;
+      referralEarnings = data.referralEarnings || 0;
       document.getElementById("wallet").innerText = currentBalance.toFixed(2);
-      document.getElementById("userIdDisplay").innerText = userId;
+      document.getElementById("wallet2").innerText = currentBalance.toFixed(2);
+      document.getElementById("userIdDisplay").innerText = myReferralCode;
+      document.getElementById("myReferralCode").innerText = myReferralCode;
+      document.getElementById("referralEarnings").innerText = referralEarnings.toFixed(2);
+      document.getElementById("referralLinkText").innerText = `${location.origin}?ref=${myReferralCode}`;
+      document.getElementById("refQr").src = `https://api.qrserver.com/v1/create-qr-code/?data=${location.origin}?ref=${myReferralCode}&size=150x150`;
     });
 
     startGame();
-    loadUserBetHistory();
+    loadBetHistory();
+    loadReferralHistory();
   }
 });
 
-function getCurrentPeriod(gameType, now = new Date()) {
-  const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
-  const secondsToday = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-  const periodIndex = Math.floor(secondsToday / gameType);
-  return `${dateStr}-${String(periodIndex + 1).padStart(4, '0')}`;
-}
-
 function startGame() {
-  clearInterval(timerInterval);
   const gameType = parseInt(document.getElementById("gameType").value);
   updateTimer(gameType);
   document.getElementById("gameType").onchange = startGame;
 }
 
 function updateTimer(gameType) {
-  timerInterval = setInterval(() => {
+  clearInterval(window.timerInterval);
+  window.timerInterval = setInterval(() => {
     const now = new Date();
-    const end = new Date(Math.ceil(Date.now() / (gameType * 1000)) * gameType * 1000);
-    const diff = Math.floor((end - now) / 1000);
-    currentPeriod = getCurrentPeriod(gameType, now);
-    document.getElementById("countdown").innerText = diff;
+    const totalSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+    const periodIndex = Math.floor(totalSec / gameType);
+    currentPeriod = `${now.toISOString().slice(0,10).replace(/-/g,"")}-${String(periodIndex+1).padStart(4,'0')}`;
+    const roundEnd = new Date(Math.ceil(Date.now() / (gameType * 1000)) * gameType * 1000);
+    const timeLeft = Math.floor((roundEnd - now) / 1000);
+    document.getElementById("countdown").innerText = timeLeft;
     document.getElementById("periodDisplay").innerText = currentPeriod;
 
-    if (diff <= 0) {
-      clearInterval(timerInterval);
+    if (timeLeft <= 0) {
+      clearInterval(window.timerInterval);
       runResult(gameType, currentPeriod);
       setTimeout(() => updateTimer(gameType), 1000);
     }
@@ -273,11 +271,11 @@ function getColor(num) {
   if ([1, 3, 7, 9].includes(num)) return "RED";
   return "GREEN";
 }
-
 function getSize(num) {
   return num >= 5 ? "BIG" : "SMALL";
 }
-  function runResult(gameType, period) {
+
+function runResult(gameType, period) {
   const num = Math.floor(Math.random() * 10);
   const color = getColor(num);
   const size = getSize(num);
@@ -289,17 +287,17 @@ function getSize(num) {
     timestamp: Date.now()
   });
 
-  onValue(ref(db, `bets`), snap => {
-    const allUsers = snap.val();
-    if (!allUsers) return;
+  get(ref(db, `bets`)).then((snap) => {
+    const allBets = snap.val();
+    if (!allBets) return;
 
-    Object.entries(allUsers).forEach(([uid, userBets]) => {
-      const bets = userBets?.[period];
+    Object.entries(allBets).forEach(([uid, userPeriods]) => {
+      const bets = userPeriods?.[period];
       if (!bets) return;
 
       let totalWin = 0;
 
-      Object.entries(bets).forEach(([betId, bet]) => {
+      Object.entries(bets).forEach(([bid, bet]) => {
         let win = false;
         let multiplier = 0;
 
@@ -315,18 +313,17 @@ function getSize(num) {
         }
 
         const payout = win ? parseFloat((bet.amount * multiplier).toFixed(2)) : 0;
-
-        update(ref(db, `bets/${uid}/${period}/${betId}`), {
+        update(ref(db, `bets/${uid}/${period}/${bid}`), {
           win: win,
           payout: payout
         });
 
-        if (uid === currentUser.uid && win) {
+        if (win && uid === currentUser.uid) {
           totalWin += payout;
         }
       });
 
-      if (uid === currentUser.uid && totalWin > 0) {
+      if (totalWin > 0 && uid === currentUser.uid) {
         currentBalance += totalWin;
         update(ref(db, `users/${uid}`), { balance: currentBalance });
         document.getElementById("wallet").innerText = currentBalance.toFixed(2);
@@ -334,31 +331,28 @@ function getSize(num) {
         alert(`🎉 You won ₹${totalWin.toFixed(2)} this round!`);
       }
 
-      // Referral commission
+      // Referral logic
       get(ref(db, `users/${uid}`)).then(userSnap => {
         const userData = userSnap.val();
         const referrer = userData.referredBy;
-        if (referrer) {
+        if (referrer && totalWin > 0) {
           const commission = parseFloat((totalWin * 0.0006).toFixed(2));
-          if (commission > 0) {
-            const log = {
-              from: uid,
-              date: new Date().toLocaleDateString(),
-              commission: commission
-            };
-            push(ref(db, `referrals/${referrer}`), log);
-
-            get(ref(db, `users/${referrer}/referralEarnings`)).then(snap => {
-              const old = snap.val() || 0;
-              update(ref(db, `users/${referrer}`), {
-                referralEarnings: parseFloat((old + commission).toFixed(2))
-              });
+          const log = {
+            from: uid,
+            date: new Date().toLocaleDateString(),
+            commission: commission
+          };
+          push(ref(db, `referrals/${referrer}`), log);
+          get(ref(db, `users/${referrer}/referralEarnings`)).then(snap => {
+            const old = snap.val() || 0;
+            update(ref(db, `users/${referrer}`), {
+              referralEarnings: parseFloat((old + commission).toFixed(2))
             });
-          }
+          });
         }
       });
     });
-  }, { onlyOnce: true });
+  });
 }
 
 window.placeBet = (type, value) => {
@@ -375,25 +369,44 @@ window.placeBet = (type, value) => {
   document.getElementById("wallet").innerText = currentBalance.toFixed(2);
   document.getElementById("wallet2").innerText = currentBalance.toFixed(2);
 
-  const row = `<tr><td>${currentPeriod}</td><td>${type}</td><td>${value}</td><td>${amount}</td><td>Pending</td></tr>`;
-  document.getElementById("betHistory").innerHTML += row;
+  loadBetHistory();
 };
 
-function loadUserBetHistory() {
-  onValue(ref(db, `bets/${auth.currentUser.uid}`), snap => {
+function loadBetHistory() {
+  onValue(ref(db, `bets/${currentUser.uid}`), (snap) => {
     const data = snap.val();
     document.getElementById("betHistory").innerHTML = "";
     if (!data) return;
     Object.entries(data).forEach(([period, bets]) => {
       Object.values(bets).forEach(bet => {
-        const row = `<tr><td>${period}</td><td>${bet.type}</td><td>${bet.value}</td><td>${bet.amount}</td><td>${bet.win === null ? "Pending" : bet.win ? '✅' : '❌'}</td></tr>`;
+        const result = bet.win === null ? "Pending" : bet.win ? "✅" : "❌";
+        const row = `<tr><td>${period}</td><td>${bet.type}</td><td>${bet.value}</td><td>${bet.amount}</td><td>${result}</td></tr>`;
         document.getElementById("betHistory").innerHTML += row;
       });
     });
   });
 }
 
-// Generate number buttons 0–9
+function loadReferralHistory() {
+  onValue(ref(db, `referrals/${currentUser.uid}`), (snap) => {
+    const data = snap.val();
+    const tbody = document.getElementById("referralHistory");
+    tbody.innerHTML = "";
+    if (!data) return;
+    Object.values(data).forEach(entry => {
+      const row = `<tr><td>${entry.from}</td><td>${entry.date}</td><td>${entry.commission}</td></tr>`;
+      tbody.innerHTML += row;
+    });
+  });
+}
+
+window.shareReferral = () => {
+  const link = `${location.origin}?ref=${myReferralCode}`;
+  navigator.clipboard.writeText(link);
+  alert("Referral link copied!");
+};
+
+// Add number buttons
 for (let i = 0; i <= 9; i++) {
   const btn = document.createElement("button");
   btn.textContent = i;
