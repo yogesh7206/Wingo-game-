@@ -99,6 +99,12 @@
 <!-- Game Section -->
 <div id="gameSection">
   <h2>Welcome, <span id="userEmail"></span></h2>
+<div>
+  <button onclick="showLotteryMenu()">🎰 Lottery</button>
+</div>
+<div id="lotteryMenu" style="margin-top:10px; display:none;">
+  <button onclick="openWingoGame()">Wingo Game</button>
+</div>
   <p>User ID: <span id="userIdDisplay"></span></p>
   <p>Balance: ₹<span id="wallet">0</span></p>
   <p>Period: <span id="periodDisplay">--</span></p>
