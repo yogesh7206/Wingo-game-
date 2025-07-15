@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Wingo Lottery Game</title>
+  <title>Lottery Games</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -32,14 +32,6 @@
       width: 40px;
       height: 40px;
       border: none;
-    }
-    #gameSection, #walletSection, #promotionSection {
-      max-width: 600px;
-      margin: auto;
-      display: none;
-    }
-    #gameSection.active, #walletSection.active, #promotionSection.active {
-      display: block;
     }
     table {
       width: 100%;
@@ -73,6 +65,16 @@
       font-size: 16px;
       color: #1976d2;
     }
+    .submenu {
+      display: none;
+      background: #e3f2fd;
+      padding: 10px;
+    }
+    .submenu button {
+      display: block;
+      margin: 5px auto;
+    }
+    .active { display: block !important; }
   </style>
 </head>
 <body>
@@ -96,55 +98,85 @@
   <p>Already have an account? <a href="#" onclick="toggleRegister()">Login</a></p>
 </div>
 
-<!-- Game Section -->
-<div id="gameSection">
+<!-- Main Game Section -->
+<div id="gameSection" class="hidden">
   <h2>Welcome, <span id="userEmail"></span></h2>
-
-  <!-- Lottery Submenu -->
-  <div>
-    <button onclick="showLotteryMenu()">🎰 Lottery</button>
-  </div>
-  <div id="lotteryMenu" style="margin-top:10px; display:none;">
-    <button onclick="openWingoGame()">Wingo Game</button>
-  </div>
-
-  <!-- Wingo Game Interface -->
-  <div id="wingoGameSection" style="display:none;">
-    <p>User ID: <span id="userIdDisplay"></span></p>
-    <p>Balance: ₹<span id="wallet">0</span></p>
-    <p>Period: <span id="periodDisplay">--</span></p>
-    <p>⏳ Time Left: <span id="countdown">--</span></p>
-    <select id="gameType">
-      <option value="30">30 Sec</option>
-      <option value="60" selected>1 Min</option>
-      <option value="180">3 Min</option>
-      <option value="300">5 Min</option>
-    </select><br>
-    <input type="number" id="betAmount" placeholder="Enter Bet ₹"><br>
-    <div>
-      <button class="btn-red" onclick="placeBet('color', 'RED')">Red</button>
-      <button class="btn-green" onclick="placeBet('color', 'GREEN')">Green</button>
-      <button class="btn-violet" onclick="placeBet('color', 'VIOLET')">Violet</button>
-    </div>
-    <div>
-      <button class="btn-big" onclick="placeBet('size', 'BIG')">Big</button>
-      <button class="btn-small" onclick="placeBet('size', 'SMALL')">Small</button>
-    </div>
-    <div>
-      <p>Numbers:</p>
-      <div id="numberButtons"></div>
-    </div>
-    <h3>My Bet History</h3>
-    <table>
-      <thead>
-        <tr><th>Period</th><th>Type</th><th>Value</th><th>Amount</th><th>Result</th></tr>
-      </thead>
-      <tbody id="betHistory"></tbody>
-    </table>
+  <p>User ID: <span id="userIdDisplay"></span></p>
+  <div id="lotteryMenu">
+    <h3>🎮 Lottery Games</h3>
+    <button onclick="showGame('wingoGame')">Wingo</button>
+    <button onclick="showGame('parityGame')">Parity</button>
   </div>
 </div>
-<!-- Wallet Section -->
-<div id="walletSection">
+
+<!-- Placeholder for dynamic game views -->
+<div id="wingoGame" class="hidden"></div>
+<div id="parityGame" class="hidden"></div>
+<!-- 🟢 Wingo Game UI -->
+<div id="wingoGameSection" class="hidden">
+  <h3>🎯 Wingo Game</h3>
+  <p>Balance: ₹<span id="wallet">0</span></p>
+  <p>Period: <span id="periodDisplay">--</span></p>
+  <p>⏳ Time Left: <span id="countdown">--</span></p>
+  <select id="gameType">
+    <option value="30">30 Sec</option>
+    <option value="60" selected>1 Min</option>
+    <option value="180">3 Min</option>
+    <option value="300">5 Min</option>
+  </select><br>
+  <input type="number" id="betAmount" placeholder="Enter Bet ₹"><br>
+  <div>
+    <button class="btn-red" onclick="placeBet('color', 'RED')">Red</button>
+    <button class="btn-green" onclick="placeBet('color', 'GREEN')">Green</button>
+    <button class="btn-violet" onclick="placeBet('color', 'VIOLET')">Violet</button>
+  </div>
+  <div>
+    <button class="btn-big" onclick="placeBet('size', 'BIG')">Big</button>
+    <button class="btn-small" onclick="placeBet('size', 'SMALL')">Small</button>
+  </div>
+  <div>
+    <p>Numbers:</p>
+    <div id="numberButtons"></div>
+  </div>
+  <h4>My Wingo Bet History</h4>
+  <table>
+    <thead>
+      <tr><th>Period</th><th>Type</th><th>Value</th><th>Amount</th><th>Result</th></tr>
+    </thead>
+    <tbody id="betHistory"></tbody>
+  </table>
+</div>
+
+<!-- 🟣 Parity Game UI -->
+<div id="parityGameSection" class="hidden">
+  <h3>🔢 Parity Game</h3>
+  <p>Balance: ₹<span id="parityWallet">0</span></p>
+  <p>Period: <span id="parityPeriodDisplay">--</span></p>
+  <p>⏳ Time Left: <span id="parityCountdown">--</span></p>
+  <select id="parityGameType">
+    <option value="60" selected>1 Min</option>
+    <option value="180">3 Min</option>
+    <option value="300">5 Min</option>
+  </select><br>
+  <input type="number" id="parityBetAmount" placeholder="Enter Bet ₹"><br>
+  <div>
+    <button onclick="placeParityBet('odd')">Odd</button>
+    <button onclick="placeParityBet('even')">Even</button>
+  </div>
+  <div>
+    <p>Numbers:</p>
+    <div id="parityNumbers"></div>
+  </div>
+  <h4>My Parity Bet History</h4>
+  <table>
+    <thead>
+      <tr><th>Period</th><th>Type</th><th>Value</th><th>Amount</th><th>Result</th></tr>
+    </thead>
+    <tbody id="parityBetHistory"></tbody>
+  </table>
+</div>
+<!-- 💰 Wallet Section -->
+<div id="walletSection" class="hidden">
   <h2>Wallet</h2>
   <p>Balance: ₹<span id="wallet2">0</span></p>
   <input type="number" id="depositAmount" placeholder="Deposit ₹">
@@ -154,16 +186,14 @@
   <button onclick="logoutUser()" style="background:red; color:white;">Logout</button>
 </div>
 
-<!-- Referral Section -->
-<div id="promotionSection">
+<!-- 🎁 Referral Section -->
+<div id="promotionSection" class="hidden">
   <h2>Referral</h2>
   <p>Your Referral Code: <span id="myReferralCode">--</span></p>
   <p>Referral Link: <span id="referralLinkText"></span></p>
   <p>Referral Earnings: ₹<span id="referralEarnings">0</span></p>
   <p>Total Users Referred: <span id="referralCount">0</span></p>
-  <p>
-    <button onclick="shareReferral()">Share Link</button>
-  </p>
+  <button onclick="shareReferral()">Share Link</button><br>
   <img id="refQr" src="" width="150" alt="Referral QR Code" />
   <h3>Referral History</h3>
   <table>
@@ -174,50 +204,41 @@
   </table>
 </div>
 
-<!-- Navigation Bar -->
+<!-- 🚀 Bottom Navigation -->
 <div class="nav-bar" id="bottomNav" style="display:none;">
-  <button onclick="switchSection('gameSection')">Game</button>
-  <button onclick="switchSection('walletSection')">Wallet</button>
-  <button onclick="switchSection('promotionSection')">Referral</button>
+  <button onclick="switchSection('game')">Game</button>
+  <button onclick="switchSection('wallet')">Wallet</button>
+  <button onclick="switchSection('promotion')">Referral</button>
 </div>
 
-<!-- JavaScript Functions for UI Switching -->
+<!-- 🔄 Section Switcher -->
 <script>
-  function toggleRegister() {
-    document.getElementById("loginSection").classList.toggle("hidden");
-    document.getElementById("registerSection").classList.toggle("hidden");
-  }
+function switchSection(tab) {
+  document.getElementById("gameSection").classList.add("hidden");
+  document.getElementById("walletSection").classList.add("hidden");
+  document.getElementById("promotionSection").classList.add("hidden");
+  if (tab === 'game') document.getElementById("gameSection").classList.remove("hidden");
+  if (tab === 'wallet') document.getElementById("walletSection").classList.remove("hidden");
+  if (tab === 'promotion') document.getElementById("promotionSection").classList.remove("hidden");
+}
 
-  function switchSection(sectionId) {
-    document.getElementById("gameSection").classList.remove("active");
-    document.getElementById("walletSection").classList.remove("active");
-    document.getElementById("promotionSection").classList.remove("active");
-    document.getElementById(sectionId).classList.add("active");
-  }
+function showGame(game) {
+  document.getElementById("wingoGame").classList.add("hidden");
+  document.getElementById("parityGame").classList.add("hidden");
+  document.getElementById("wingoGameSection").classList.add("hidden");
+  document.getElementById("parityGameSection").classList.add("hidden");
 
-  function showLotteryMenu() {
-    document.getElementById("lotteryMenu").style.display = "block";
+  if (game === 'wingoGame') {
+    document.getElementById("wingoGame").classList.remove("hidden");
+    document.getElementById("wingoGameSection").classList.remove("hidden");
   }
-
-  function openWingoGame() {
-    document.getElementById("wingoGameSection").style.display = "block";
-    if (typeof startGame === 'function') startGame();
+  if (game === 'parityGame') {
+    document.getElementById("parityGame").classList.remove("hidden");
+    document.getElementById("parityGameSection").classList.remove("hidden");
   }
-
-  window.onload = () => {
-    const container = document.getElementById("numberButtons");
-    if (container) {
-      for (let i = 0; i <= 9; i++) {
-        const btn = document.createElement("button");
-        btn.textContent = i;
-        btn.className = "number-btn";
-        btn.onclick = () => placeBet("number", i);
-        container.appendChild(btn);
-      }
-    }
-  };
+}
 </script>
-<!-- Firebase Script Starts -->
+<!-- 🔥 Firebase Scripts -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
 import {
@@ -228,6 +249,7 @@ import {
   getDatabase, ref, set, update, push, get, onValue
 } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 
+// ✅ Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyBe5kGOwYS3FsF_9_q1pjxaWrF1glUe87c",
   authDomain: "wingologin.firebaseapp.com",
@@ -248,46 +270,55 @@ let currentPeriod = null;
 let myReferralCode = "";
 let referralEarnings = 0;
 
-function loginUser() {
-  const email = document.getElementById("loginEmail").value;
-  const pass = document.getElementById("loginPass").value;
-  signInWithEmailAndPassword(auth, email, pass).catch(err => alert(err.message));
+// 🔁 Toggle Login/Register
+function toggleRegister() {
+  document.getElementById("loginSection").classList.toggle("hidden");
+  document.getElementById("registerSection").classList.toggle("hidden");
 }
 
-function registerUser() {
+// 🔐 Login
+window.loginUser = () => {
+  const email = document.getElementById("loginEmail").value;
+  const pass = document.getElementById("loginPass").value;
+  signInWithEmailAndPassword(auth, email, pass)
+    .catch(err => alert("Login Error: " + err.message));
+};
+
+// 📝 Register
+window.registerUser = () => {
   const email = document.getElementById("regEmail").value;
   const pass = document.getElementById("regPass").value;
   const referredBy = document.getElementById("referralCode").value;
-
   createUserWithEmailAndPassword(auth, email, pass)
     .then(cred => {
-      const uid = cred.user.uid;
-      const userId = uid.slice(-6).toUpperCase();
-      set(ref(db, `users/${uid}`), {
+      const userId = cred.user.uid;
+      set(ref(db, `users/${userId}`), {
         email: email,
         balance: 0,
         userId: userId,
-        referralEarnings: 0,
-        referredBy: referredBy || null
+        referredBy: referredBy || null,
+        referralEarnings: 0
       });
     })
-    .catch(err => alert(err.message));
-}
+    .catch(err => alert("Register Error: " + err.message));
+};
 
-function logoutUser() {
-  signOut(auth);
-  location.reload();
-}
+// 🔓 Logout
+window.logoutUser = () => {
+  signOut(auth).then(() => location.reload());
+};
 
+// 🟢 Auth State Change
 onAuthStateChanged(auth, (user) => {
   if (user) {
     currentUser = user;
     document.getElementById("loginSection").classList.add("hidden");
     document.getElementById("registerSection").classList.add("hidden");
-    document.getElementById("gameSection").classList.add("active");
+    document.getElementById("gameSection").classList.remove("hidden");
     document.getElementById("bottomNav").style.display = "flex";
     document.getElementById("userEmail").innerText = user.email;
 
+    // 🧾 Load User Data
     get(ref(db, `users/${user.uid}`)).then((snap) => {
       const data = snap.val();
       currentBalance = data.balance || 0;
@@ -302,12 +333,16 @@ onAuthStateChanged(auth, (user) => {
       document.getElementById("refQr").src = `https://api.qrserver.com/v1/create-qr-code/?data=${location.origin}?ref=${myReferralCode}&size=150x150`;
     });
 
+    // ⏱️ Start Game + Load Data
     startGame();
     loadBetHistory();
     loadReferralHistory();
   }
 });
-  function startGame() {
+</script>
+<script type="module">
+// ✅ Timer and Period Logic
+function startGame() {
   const gameType = parseInt(document.getElementById("gameType").value);
   updateTimer(gameType);
   document.getElementById("gameType").onchange = startGame;
@@ -333,6 +368,7 @@ function updateTimer(gameType) {
   }, 1000);
 }
 
+// 🎯 Wingo Result Generation
 function getColor(num) {
   if (num === 5) return "VIOLET";
   if ([1, 3, 7, 9].includes(num)) return "RED";
@@ -398,7 +434,7 @@ function runResult(gameType, period) {
         alert(`🎉 You won ₹${totalWin.toFixed(2)} this round!`);
       }
 
-      // Referral commission
+      // Referral Commission
       get(ref(db, `users/${uid}`)).then(userSnap => {
         const userData = userSnap.val();
         const referrer = userData.referredBy;
@@ -422,6 +458,7 @@ function runResult(gameType, period) {
   });
 }
 
+// 🧾 Bet Placing
 window.placeBet = (type, value) => {
   const amount = parseFloat(document.getElementById("betAmount").value);
   if (!amount || amount <= 0) return alert("Enter valid amount");
@@ -438,22 +475,24 @@ window.placeBet = (type, value) => {
 
   loadBetHistory();
 };
-  function loadBetHistory() {
+
+// 📜 Bet History
+function loadBetHistory() {
   onValue(ref(db, `bets/${currentUser.uid}`), (snap) => {
     const data = snap.val();
-    const tbody = document.getElementById("betHistory");
-    tbody.innerHTML = "";
+    document.getElementById("betHistory").innerHTML = "";
     if (!data) return;
     Object.entries(data).forEach(([period, bets]) => {
       Object.values(bets).forEach(bet => {
         const result = bet.win === null ? "Pending" : bet.win ? "✅" : "❌";
         const row = `<tr><td>${period}</td><td>${bet.type}</td><td>${bet.value}</td><td>${bet.amount}</td><td>${result}</td></tr>`;
-        tbody.innerHTML += row;
+        document.getElementById("betHistory").innerHTML += row;
       });
     });
   });
 }
 
+// 🤝 Referral History
 function loadReferralHistory() {
   onValue(ref(db, `referrals/${currentUser.uid}`), (snap) => {
     const data = snap.val();
@@ -467,34 +506,21 @@ function loadReferralHistory() {
   });
 }
 
+// 📤 Share Referral
 window.shareReferral = () => {
   const link = `${location.origin}?ref=${myReferralCode}`;
   navigator.clipboard.writeText(link);
   alert("Referral link copied!");
 };
 
-// Deposit & Withdraw (basic demo)
-function deposit() {
-  const amt = parseFloat(document.getElementById("depositAmount").value);
-  if (!amt || amt <= 0) return alert("Enter valid deposit amount");
-  currentBalance += amt;
-  update(ref(db, `users/${currentUser.uid}`), { balance: currentBalance });
-  document.getElementById("wallet").innerText = currentBalance.toFixed(2);
-  document.getElementById("wallet2").innerText = currentBalance.toFixed(2);
-  alert("Amount added!");
-}
-
-function withdraw() {
-  const amt = parseFloat(document.getElementById("withdrawAmount").value);
-  if (!amt || amt <= 0) return alert("Enter valid withdrawal amount");
-  if (amt > currentBalance) return alert("Insufficient balance");
-  currentBalance -= amt;
-  update(ref(db, `users/${currentUser.uid}`), { balance: currentBalance });
-  document.getElementById("wallet").innerText = currentBalance.toFixed(2);
-  document.getElementById("wallet2").innerText = currentBalance.toFixed(2);
-  alert("Withdrawal successful!");
+// 🔢 Add number buttons for Wingo
+for (let i = 0; i <= 9; i++) {
+  const btn = document.createElement("button");
+  btn.textContent = i;
+  btn.className = "number-btn";
+  btn.onclick = () => placeBet("number", i);
+  document.getElementById("numberButtons").appendChild(btn);
 }
 </script>
-
 </body>
 </html>
