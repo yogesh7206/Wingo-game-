@@ -3,38 +3,52 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Wingo Lottery Game</title>
+  <title>Wingo Color Game</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #f4f6fa; margin: 0; padding-bottom: 80px; text-align: center; }
-    .hidden { display: none !important; }
-    input, button, select {
-      padding: 10px; margin: 5px; font-size: 16px; border-radius: 6px; border: 1px solid #ccc;
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      text-align: center;
     }
-    .btn-red { background: #e53935; color: white; }
-    .btn-green { background: #43a047; color: white; }
-    .btn-violet { background: #8e24aa; color: white; }
-    .btn-big, .btn-small { background: #ff9800; color: white; }
-    .number-btn {
-      background: #3949ab; color: white; margin: 2px; border-radius: 50%; width: 40px; height: 40px; border: none;
+    .hidden { display: none; }
+    input, button {
+      padding: 10px;
+      margin: 5px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
     }
-    table {
-      width: 100%; margin-top: 20px; border-collapse: collapse; background: #fff;
-    }
-    th, td { padding: 8px; border: 1px solid #ddd; }
-    th { background-color: #1976d2; color: white; }
     .nav-bar {
-      position: fixed; bottom: 0; width: 100%; background: #fff; border-top: 1px solid #ccc;
-      display: flex; justify-content: space-around; padding: 10px 0; box-shadow: 0 -1px 5px rgba(0,0,0,0.1);
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: white;
+      display: flex;
+      justify-content: space-around;
+      border-top: 1px solid #ccc;
     }
     .nav-bar button {
-      flex: 1; background: none; border: none; font-size: 16px; color: #1976d2;
+      flex: 1;
+      border: none;
+      background: none;
+      font-size: 16px;
+      padding: 10px 0;
+      color: #1976d2;
     }
-    .active { display: block !important; }
+    .submenu {
+      background: #e3f2fd;
+      padding: 10px;
+    }
+    .submenu button {
+      display: block;
+      margin: 5px auto;
+    }
   </style>
 </head>
 <body>
 
-<!-- 🔐 LOGIN -->
+<!-- 🔐 LOGIN SECTION -->
 <div id="loginSection">
   <h2>Login</h2>
   <input type="email" id="loginEmail" placeholder="Email"><br>
@@ -43,12 +57,12 @@
   <p>Don't have an account? <a href="#" onclick="toggleRegister()">Register</a></p>
 </div>
 
-<!-- 📝 REGISTER -->
+<!-- 📝 REGISTER SECTION -->
 <div id="registerSection" class="hidden">
   <h2>Register</h2>
   <input type="email" id="regEmail" placeholder="Email"><br>
   <input type="password" id="regPass" placeholder="Password"><br>
-  <input type="text" id="referralCode" placeholder="Referral Code (Optional)"><br>
+  <input type="text" id="referralCode" placeholder="Referral Code (optional)"><br>
   <button onclick="registerUser()">Register</button>
   <p>Already have an account? <a href="#" onclick="toggleRegister()">Login</a></p>
 </div>
@@ -56,75 +70,65 @@
 <!-- 🎮 GAME SECTION -->
 <div id="gameSection" class="hidden">
   <h2>Welcome, <span id="userEmail"></span></h2>
-  <p>User ID: <span id="userIdDisplay"></span></p>
-  <div id="lotteryMenu">
-    <h3>🎮 Lottery Games</h3>
-    <button onclick="showGame('wingo')">Wingo</button>
-    <button onclick="showGame('parity')">Parity</button>
+  <p>User ID: <span id="userIdDisplay">--</span></p>
+  <div class="submenu">
+    <h3>🎯 Lottery</h3>
+    <button onclick="showGame('wingo')">Wingo Game</button>
+    <button onclick="showGame('parity')">Parity Game</button>
   </div>
 </div>
 
-<!-- 🎯 Wingo UI -->
+<!-- 🔄 PAGE SWITCH BUTTONS -->
+<div class="nav-bar" id="bottomNav" style="display:none;">
+  <button onclick="switchTab('game')">Game</button>
+  <button onclick="switchTab('wallet')">Wallet</button>
+  <button onclick="switchTab('promotion')">Referral</button>
+</div>
+<!-- 🟢 WINGO GAME UI -->
 <div id="wingoSection" class="hidden">
   <h3>🎯 Wingo Game</h3>
-  <p>Balance: ₹<span id="wallet">0</span></p>
+  <p>Balance: ₹<span id="wallet">0.00</span></p>
   <p>Period: <span id="periodDisplay">--</span></p>
   <p>⏳ Time Left: <span id="countdown">--</span></p>
-  <select id="gameType">
-    <option value="30">30 Sec</option>
-    <option value="60" selected>1 Min</option>
-    <option value="180">3 Min</option>
-    <option value="300">5 Min</option>
-  </select><br>
-  <input type="number" id="betAmount" placeholder="Enter Bet ₹"><br>
-  <div>
-    <button class="btn-red" onclick="placeBet('color', 'RED')">Red</button>
-    <button class="btn-green" onclick="placeBet('color', 'GREEN')">Green</button>
-    <button class="btn-violet" onclick="placeBet('color', 'VIOLET')">Violet</button>
-  </div>
-  <div>
-    <button class="btn-big" onclick="placeBet('size', 'BIG')">Big</button>
-    <button class="btn-small" onclick="placeBet('size', 'SMALL')">Small</button>
-  </div>
-  <p>Numbers:</p>
+  <input type="number" id="betAmount" placeholder="Bet Amount ₹"><br>
+  <button onclick="placeBet('color', 'RED')">Red</button>
+  <button onclick="placeBet('color', 'GREEN')">Green</button>
+  <button onclick="placeBet('color', 'VIOLET')">Violet</button><br>
+  <button onclick="placeBet('size', 'BIG')">Big</button>
+  <button onclick="placeBet('size', 'SMALL')">Small</button><br>
   <div id="numberButtons"></div>
-  <h4>My Wingo Bet History</h4>
-  <table>
-    <thead><tr><th>Period</th><th>Type</th><th>Value</th><th>Amount</th><th>Result</th></tr></thead>
+  <h4>My Bets</h4>
+  <table border="1" style="width:100%">
+    <thead>
+      <tr><th>Period</th><th>Type</th><th>Value</th><th>Amount</th><th>Result</th></tr>
+    </thead>
     <tbody id="betHistory"></tbody>
   </table>
 </div>
-<!-- 🟣 Parity Game -->
+
+<!-- 🟣 PARITY GAME UI -->
 <div id="paritySection" class="hidden">
   <h3>🔢 Parity Game</h3>
-  <p>Balance: ₹<span id="parityWallet">0</span></p>
+  <p>Balance: ₹<span id="wallet2">0.00</span></p>
   <p>Period: <span id="periodDisplay2">--</span></p>
   <p>⏳ Time Left: <span id="countdown2">--</span></p>
-  <select id="parityGameType">
-    <option value="60" selected>1 Min</option>
-    <option value="180">3 Min</option>
-    <option value="300">5 Min</option>
-  </select><br>
-  <input type="number" id="parityBetAmount" placeholder="Enter Bet ₹"><br>
-  <div>
-    <button onclick="placeParityBet('odd')">Odd</button>
-    <button onclick="placeParityBet('even')">Even</button>
-  </div>
-  <div>
-    <p>Numbers:</p>
-    <div id="parityNumbers"></div>
-  </div>
-  <h4>My Parity Bet History</h4>
-  <table>
-    <thead><tr><th>Period</th><th>Type</th><th>Value</th><th>Amount</th><th>Result</th></tr></thead>
+  <input type="number" id="parityBetAmount" placeholder="Bet Amount ₹"><br>
+  <button onclick="placeParityBet('odd')">Odd</button>
+  <button onclick="placeParityBet('even')">Even</button><br>
+  <div id="parityNumbers"></div>
+  <h4>Parity Bets</h4>
+  <table border="1" style="width:100%">
+    <thead>
+      <tr><th>Period</th><th>Type</th><th>Value</th><th>Amount</th><th>Result</th></tr>
+    </thead>
     <tbody id="parityBetHistory"></tbody>
   </table>
 </div>
 
-<!-- 💰 Wallet Section -->
+<!-- 💰 WALLET SECTION -->
 <div id="walletSection" class="hidden">
   <h2>Wallet</h2>
-  <p>Balance: ₹<span id="wallet2">0</span></p>
+  <p>Balance: ₹<span id="walletBalance">0.00</span></p>
   <input type="number" id="depositAmount" placeholder="Deposit ₹">
   <button onclick="deposit()">Deposit</button><br>
   <input type="number" id="withdrawAmount" placeholder="Withdraw ₹">
@@ -132,463 +136,144 @@
   <button onclick="logoutUser()" style="background:red; color:white;">Logout</button>
 </div>
 
-<!-- 🎁 Referral Section -->
+<!-- 🎁 REFERRAL SECTION -->
 <div id="promotionSection" class="hidden">
   <h2>Referral</h2>
   <p>Your Referral Code: <span id="myReferralCode">--</span></p>
   <p>Referral Link: <span id="referralLinkText"></span></p>
   <p>Referral Earnings: ₹<span id="referralEarnings">0</span></p>
-  <p>Total Users Referred: <span id="referralCount">0</span></p>
-  <button onclick="shareReferral()">Share Link</button><br>
-  <img id="refQr" src="" width="150" alt="Referral QR Code" />
+  <p>Total Referred Users: <span id="referralCount">0</span></p>
+  <button onclick="shareReferral()">Share Link</button><br><br>
+  <img id="refQr" src="" width="150" alt="QR Code" />
   <h3>Referral History</h3>
-  <table>
-    <thead><tr><th>User</th><th>Date</th><th>Commission ₹</th></tr></thead>
+  <table border="1" style="width:100%">
+    <thead>
+      <tr><th>User</th><th>Date</th><th>Commission ₹</th></tr>
+    </thead>
     <tbody id="referralHistory"></tbody>
   </table>
 </div>
-
-<!-- 🚀 Bottom Navigation -->
-<div class="nav-bar" id="bottomNav" style="display:none;">
-  <button onclick="switchSection('game')">Game</button>
-  <button onclick="switchSection('wallet')">Wallet</button>
-  <button onclick="switchSection('promotion')">Referral</button>
-</div>
-
-<!-- 🔄 Section Switcher -->
+<!-- 💸 Deposit & Withdraw -->
 <script>
-function switchSection(tab) {
-  document.getElementById("gameSection").classList.add("hidden");
-  document.getElementById("walletSection").classList.add("hidden");
-  document.getElementById("promotionSection").classList.add("hidden");
-  if (tab === 'game') document.getElementById("gameSection").classList.remove("hidden");
-  if (tab === 'wallet') document.getElementById("walletSection").classList.remove("hidden");
-  if (tab === 'promotion') document.getElementById("promotionSection").classList.remove("hidden");
-}
-
-function toggleRegister() {
-  document.getElementById("loginSection").classList.toggle("hidden");
-  document.getElementById("registerSection").classList.toggle("hidden");
-}
-</script>
-
-<!-- 🔥 Firebase Scripts -->
-<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-database-compat.js"></script>
-
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyBe5kGOwYS3FsF_9_q1pjxaWrF1glUe87c",
-  authDomain: "wingologin.firebaseapp.com",
-  databaseURL: "https://wingologin-default-rtdb.firebaseio.com",
-  projectId: "wingologin",
-  storageBucket: "wingologin.appspot.com",
-  messagingSenderId: "605536859710",
-  appId: "1:605536859710:web:ed9495775c8f8dd6a8836f"
-};
-firebase.initializeApp(firebaseConfig);
-
-const auth = firebase.auth();
-const db = firebase.database();
-
-let currentUser = null;
-let currentBalance = 0;
-let currentPeriod = "";
-let myReferralCode = "";
-let referralEarnings = 0;
-
-function loginUser() {
-  const email = document.getElementById("loginEmail").value;
-  const pass = document.getElementById("loginPass").value;
-  auth.signInWithEmailAndPassword(email, pass)
-    .catch(err => alert("Login Error: " + err.message));
-}
-
-function registerUser() {
-  const email = document.getElementById("regEmail").value;
-  const pass = document.getElementById("regPass").value;
-  const referredBy = document.getElementById("referralCode").value;
-
-  auth.createUserWithEmailAndPassword(email, pass)
-    .then(cred => {
-      const userId = cred.user.uid;
-      db.ref(`users/${userId}`).set({
-        email: email,
-        balance: 0,
-        userId: userId,
-        referredBy: referredBy || null,
-        referralEarnings: 0
-      });
-    })
-    .catch(err => alert("Register Error: " + err.message));
-}
-
-function logoutUser() {
-  auth.signOut().then(() => location.reload());
-}
-
-auth.onAuthStateChanged(user => {
-  if (user) {
-    currentUser = user;
-    document.getElementById("loginSection").classList.add("hidden");
-    document.getElementById("registerSection").classList.add("hidden");
-    document.getElementById("gameSection").classList.remove("hidden");
-    document.getElementById("bottomNav").style.display = "flex";
-    document.getElementById("userEmail").innerText = user.email;
-
-    db.ref("users/" + user.uid).once("value").then(snap => {
-      const data = snap.val();
-      currentBalance = data.balance || 0;
-      myReferralCode = data.userId;
-      referralEarnings = data.referralEarnings || 0;
-
-      document.getElementById("wallet").innerText = currentBalance.toFixed(2);
-      document.getElementById("wallet2").innerText = currentBalance.toFixed(2);
-      document.getElementById("userIdDisplay").innerText = myReferralCode;
-      document.getElementById("myReferralCode").innerText = myReferralCode;
-      document.getElementById("referralEarnings").innerText = referralEarnings.toFixed(2);
-      document.getElementById("referralLinkText").innerText = `${location.origin}?ref=${myReferralCode}`;
-      document.getElementById("refQr").src = `https://api.qrserver.com/v1/create-qr-code/?data=${location.origin}?ref=${myReferralCode}&size=150x150`;
-    });
-
-    startSharedTimer(); // ⏱️ Shared timer logic
-    loadBetHistory();
-    loadReferralHistory();
-  }
-});
-                                                   </script>
-                                                   <!-- 📤 Share Referral -->
-<script>
-window.shareReferral = () => {
-  const link = `${location.origin}?ref=${myReferralCode}`;
-  navigator.clipboard.writeText(link);
-  alert("Referral link copied!");
-};
-
-// 🔢 Add number buttons for Wingo and Parity
-function createNumberButtons(containerId, placeFn) {
-  const container = document.getElementById(containerId);
-  for (let i = 0; i <= 9; i++) {
-    const btn = document.createElement("button");
-    btn.textContent = i;
-    btn.className = "number-btn";
-    btn.onclick = () => placeFn("number", i);
-    container.appendChild(btn);
-  }
-}
-
-createNumberButtons("numberButtons", placeBet);
-createNumberButtons("parityNumbers", (type, value) => {
-  const amount = parseFloat(document.getElementById("parityBetAmount").value);
-  if (!amount || amount <= 0) return alert("Enter valid amount");
-  if (amount > currentBalance) return alert("Insufficient balance");
-
-  const betRef = ref(db, `bets/${currentUser.uid}/${currentPeriod}`);
-  const newBet = { type, value, amount, win: null };
-  push(betRef, newBet);
-
-  currentBalance -= amount;
+window.deposit = () => {
+  const amt = parseFloat(document.getElementById("depositAmount").value);
+  if (!amt || amt <= 0) return alert("Enter valid deposit");
+  currentBalance += amt;
   update(ref(db, `users/${currentUser.uid}`), { balance: currentBalance });
   document.getElementById("wallet").innerText = currentBalance.toFixed(2);
   document.getElementById("wallet2").innerText = currentBalance.toFixed(2);
-});
-</script>
-<script type="module">
-// ✅ Shared Timer + Period Logic for both Wingo and Parity
-function startGame() {
-  const gameType = parseInt(document.getElementById("gameType").value);
-  const parityGameType = parseInt(document.getElementById("parityGameType").value);
+  alert(`₹${amt.toFixed(2)} added!`);
+};
 
-  // If gameType changes, sync parity too
-  document.getElementById("gameType").onchange = () => {
-    document.getElementById("parityGameType").value = document.getElementById("gameType").value;
-    startGame();
-  };
-
-  document.getElementById("parityGameType").onchange = () => {
-    document.getElementById("gameType").value = document.getElementById("parityGameType").value;
-    startGame();
-  };
-
-  updateTimer(gameType);
-}
-
-function updateTimer(gameType) {
-  clearInterval(window.timerInterval);
-  window.timerInterval = setInterval(() => {
-    const now = new Date();
-    const totalSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-    const periodIndex = Math.floor(totalSec / gameType);
-    currentPeriod = `${now.toISOString().slice(0,10).replace(/-/g,"")}-${String(periodIndex+1).padStart(4,'0')}`;
-    const roundEnd = new Date(Math.ceil(Date.now() / (gameType * 1000)) * gameType * 1000);
-    const timeLeft = Math.floor((roundEnd - now) / 1000);
-
-    // Show time & period in both games
-    document.getElementById("countdown").innerText = timeLeft;
-    document.getElementById("periodDisplay").innerText = currentPeriod;
-    document.getElementById("parityCountdown").innerText = timeLeft;
-    document.getElementById("parityPeriodDisplay").innerText = currentPeriod;
-
-    if (timeLeft <= 0) {
-      clearInterval(window.timerInterval);
-      runResult(gameType, currentPeriod);
-      setTimeout(() => updateTimer(gameType), 1000);
-    }
-  }, 1000);
-}
-</script>
-<script type="module">
-// Add number buttons for Parity game
-for (let i = 0; i <= 9; i++) {
-  const btn = document.createElement("button");
-  btn.textContent = i;
-  btn.className = "number-btn";
-  btn.onclick = () => placeParityBet("number", i);
-  document.getElementById("parityNumbers").appendChild(btn);
-}
-
-// 🧾 Place Parity Bet
-window.placeParityBet = (typeOrValue) => {
-  const amount = parseFloat(document.getElementById("parityBetAmount").value);
-  if (!amount || amount <= 0) return alert("Enter valid amount");
-  if (amount > currentBalance) return alert("Insufficient balance");
-
-  let type = "number";
-  let value = typeOrValue;
-  if (typeOrValue === "odd" || typeOrValue === "even") {
-    type = "parity";
-    value = typeOrValue.toUpperCase();
-  }
-
-  const betRef = ref(db, `parityBets/${currentUser.uid}/${currentPeriod}`);
-  const newBet = { type, value, amount, win: null };
-  push(betRef, newBet);
-
-  currentBalance -= amount;
+window.withdraw = () => {
+  const amt = parseFloat(document.getElementById("withdrawAmount").value);
+  if (!amt || amt <= 0 || amt > currentBalance)
+    return alert("Invalid withdraw");
+  currentBalance -= amt;
   update(ref(db, `users/${currentUser.uid}`), { balance: currentBalance });
   document.getElementById("wallet").innerText = currentBalance.toFixed(2);
   document.getElementById("wallet2").innerText = currentBalance.toFixed(2);
-  document.getElementById("parityWallet").innerText = currentBalance.toFixed(2);
-
-  loadParityHistory();
+  alert(`₹${amt.toFixed(2)} withdrawn!`);
 };
-
-// 📜 Load Parity Bet History
-function loadParityHistory() {
-  onValue(ref(db, `parityBets/${currentUser.uid}`), (snap) => {
-    const data = snap.val();
-    document.getElementById("parityBetHistory").innerHTML = "";
-    if (!data) return;
-    Object.entries(data).forEach(([period, bets]) => {
-      Object.values(bets).forEach(bet => {
-        const result = bet.win === null ? "Pending" : bet.win ? "✅" : "❌";
-        const row = `<tr><td>${period}</td><td>${bet.type}</td><td>${bet.value}</td><td>${bet.amount}</td><td>${result}</td></tr>`;
-        document.getElementById("parityBetHistory").innerHTML += row;
-      });
-    });
-  });
-}
 </script>
-<script type="module">
-// 🎯 Parity Result Generation
-function runParityResult(gameType, period) {
-  const num = Math.floor(Math.random() * 10);
-  const parity = num % 2 === 0 ? "EVEN" : "ODD";
 
-  // Save Parity Result
-  set(ref(db, `parityResults/${gameType}/${period}`), {
-    number: num,
-    parity: parity,
-    timestamp: Date.now()
-  });
-
-  get(ref(db, `parityBets`)).then((snap) => {
-    const allBets = snap.val();
-    if (!allBets) return;
-
-    Object.entries(allBets).forEach(([uid, userPeriods]) => {
-      const bets = userPeriods?.[period];
-      if (!bets) return;
-
-      let totalWin = 0;
-
-      Object.entries(bets).forEach(([bid, bet]) => {
-        let win = false;
-        let multiplier = 0;
-
-        if (bet.type === "parity" && bet.value === parity) {
-          win = true;
-          multiplier = 1.96;
-        } else if (bet.type === "number" && Number(bet.value) === num) {
-          win = true;
-          multiplier = 8.5;
-        }
-
-        const payout = win ? parseFloat((bet.amount * multiplier).toFixed(2)) : 0;
-        update(ref(db, `parityBets/${uid}/${period}/${bid}`), {
-          win: win,
-          payout: payout
-        });
-
-        if (win && uid === currentUser.uid) {
-          totalWin += payout;
-        }
-      });
-
-      // Update user balance
-      if (totalWin > 0 && uid === currentUser.uid) {
-        currentBalance += totalWin;
-        update(ref(db, `users/${uid}`), { balance: currentBalance });
-        document.getElementById("wallet").innerText = currentBalance.toFixed(2);
-        document.getElementById("wallet2").innerText = currentBalance.toFixed(2);
-        document.getElementById("parityWallet").innerText = currentBalance.toFixed(2);
-        alert(`🎉 You won ₹${totalWin.toFixed(2)} in Parity!`);
-      }
-
-      // Referral Commission
-      get(ref(db, `users/${uid}`)).then(userSnap => {
-        const userData = userSnap.val();
-        const referrer = userData.referredBy;
-        if (referrer && totalWin > 0) {
-          const commission = parseFloat((totalWin * 0.0006).toFixed(2));
-          const log = {
-            from: uid,
-            date: new Date().toLocaleDateString(),
-            commission: commission
-          };
-          push(ref(db, `referrals/${referrer}`), log);
-          get(ref(db, `users/${referrer}/referralEarnings`)).then(snap => {
-            const old = snap.val() || 0;
-            update(ref(db, `users/${referrer}`), {
-              referralEarnings: parseFloat((old + commission).toFixed(2))
-            });
-          });
-        }
-      });
-    });
-  });
-}
-</script>
-<script type="module">
-// ✅ Shared Timer and Period Logic for Wingo & Parity
-function startGame() {
-  const gameType = parseInt(document.getElementById("gameType").value);
-  updateTimer(gameType);
-
-  // Also update Parity game type dropdown
-  document.getElementById("parityGameType").value = gameType;
-  document.getElementById("gameType").onchange = startGame;
-  document.getElementById("parityGameType").onchange = startGame;
-}
-
-function updateTimer(gameType) {
-  clearInterval(window.timerInterval);
-  window.timerInterval = setInterval(() => {
-    const now = new Date();
-    const totalSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-    const periodIndex = Math.floor(totalSec / gameType);
-    currentPeriod = `${now.toISOString().slice(0,10).replace(/-/g,"")}-${String(periodIndex+1).padStart(4,'0')}`;
-
-    const roundEnd = new Date(Math.ceil(Date.now() / (gameType * 1000)) * gameType * 1000);
-    const timeLeft = Math.floor((roundEnd - now) / 1000);
-
-    // Set for both Wingo and Parity
-    document.getElementById("countdown").innerText = timeLeft;
-    document.getElementById("parityCountdown").innerText = timeLeft;
-    document.getElementById("periodDisplay").innerText = currentPeriod;
-    document.getElementById("parityPeriodDisplay").innerText = currentPeriod;
-
-    if (timeLeft <= 0) {
-      clearInterval(window.timerInterval);
-      runResult(gameType, currentPeriod);         // Run Wingo Result
-      runParityResult(gameType, currentPeriod);   // Run Parity Result
-      setTimeout(() => updateTimer(gameType), 1000);
-    }
-  }, 1000);
-}
-</script>
-<script type="module">
-// ✅ Place Parity Bet
+<!-- 🟣 Parity Bet -->
+<script>
 window.placeParityBet = (type) => {
-  const amount = parseFloat(document.getElementById("parityBetAmount").value);
-  if (!amount || amount <= 0) return alert("Enter valid amount");
-  if (amount > currentBalance) return alert("Insufficient balance");
+  const amt = parseFloat(document.getElementById("parityBetAmount").value);
+  if (!amt || amt <= 0) return alert("Enter valid amount");
+  if (amt > currentBalance) return alert("Insufficient balance");
 
-  const betRef = ref(db, `parityBets/${currentUser.uid}/${currentPeriod}`);
-  const newBet = { type: "parity", value: type, amount, win: null };
+  const parityGameType = parseInt(document.getElementById("parityGameType").value);
+  const now = new Date();
+  const totalSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+  const periodIndex = Math.floor(totalSec / parityGameType);
+  const parityPeriod = `${now.toISOString().slice(0,10).replace(/-/g,"")}-${String(periodIndex+1).padStart(4,'0')}`;
+
+  const betRef = ref(db, `paritybets/${currentUser.uid}/${parityPeriod}`);
+  const newBet = { type, amount: amt, win: null };
   push(betRef, newBet);
 
-  currentBalance -= amount;
+  currentBalance -= amt;
   update(ref(db, `users/${currentUser.uid}`), { balance: currentBalance });
-  document.getElementById("parityWallet").innerText = currentBalance.toFixed(2);
+  document.getElementById("wallet").innerText = currentBalance.toFixed(2);
   document.getElementById("wallet2").innerText = currentBalance.toFixed(2);
 
   loadParityBetHistory();
 };
+</script>
 
-// ✅ Generate Result for Parity Game
-function runParityResult(gameType, period) {
-  const num = Math.floor(Math.random() * 10);
-  const parity = num % 2 === 0 ? "even" : "odd";
-
-  set(ref(db, `parityResults/${gameType}/${period}`), {
-    number: num,
-    parity: parity,
-    timestamp: Date.now()
-  });
-
-  get(ref(db, `parityBets`)).then((snap) => {
-    const allBets = snap.val();
-    if (!allBets) return;
-
-    Object.entries(allBets).forEach(([uid, userPeriods]) => {
-      const bets = userPeriods?.[period];
-      if (!bets) return;
-
-      let totalWin = 0;
-      Object.entries(bets).forEach(([bid, bet]) => {
-        let win = false;
-        let multiplier = 1.96;
-
-        if (bet.value === parity) win = true;
-
-        const payout = win ? parseFloat((bet.amount * multiplier).toFixed(2)) : 0;
-        update(ref(db, `parityBets/${uid}/${period}/${bid}`), {
-          win: win,
-          payout: payout
-        });
-
-        if (win && uid === currentUser.uid) {
-          totalWin += payout;
-        }
-      });
-
-      if (totalWin > 0 && uid === currentUser.uid) {
-        currentBalance += totalWin;
-        update(ref(db, `users/${uid}`), { balance: currentBalance });
-        document.getElementById("parityWallet").innerText = currentBalance.toFixed(2);
-        document.getElementById("wallet2").innerText = currentBalance.toFixed(2);
-        alert(`🎉 You won ₹${totalWin.toFixed(2)} in Parity!`);
-      }
-    });
-  });
-}
-
-// 📜 Load Parity Bet History
+<!-- 🟣 Parity History -->
+<script>
 function loadParityBetHistory() {
-  onValue(ref(db, `parityBets/${currentUser.uid}`), (snap) => {
+  onValue(ref(db, `paritybets/${currentUser.uid}`), (snap) => {
     const data = snap.val();
     document.getElementById("parityBetHistory").innerHTML = "";
     if (!data) return;
-
     Object.entries(data).forEach(([period, bets]) => {
       Object.values(bets).forEach(bet => {
         const result = bet.win === null ? "Pending" : bet.win ? "✅" : "❌";
-        const row = `<tr><td>${period}</td><td>${bet.type}</td><td>${bet.value}</td><td>${bet.amount}</td><td>${result}</td></tr>`;
+        const row = `<tr><td>${period}</td><td>${bet.type}</td><td>-</td><td>${bet.amount}</td><td>${result}</td></tr>`;
         document.getElementById("parityBetHistory").innerHTML += row;
       });
     });
   });
 }
-          </script>
+</script>
+
+<!-- 🟣 Parity Number Buttons -->
+<script>
+for (let i = 0; i <= 9; i++) {
+  const btn = document.createElement("button");
+  btn.textContent = i;
+  btn.className = "number-btn";
+  btn.onclick = () => alert("Choose Odd or Even for Parity Game");
+  document.getElementById("parityNumbers").appendChild(btn);
+}
+</script>
+<!-- 💰 Deposit & Withdraw Logic -->
+<script>
+window.deposit = () => {
+  const amount = parseFloat(document.getElementById("depositAmount").value);
+  if (!amount || amount <= 0) return alert("Enter valid amount");
+  currentBalance += amount;
+  update(ref(db, `users/${currentUser.uid}`), { balance: currentBalance });
+  document.getElementById("wallet").innerText = currentBalance.toFixed(2);
+  document.getElementById("wallet2").innerText = currentBalance.toFixed(2);
+  alert("Deposited ₹" + amount.toFixed(2));
+};
+
+window.withdraw = () => {
+  const amount = parseFloat(document.getElementById("withdrawAmount").value);
+  if (!amount || amount <= 0) return alert("Enter valid amount");
+  if (amount > currentBalance) return alert("Insufficient balance");
+  currentBalance -= amount;
+  update(ref(db, `users/${currentUser.uid}`), { balance: currentBalance });
+  document.getElementById("wallet").innerText = currentBalance.toFixed(2);
+  document.getElementById("wallet2").innerText = currentBalance.toFixed(2);
+  alert("Withdrawn ₹" + amount.toFixed(2));
+};
+</script>
+
+<!-- 🔁 Keep Period and Timer Synced Across Games -->
+<script>
+function syncTimers() {
+  const gameType = parseInt(document.getElementById("gameType").value);
+  const now = new Date();
+  const totalSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+  const periodIndex = Math.floor(totalSec / gameType);
+  const currentPeriod = `${now.toISOString().slice(0,10).replace(/-/g,"")}-${String(periodIndex+1).padStart(4,'0')}`;
+  const roundEnd = new Date(Math.ceil(Date.now() / (gameType * 1000)) * gameType * 1000);
+  const timeLeft = Math.floor((roundEnd - now) / 1000);
+
+  // Set for both games
+  document.getElementById("periodDisplay").innerText = currentPeriod;
+  document.getElementById("parityPeriodDisplay").innerText = currentPeriod;
+  document.getElementById("countdown").innerText = timeLeft;
+  document.getElementById("parityCountdown").innerText = timeLeft;
+}
+
+setInterval(syncTimers, 1000);
+</script>
+
+</html>
