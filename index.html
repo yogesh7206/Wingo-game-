@@ -5,307 +5,214 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f4f6fa;
-      text-align: center;
-    }
-    .hidden { display: none; }
-    .section { padding: 20px; }
-    button {
-      padding: 10px 16px;
-      margin: 5px;
-      border-radius: 6px;
-      font-size: 16px;
-      border: none;
-      background: #007bff;
-      color: white;
-    }
-    input {
-      padding: 10px;
-      margin: 5px;
-      width: 80%;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-    #bottomNav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: #fff;
-      display: flex;
-      justify-content: space-around;
-      padding: 10px;
-      border-top: 1px solid #ccc;
-    }
+    body { font-family: Arial, sans-serif; background: #f0f0f0; margin: 0; }
+    nav { background: #333; color: #fff; padding: 10px; display: flex; justify-content: space-around; }
+    nav button { background: none; border: none; color: #fff; font-size: 16px; cursor: pointer; }
+    .section { display: none; padding: 20px; }
+    .active { display: block; }
+    .game-buttons button { margin: 5px; padding: 10px; }
   </style>
 </head>
 <body>
 
-<!-- LOGIN SECTION -->
-<div id="loginSection" class="section">
+<nav>
+  <button onclick="showSection('loginSection')">Login</button>
+  <button onclick="showSection('registerSection')">Register</button>
+  <button onclick="showSection('homeSection')">Home</button>
+  <button onclick="showSection('walletSection')">Wallet</button>
+  <button onclick="showSection('lotterySection')">Game</button>
+</nav>
+
+<!-- Login Section -->
+<div id="loginSection" class="section active">
   <h2>Login</h2>
-  <input id="loginEmail" placeholder="Email"><br>
-  <input id="loginPass" type="password" placeholder="Password"><br>
-  <button onclick="loginUser()">Login</button>
-  <p onclick="toggleRegister()">Don't have an account? Register</p>
+  <input type="email" id="loginEmail" placeholder="Email"><br><br>
+  <input type="password" id="loginPassword" placeholder="Password"><br><br>
+  <button onclick="login()">Login</button>
+  <p>Don't have an account? <button onclick="showSection('registerSection')">Register</button></p>
 </div>
 
-<!-- REGISTER SECTION -->
-<div id="registerSection" class="section hidden">
+<!-- Register Section -->
+<div id="registerSection" class="section">
   <h2>Register</h2>
-  <input id="regEmail" placeholder="Email"><br>
-  <input id="regPass" type="password" placeholder="Password"><br>
-  <input id="referralCode" placeholder="Referral Code (optional)"><br>
-  <button onclick="registerUser()">Register</button>
-  <p onclick="toggleRegister()">Already have an account? Login</p>
+  <input type="email" id="registerEmail" placeholder="Email"><br><br>
+  <input type="password" id="registerPassword" placeholder="Password"><br><br>
+  <input type="text" id="referralCode" placeholder="Referral Code (optional)"><br><br>
+  <button onclick="register()">Register</button>
+  <p>Already have an account? <button onclick="showSection('loginSection')">Login</button></p>
 </div>
-<!-- GAME SECTION -->
-<div id="gameSection" class="section hidden">
-  <h3>Welcome: <span id="userEmail"></span></h3>
-  <p>User ID: <span id="userIdDisplay"></span></p>
-  <p>Wallet: ₹<span id="wallet"></span></p>
-  <div>
-    <button onclick="showGame('wingoGame')">Wingo</button>
-    <button onclick="showGame('parityGame')">Parity</button>
+
+<!-- Home Section -->
+<div id="homeSection" class="section">
+  <h2>Welcome, <span id="userEmail">User</span></h2>
+  <p>User ID: <span id="userId">--</span></p>
+</div>
+<!-- Wallet Section -->
+<div id="walletSection" class="section">
+  <h2>Your Wallet</h2>
+  <p>Balance: ₹<span id="walletBalance">0</span></p>
+</div>
+
+<!-- Lottery Section -->
+<div id="lotterySection" class="section">
+  <h2>🎮 Lottery Games</h2>
+  <button onclick="showGame('wingo')">Wingo</button>
+  <button onclick="showGame('parity')">Parity</button>
+
+  <div id="wingoGame" class="gameSection">
+    <h3>🎯 Wingo Game</h3>
+    <p>Balance: ₹<span id="wingoBalance">0</span></p>
+    <p>Period: <span id="wingoPeriod">--</span></p>
+    <p>⏳ Time Left: <span id="wingoTimer">--</span></p>
+    <div class="game-buttons" id="wingoButtons"></div>
   </div>
 
-  <div id="wingoGame">
-    <h4>Wingo Game</h4>
-    <p>Period: <span id="periodDisplay"></span> | Time Left: <span id="countdown"></span></p>
-    <input id="betAmount" placeholder="Bet Amount"><br>
-    <div id="numberButtons"></div>
-  </div>
-
-  <div id="parityGame" class="hidden">
-    <h4>Parity Game</h4>
-    <p>Period: <span id="parityPeriodDisplay"></span> | Time Left: <span id="parityCountdown"></span></p>
-    <input id="parityBetAmount" placeholder="Bet Amount"><br>
-    <div id="parityNumbers"></div>
+  <div id="parityGame" class="gameSection" style="display:none;">
+    <h3>🎯 Parity Game</h3>
+    <p>Balance: ₹<span id="parityBalance">0</span></p>
+    <p>Period: <span id="parityPeriod">--</span></p>
+    <p>⏳ Time Left: <span id="parityTimer">--</span></p>
+    <div class="game-buttons" id="parityButtons"></div>
   </div>
 </div>
-
-<!-- WALLET SECTION -->
-<div id="walletSection" class="section hidden">
-  <h3>Wallet</h3>
-  <p>Balance: ₹<span id="wallet2"></span></p>
-  <input id="depositAmount" placeholder="Deposit Amount">
-  <button onclick="deposit()">Deposit</button><br>
-  <input id="withdrawAmount" placeholder="Withdraw Amount">
-  <button onclick="withdraw()">Withdraw</button>
-</div>
-
-<!-- PROMOTION SECTION -->
-<div id="promotionSection" class="section hidden">
-  <h3>Referral</h3>
-  <p>Your Code: <span id="myReferralCode"></span></p>
-  <p>Link: <span id="referralLinkText"></span></p>
-  <img id="refQr" src="" alt="QR Code" style="width: 150px;">
-  <button onclick="shareReferral()">Copy Link</button>
-</div>
-
-<!-- BOTTOM NAVIGATION -->
-<div id="bottomNav" class="hidden">
-  <button onclick="switchSection('game')">Game</button>
-  <button onclick="switchSection('wallet')">Wallet</button>
-  <button onclick="switchSection('promotion')">Promotion</button>
-  <button onclick="logoutUser()">Logout</button>
-</div>
-<!-- Firebase Scripts -->
-<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-database-compat.js"></script>
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
-  // Replace with your Firebase config
+  // ✅ Your Firebase config
   const firebaseConfig = {
-  apiKey: "AIzaSyBe5kGOwYS3FsF_9_q1pjxaWrF1glUe87c",
-  authDomain: "wingologin.firebaseapp.com",
-  databaseURL: "https://wingologin-default-rtdb.firebaseio.com",
-  projectId: "wingologin",
-  storageBucket: "wingologin.firebasestorage.app",
-  messagingSenderId: "605536859710",
-  appId: "1:605536859710:web:ed9495775c8f8dd6a8836f",
-  measurementId: "G-FLDY936H9P"
-};
-
+    apiKey: "AIzaSyBe5kGOwYS3FsF_9_q1pjxaWrF1glUe87c",
+    authDomain: "wingologin.firebaseapp.com",
+    databaseURL: "https://wingologin-default-rtdb.firebaseio.com",
+    projectId: "wingologin",
+    storageBucket: "wingologin.appspot.com",
+    messagingSenderId: "605536859710",
+    appId: "1:605536859710:web:ed9495775c8f8dd6a8836f"
+  };
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.database();
+
   let currentUser = null;
 
-  function toggleRegister() {
-    document.getElementById("loginSection").classList.toggle("hidden");
-    document.getElementById("registerSection").classList.toggle("hidden");
-  }
-
-  function switchSection(section) {
-    ["game", "wallet", "promotion"].forEach(id => {
-      document.getElementById(id + "Section").classList.add("hidden");
-    });
-    document.getElementById(section + "Section").classList.remove("hidden");
+  function showSection(id) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
   }
 
   function showGame(game) {
-    document.getElementById("wingoGame").classList.add("hidden");
-    document.getElementById("parityGame").classList.add("hidden");
-    document.getElementById(game).classList.remove("hidden");
+    document.getElementById("wingoGame").style.display = game === "wingo" ? "block" : "none";
+    document.getElementById("parityGame").style.display = game === "parity" ? "block" : "none";
   }
 
-  function registerUser() {
-    const email = document.getElementById("regEmail").value;
-    const password = document.getElementById("regPass").value;
+  function register() {
+    const email = document.getElementById("registerEmail").value;
+    const password = document.getElementById("registerPassword").value;
     const referral = document.getElementById("referralCode").value;
 
-    auth.createUserWithEmailAndPassword(email, password).then(userCred => {
-      const uid = userCred.user.uid;
+    auth.createUserWithEmailAndPassword(email, password).then(userCredential => {
+      const uid = userCredential.user.uid;
       db.ref("users/" + uid).set({
         email: email,
-        wallet: 100,
-        referralCode: uid.slice(0, 6),
-        referredBy: referral || ""
+        balance: 100,
+        referral: referral || ""
       });
-    }).catch(alert);
+      alert("Registered! Now login.");
+      showSection('loginSection');
+    }).catch(error => alert(error.message));
   }
 
-  function loginUser() {
+  function login() {
     const email = document.getElementById("loginEmail").value;
-    const password = document.getElementById("loginPass").value;
-    auth.signInWithEmailAndPassword(email, password).catch(alert);
+    const password = document.getElementById("loginPassword").value;
+
+    auth.signInWithEmailAndPassword(email, password).then(userCredential => {
+      currentUser = userCredential.user;
+      loadUserData(currentUser.uid);
+      showSection('homeSection');
+    }).catch(error => alert(error.message));
   }
 
-  function logoutUser() {
-    auth.signOut();
-  }
-
-  auth.onAuthStateChanged(user => {
-    if (user) {
-      currentUser = user;
-      const uid = user.uid;
-      db.ref("users/" + uid).once("value").then(snapshot => {
-        const data = snapshot.val();
-        document.getElementById("userEmail").innerText = data.email;
-        document.getElementById("userIdDisplay").innerText = uid;
-        document.getElementById("wallet").innerText = data.wallet || 0;
-        document.getElementById("wallet2").innerText = data.wallet || 0;
-        document.getElementById("myReferralCode").innerText = data.referralCode;
-        const refLink = location.origin + location.pathname + "?ref=" + data.referralCode;
-        document.getElementById("referralLinkText").innerText = refLink;
-        document.getElementById("refQr").src = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" + encodeURIComponent(refLink);
-      });
-      document.getElementById("loginSection").classList.add("hidden");
-      document.getElementById("registerSection").classList.add("hidden");
-      document.getElementById("gameSection").classList.remove("hidden");
-      document.getElementById("bottomNav").classList.remove("hidden");
-    } else {
-      currentUser = null;
-      document.getElementById("gameSection").classList.add("hidden");
-      document.getElementById("walletSection").classList.add("hidden");
-      document.getElementById("promotionSection").classList.add("hidden");
-      document.getElementById("bottomNav").classList.add("hidden");
-      document.getElementById("loginSection").classList.remove("hidden");
-    }
-  });
-
-  function deposit() {
-    const amt = parseInt(document.getElementById("depositAmount").value);
-    if (!currentUser || isNaN(amt)) return;
-    const uid = currentUser.uid;
-    const ref = db.ref("users/" + uid + "/wallet");
-    ref.transaction(w => (w || 0) + amt);
-  }
-
-  function withdraw() {
-    const amt = parseInt(document.getElementById("withdrawAmount").value);
-    if (!currentUser || isNaN(amt)) return;
-    const uid = currentUser.uid;
-    const ref = db.ref("users/" + uid + "/wallet");
-    ref.transaction(w => (w || 0) >= amt ? w - amt : w);
-  }
-
-  function shareReferral() {
-    const text = document.getElementById("referralLinkText").innerText;
-    navigator.clipboard.writeText(text);
-    alert("Referral link copied!");
-  }
-
-  function createGameButtons() {
-    for (let i = 0; i <= 9; i++) {
-      const btn = document.createElement("button");
-      btn.innerText = i;
-      btn.onclick = () => placeBet(i, "wingo");
-      document.getElementById("numberButtons").appendChild(btn);
-
-      const pbtn = document.createElement("button");
-      pbtn.innerText = i;
-      pbtn.onclick = () => placeBet(i, "parity");
-      document.getElementById("parityNumbers").appendChild(pbtn);
-    }
-  }
-
-  function placeBet(number, game) {
-    const amountInput = game === "wingo" ? "betAmount" : "parityBetAmount";
-    const periodDisplay = game === "wingo" ? currentPeriod : currentPeriod;
-    const amount = parseInt(document.getElementById(amountInput).value);
-    if (!currentUser || isNaN(amount)) return;
-
-    const uid = currentUser.uid;
-    const path = `bets/${game}/${periodDisplay}/${uid}`;
-    db.ref(path).push({ number: number, amount: amount });
-    db.ref("users/" + uid + "/wallet").transaction(w => (w || 0) >= amount ? w - amount : w);
-    alert("Bet placed on number " + number);
-  }
-
-  let currentPeriod = 0;
-  let timer = 60;
-
-  function startTimer() {
-    setInterval(() => {
-      timer--;
-      if (timer <= 0) {
-        currentPeriod++;
-        timer = 60;
-        calculateResults("wingo");
-        calculateResults("parity");
-      }
-      document.getElementById("countdown").innerText = timer + "s";
-      document.getElementById("parityCountdown").innerText = timer + "s";
-      document.getElementById("periodDisplay").innerText = currentPeriod;
-      document.getElementById("parityPeriodDisplay").innerText = currentPeriod;
-    }, 1000);
-  }
-
-  function calculateResults(game) {
-    db.ref(`bets/${game}/${currentPeriod - 1}`).once("value", snapshot => {
-      const allBets = snapshot.val();
-      if (!allBets) return;
-
-      const totals = Array(10).fill(0);
-      for (let uid in allBets) {
-        for (let key in allBets[uid]) {
-          const bet = allBets[uid][key];
-          totals[bet.number] += bet.amount;
-        }
-      }
-      const winningNumber = totals.indexOf(Math.max(...totals));
-      for (let uid in allBets) {
-        for (let key in allBets[uid]) {
-          const bet = allBets[uid][key];
-          if (bet.number == winningNumber) {
-            const winAmount = bet.amount * 2;
-            db.ref("users/" + uid + "/wallet").transaction(w => (w || 0) + winAmount);
-          }
-        }
-      }
+  function loadUserData(uid) {
+    db.ref("users/" + uid).once("value").then(snapshot => {
+      const data = snapshot.val();
+      document.getElementById("userEmail").innerText = data.email;
+      document.getElementById("userId").innerText = uid;
+      document.getElementById("walletBalance").innerText = data.balance;
+      document.getElementById("wingoBalance").innerText = data.balance;
+      document.getElementById("parityBalance").innerText = data.balance;
     });
   }
 
-  createGameButtons();
-  startTimer();
+  // Game Buttons
+  const numbers = [2, 3, 5, 7];
+  window.onload = () => {
+    numbers.forEach(num => {
+      document.getElementById("wingoButtons").innerHTML += `<button onclick="placeBet('wingo', ${num})">${num}</button>`;
+      document.getElementById("parityButtons").innerHTML += `<button onclick="placeBet('parity', ${num})">${num}</button>`;
+    });
+    startTimerLoop();
+  };
+
+  function placeBet(game, number) {
+    if (!currentUser) return alert("Login first");
+    const uid = currentUser.uid;
+    const ref = db.ref("users/" + uid);
+    ref.once("value").then(snapshot => {
+      let balance = snapshot.val().balance;
+      if (balance < 10) return alert("Insufficient balance");
+      balance -= 10;
+      ref.update({ balance });
+      db.ref("bets/" + game + "/" + currentPeriod + "/" + uid).push({ number, time: Date.now() });
+      loadUserData(uid);
+      alert("Bet placed on " + number);
+    });
+  }
+
+  // Shared Timer & Period
+  let currentPeriod = "--";
+  let timeLeft = 0;
+
+  function startTimerLoop() {
+    const periodRef = db.ref("game/period");
+    const timeRef = db.ref("game/time");
+
+    periodRef.on("value", snap => {
+      currentPeriod = snap.val();
+      document.getElementById("wingoPeriod").innerText = currentPeriod;
+      document.getElementById("parityPeriod").innerText = currentPeriod;
+    });
+
+    timeRef.on("value", snap => {
+      timeLeft = snap.val();
+    });
+
+    setInterval(() => {
+      if (timeLeft > 0) {
+        timeLeft--;
+        db.ref("game/time").set(timeLeft);
+      } else {
+        timeLeft = 60;
+        db.ref("game/period").transaction(n => (parseInt(n || "1000") + 1).toString());
+      }
+      document.getElementById("wingoTimer").innerText = timeLeft + "s";
+      document.getElementById("parityTimer").innerText = timeLeft + "s";
+    }, 1000);
+  }
+</script>
+<style>
+  body { font-family: Arial; padding: 20px; }
+  .section { display: none; }
+  .section.active { display: block; }
+  .gameSection { margin-top: 15px; }
+  .game-buttons button { margin: 5px; padding: 10px; }
+</style>
+
+<script>
+  // Default to login
+  showSection('loginSection');
 </script>
 
 </body>
