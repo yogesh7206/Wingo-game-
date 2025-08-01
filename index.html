@@ -440,3 +440,46 @@
     </tbody>
   </table>
   </div>
+  <div id="adminPanel" style="margin-top: 40px; display: none;">
+  <h3>Admin Panel - Manual Result</h3>
+  <label>Period:</label>
+  <input type="text" id="manualPeriod" placeholder="e.g. 2400190">
+  <label>Color:</label>
+  <select id="manualColor">
+    <option value="green">Green</option>
+    <option value="red">Red</option>
+    <option value="violet">Violet</option>
+  </select>
+  <button onclick="setManualResult()">Set Result</button>
+  <p id="manualResultStatus"></p>
+</div>
+  <script>
+  const adminEmails = ["sandhyabaghel905@gmail.com", "youradmin@gmail.com"];
+
+  function setManualResult() {
+    const period = document.getElementById("manualPeriod").value.trim();
+    const color = document.getElementById("manualColor").value;
+    const status = document.getElementById("manualResultStatus");
+
+    if (!period || !color) {
+      status.textContent = "Please enter period and select color.";
+      return;
+    }
+
+    db.ref("results/" + period).set({
+      color: color,
+      time: new Date().toISOString()
+    }).then(() => {
+      status.textContent = "Result set successfully.";
+      payoutWinners(period, color); // Reuse payout logic
+    }).catch((error) => {
+      status.textContent = "Error: " + error.message;
+    });
+  }
+
+  auth.onAuthStateChanged((user) => {
+    if (user && adminEmails.includes(user.email)) {
+      document.getElementById("adminPanel").style.display = "block";
+    }
+  });
+  </script>
