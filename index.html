@@ -3,77 +3,83 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Wingo Game</title>
+  <title>Win89 - Color Prediction Game</title>
   <style>
-    body { font-family: Arial; background: #f4f6fa; margin: 0; padding-bottom: 80px; text-align: center; }
-    .section { display: none; padding: 20px; }
-    #homeSection, #gameSection, #walletSection, #historySection, #leaderboardSection, #adminPanel { display: none; }
-    button { padding: 10px 20px; margin: 10px; }
-    table { border-collapse: collapse; width: 90%; margin: 0 auto; }
-    th, td { border: 1px solid #ccc; padding: 8px; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6fa;
+      margin: 0;
+      padding-bottom: 100px;
+      text-align: center;
+    }
+    header {
+      background: #0d6efd;
+      color: white;
+      padding: 10px;
+    }
+    header img {
+      height: 40px;
+      vertical-align: middle;
+    }
+    header h1 {
+      display: inline;
+      font-size: 1.5rem;
+      margin-left: 10px;
+    }
+    nav button {
+      padding: 10px;
+      margin: 5px;
+      background: #198754;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+    .section {
+      display: none;
+      padding: 20px;
+    }
+    .visible {
+      display: block;
+    }
+    input, select {
+      padding: 10px;
+      margin: 5px;
+      width: 80%;
+      max-width: 300px;
+    }
+    button.placeBetBtn {
+      background: #dc3545;
+      color: white;
+      padding: 12px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
-  <h2>🎮 Wingo Color Prediction Game</h2>
 
-  <!-- Auth Section -->
-  <div id="authSection">
-    <input type="email" id="email" placeholder="Email"><br>
-    <input type="password" id="password" placeholder="Password"><br>
-    <button onclick="login()">Login</button>
-    <button onclick="register()">Register</button>
-    <p id="authMessage"></p>
-  </div>
+<header>
+  <img src="https://i.ibb.co/2yyf9Rw/win89-logo.png" alt="Win89 Logo" />
+  <h1>Win89</h1>
+</header>
 
-  <!-- Navigation -->
-  <div id="nav" style="display:none;">
-    <button onclick="showSection('homeSection')">Home</button>
-    <button onclick="showSection('gameSection')">Wingo</button>
-    <button onclick="showSection('walletSection')">Wallet</button>
-    <button onclick="showSection('historySection')">History</button>
-    <button onclick="showSection('leaderboardSection')">Leaderboard</button>
-    <button onclick="logout()">Logout</button>
-  </div>
+<nav>
+  <button onclick="showSection('loginSection')">Login</button>
+  <button onclick="showSection('registerSection')">Register</button>
+  <button onclick="showSection('walletSection')">Wallet</button>
+  <button onclick="showSection('lotterySection')">Wingo</button>
+  <button onclick="showSection('historySection')">Bet History</button>
+  <button onclick="showSection('leaderboardSection')">Leaderboard</button>
+</nav>
 
-  <!-- Sections -->
-  <div id="homeSection" class="section">
-    <h3>Welcome!</h3>
-    <p id="userEmail"></p>
-    <p>Wallet: ₹<span id="walletBalance">0</span></p>
-    <p>Referral Code: <span id="referralCode"></span></p>
-  </div>
-  <!-- Wingo Game Section -->
-  <div id="gameSection" class="section">
-    <h3>Wingo Game</h3>
-    <p>Period No: <span id="periodNumber"></span></p>
-    <p>Timer: <span id="countdownTimer"></span>s</p>
-    <button onclick="placeBet('green')">Bet Green</button>
-    <button onclick="placeBet('red')">Bet Red</button>
-    <button onclick="placeBet('violet')">Bet Violet</button>
-  </div>
-
-  <!-- Wallet -->
-  <div id="walletSection" class="section">
-    <h3>Wallet</h3>
-    <p>Balance: ₹<span id="walletBalance2">0</span></p>
-    <button onclick="addMoney()">Add ₹100</button>
-  </div>
-
-  <!-- History Section -->
-  <div id="historySection" class="section">
-    <h3>Bet History</h3>
-    <table>
-      <thead><tr><th>Period</th><th>Color</th><th>Status</th></tr></thead>
-      <tbody id="historyBody"></tbody>
-    </table>
-  </div>
-
-  <!-- Leaderboard and Admin Panel come in later parts -->
-
-<!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<!-- Sections will come next -->
+  <!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
 <script>
   const firebaseConfig = {
@@ -81,7 +87,7 @@
     authDomain: "wingologin.firebaseapp.com",
     databaseURL: "https://wingologin-default-rtdb.firebaseio.com",
     projectId: "wingologin",
-    storageBucket: "wingologin.appspot.com",
+    storageBucket: "wingologin.firebasestorage.app",
     messagingSenderId: "605536859710",
     appId: "1:605536859710:web:ed9495775c8f8dd6a8836f",
     measurementId: "G-FLDY936H9P"
@@ -91,239 +97,356 @@
   const auth = firebase.auth();
   const db = firebase.database();
 
-  function showSection(id) {
-    document.querySelectorAll('.section').forEach(div => div.style.display = 'none');
-    document.getElementById(id).style.display = 'block';
-  }
+  let currentUser = null;
 
+  function showSection(id) {
+    document.querySelectorAll('.section').forEach(sec => sec.classList.remove('visible'));
+    document.getElementById(id).classList.add('visible');
+  }
+</script>
+
+<!-- Login Section -->
+<div id="loginSection" class="section visible">
+  <h2>Login to Win89</h2>
+  <input id="loginEmail" placeholder="Email" type="email" />
+  <input id="loginPassword" placeholder="Password" type="password" />
+  <button onclick="login()">Login</button>
+</div>
+
+<!-- Register Section -->
+<div id="registerSection" class="section">
+  <h2>Register for Win89</h2>
+  <input id="registerEmail" placeholder="Email" type="email" />
+  <input id="registerPassword" placeholder="Password" type="password" />
+  <input id="referralCode" placeholder="Referral Code (optional)" />
+  <button onclick="register()">Register</button>
+</div>
+
+<script>
   function login() {
-    const email = email.value;
-    const pass = password.value;
-    auth.signInWithEmailAndPassword(email, pass)
-      .then(() => location.reload())
-      .catch(e => authMessage.innerText = e.message);
+    const email = document.getElementById("loginEmail").value;
+    const password = document.getElementById("loginPassword").value;
+    auth.signInWithEmailAndPassword(email, password)
+      .then(user => {
+        currentUser = user.user;
+        alert("Logged in!");
+        showSection("walletSection");
+      })
+      .catch(err => alert(err.message));
   }
 
   function register() {
-    const email = email.value;
-    const pass = password.value;
-    auth.createUserWithEmailAndPassword(email, pass)
-      .then(cred => {
-        db.ref("users/" + cred.user.uid).set({
+    const email = document.getElementById("registerEmail").value;
+    const password = document.getElementById("registerPassword").value;
+    const referral = document.getElementById("referralCode").value;
+    auth.createUserWithEmailAndPassword(email, password)
+      .then(user => {
+        currentUser = user.user;
+        db.ref("users/" + currentUser.uid).set({
           email: email,
-          balance: 100,
-          referral: "",
-          bets: {}
+          wallet: 100,
+          referral: referral || ""
         });
-        location.reload();
+        alert("Registered!");
+        showSection("walletSection");
       })
-      .catch(e => authMessage.innerText = e.message);
-  }
-
-  function logout() {
-    auth.signOut().then(() => location.reload());
+      .catch(err => alert(err.message));
   }
 
   auth.onAuthStateChanged(user => {
     if (user) {
-      document.getElementById("authSection").style.display = "none";
-      document.getElementById("nav").style.display = "block";
-      showSection('homeSection');
-      loadUser(user);
+      currentUser = user;
     }
   });
 </script>
+
+<!-- Wallet Section -->
+<div id="walletSection" class="section">
+  <h2>Wallet</h2>
+  <p>Your balance: ₹<span id="walletBalance">0</span></p>
+</div>
+
 <script>
-  let currentUser = null;
-  let currentPeriod = 0;
-  let timeLeft = 0;
-
-  function loadUser(user) {
-    currentUser = user;
-    document.getElementById("userEmail").innerText = user.email;
-
-    db.ref("users/" + user.uid).once("value").then(snapshot => {
-      const data = snapshot.val();
-      document.getElementById("walletBalance").innerText = data.balance || 0;
-      document.getElementById("walletBalance2").innerText = data.balance || 0;
-      const referralCode = user.uid.slice(0, 6).toUpperCase();
-      document.getElementById("referralCode").innerText = referralCode;
+  function updateWallet() {
+    if (!currentUser) return;
+    db.ref("users/" + currentUser.uid + "/wallet").on("value", snapshot => {
+      document.getElementById("walletBalance").textContent = snapshot.val() || 0;
     });
   }
 
-  function addMoney() {
-    db.ref("users/" + currentUser.uid).once("value").then(snapshot => {
-      let balance = snapshot.val().balance || 0;
-      balance += 100;
-      db.ref("users/" + currentUser.uid).update({ balance });
-      document.getElementById("walletBalance").innerText = balance;
-      document.getElementById("walletBalance2").innerText = balance;
-    });
-  }
-
-  // Period Number and Countdown Timer
-  function updateTimerAndPeriod() {
-    const now = Date.now();
-    const roundMs = 60 * 1000; // 1 min per round
-    const startTime = new Date("2024-01-01T00:00:00Z").getTime();
-    const diff = now - startTime;
-    currentPeriod = Math.floor(diff / roundMs);
-    timeLeft = 60 - Math.floor((diff % roundMs) / 1000);
-    document.getElementById("periodNumber").innerText = currentPeriod;
-    document.getElementById("countdownTimer").innerText = timeLeft;
-  }
-
-  setInterval(() => {
-    updateTimerAndPeriod();
-    if (timeLeft === 5) {
-      generateResult();
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      currentUser = user;
+      updateWallet();
     }
-  }, 1000);
+  });
 </script>
+<!-- Lottery Game Section (Wingo) -->
+<div id="lotterySection" class="section">
+  <h2>Wingo Game</h2>
+  <p>Period No: <span id="periodNumber">-</span></p>
+  <p>Time Left: <span id="countdown">--</span> seconds</p>
+
+  <select id="betColor">
+    <option value="">Select Color</option>
+    <option value="red">🔴 Red</option>
+    <option value="green">🟢 Green</option>
+    <option value="blue">🔵 Blue</option>
+    <option value="violet">🟣 Violet</option>
+  </select><br/>
+
+  <input id="betAmount" placeholder="Enter amount" type="number" min="1" /><br/>
+  <button class="placeBetBtn" onclick="placeBet()">Place Bet</button>
+
+  <p id="betMessage"></p>
+</div>
+
 <script>
-  function placeBet(color) {
-    const amount = 10; // Fixed bet amount
+  // Shared Period & Timer Logic
+  let currentPeriod = 1001;
+  let timeLeft = 60;
+
+  function updatePeriodAndTimer() {
+    document.getElementById("periodNumber").textContent = currentPeriod;
+    document.getElementById("countdown").textContent = timeLeft;
+
+    const interval = setInterval(() => {
+      timeLeft--;
+      document.getElementById("countdown").textContent = timeLeft;
+
+      if (timeLeft <= 0) {
+        clearInterval(interval);
+        timeLeft = 60;
+        currentPeriod++;
+        generateResult();
+        updatePeriodAndTimer();
+      }
+    }, 1000);
+  }
+
+  updatePeriodAndTimer();
+
+  // Place Bet Logic
+  function placeBet() {
+    if (!currentUser) return alert("Please login");
+    const color = document.getElementById("betColor").value;
+    const amount = parseInt(document.getElementById("betAmount").value);
+    if (!color || isNaN(amount) || amount <= 0) return alert("Enter valid bet");
+
     const uid = currentUser.uid;
-    db.ref("users/" + uid).once("value").then(snapshot => {
-      const user = snapshot.val();
-      if (user.balance < amount) {
-        alert("Not enough balance");
+    const betRef = db.ref("bets/" + currentPeriod + "/" + uid);
+
+    // Check wallet balance
+    db.ref("users/" + uid + "/wallet").once("value", snapshot => {
+      const balance = snapshot.val() || 0;
+      if (balance < amount) {
+        alert("Insufficient balance");
         return;
       }
 
-      // Deduct balance
-      const newBalance = user.balance - amount;
-      db.ref("users/" + uid).update({ balance: newBalance });
-      document.getElementById("walletBalance").innerText = newBalance;
-      document.getElementById("walletBalance2").innerText = newBalance;
-
       // Save bet
-      const betRef = db.ref("bets/" + currentPeriod + "/" + uid);
-      betRef.set({ color, amount, status: "pending" });
+      betRef.set({
+        color: color,
+        amount: amount,
+        time: Date.now()
+      });
 
-      // Save in user history
-      const userBetRef = db.ref("users/" + uid + "/bets/" + currentPeriod);
-      userBetRef.set({ color, amount, status: "pending" });
+      // Deduct from wallet
+      db.ref("users/" + uid).update({
+        wallet: balance - amount
+      });
 
-      alert("Bet placed for " + color);
+      document.getElementById("betMessage").textContent = `Bet placed on ${color.toUpperCase()} for ₹${amount}`;
     });
   }
-
+</script>
+<script>
+  // Function to generate random color result
   function generateResult() {
-    const resultRef = db.ref("results/" + currentPeriod);
-    resultRef.once("value").then(snapshot => {
-      if (snapshot.exists()) return; // Already generated
+    const colors = ["red", "green", "blue", "violet"];
+    const resultColor = colors[Math.floor(Math.random() * colors.length)];
+    db.ref("results/" + currentPeriod).set({
+      color: resultColor,
+      time: Date.now()
+    });
 
-      const colors = ["red", "green", "violet"];
-      const resultColor = colors[Math.floor(Math.random() * 3)];
-      resultRef.set({ color: resultColor });
+    payWinners(resultColor);
+  }
 
-      // Fetch all bets for the period
-      db.ref("bets/" + currentPeriod).once("value").then(betsSnap => {
-        betsSnap.forEach(child => {
-          const uid = child.key;
-          const bet = child.val();
-          const win = bet.color === resultColor;
+  // Pay winning users
+  function payWinners(resultColor) {
+    const betRef = db.ref("bets/" + currentPeriod);
+    betRef.once("value", snapshot => {
+      if (!snapshot.exists()) return;
 
-          db.ref("users/" + uid).once("value").then(userSnap => {
-            const user = userSnap.val();
-            let balance = user.balance || 0;
-            if (win) balance += bet.amount * 2;
-
-            db.ref("users/" + uid).update({ balance });
-            db.ref("users/" + uid + "/bets/" + currentPeriod + "/status").set(win ? "win" : "lose");
+      snapshot.forEach(userBet => {
+        const uid = userBet.key;
+        const data = userBet.val();
+        if (data.color === resultColor) {
+          // Win: payout 2x
+          const winAmount = data.amount * 2;
+          const userWalletRef = db.ref("users/" + uid + "/wallet");
+          userWalletRef.once("value", snap => {
+            const currentBal = snap.val() || 0;
+            userWalletRef.set(currentBal + winAmount);
           });
-        });
+        }
       });
     });
   }
-          </script>
-          <!-- Bet History UI is already present in Part 2 -->
+</script>
+<!-- Bet History Section -->
+<div id="historySection" class="section">
+  <h2>Bet History</h2>
+  <div id="betHistoryList"></div>
+</div>
 
 <script>
   function loadBetHistory() {
-    db.ref("users/" + currentUser.uid + "/bets").limitToLast(10).once("value").then(snapshot => {
-      const body = document.getElementById("historyBody");
-      body.innerHTML = "";
-      snapshot.forEach(child => {
-        const period = child.key;
-        const bet = child.val();
-        const row = `<tr>
-          <td>${period}</td>
-          <td>${bet.color}</td>
-          <td>${bet.status}</td>
-        </tr>`;
-        body.innerHTML += row;
+    if (!currentUser) return;
+
+    const uid = currentUser.uid;
+    const betHistoryDiv = document.getElementById("betHistoryList");
+    betHistoryDiv.innerHTML = "Loading...";
+
+    db.ref("bets").once("value", snapshot => {
+      let html = "";
+
+      snapshot.forEach(periodSnap => {
+        const period = periodSnap.key;
+        const userBet = periodSnap.child(uid);
+        if (userBet.exists()) {
+          const data = userBet.val();
+          const color = data.color;
+          const amount = data.amount;
+
+          db.ref("results/" + period + "/color").once("value", snap => {
+            const resultColor = snap.val();
+            const won = resultColor === color;
+            const resultText = won ? "✅ Win" : "❌ Lose";
+
+            html += `
+              <div style="border:1px solid #ccc; padding:10px; margin:10px;">
+                <strong>Period:</strong> ${period}<br/>
+                <strong>Color:</strong> ${color}<br/>
+                <strong>Amount:</strong> ₹${amount}<br/>
+                <strong>Result:</strong> ${resultColor} ${resultText}
+              </div>
+            `;
+            betHistoryDiv.innerHTML = html;
+          });
+        }
       });
+
+      if (html === "") {
+        betHistoryDiv.innerHTML = "No bets placed yet.";
+      }
     });
   }
 
-  // Call this after auth
-  auth.onAuthStateChanged(user => {
-    if (user) {
-      loadBetHistory();
-    }
-  });
-</script>
+  // Load bet history every time the section is shown
+  function showSection(id) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('visible'));
+    document.getElementById(id).classList.add('visible');
 
+    if (id === "historySection") loadBetHistory();
+  }
+</script>
 <!-- Leaderboard Section -->
 <div id="leaderboardSection" class="section">
-  <h3>Leaderboard (Top Winners)</h3>
-  <ol id="leaderboardList"></ol>
+  <h2>🏆 Leaderboard - Top Earners</h2>
+  <div id="leaderboardList">Loading...</div>
 </div>
 
 <script>
   function loadLeaderboard() {
-    db.ref("users").once("value").then(snapshot => {
-      const scores = [];
-      snapshot.forEach(child => {
-        const user = child.val();
-        const total = Object.values(user.bets || {}).reduce((sum, b) => {
-          return sum + (b.status === "win" ? b.amount : 0);
-        }, 0);
-        scores.push({ email: user.email, win: total });
-      });
+    const listDiv = document.getElementById("leaderboardList");
+    listDiv.innerHTML = "Loading...";
 
-      scores.sort((a, b) => b.win - a.win);
-      const top = scores.slice(0, 10);
-      const list = document.getElementById("leaderboardList");
-      list.innerHTML = "";
-      top.forEach(item => {
-        list.innerHTML += `<li>${item.email}: ₹${item.win}</li>`;
+    db.ref("users")
+      .orderByChild("wallet")
+      .limitToLast(10)
+      .once("value", snapshot => {
+        const users = [];
+        snapshot.forEach(child => {
+          users.push({
+            name: child.val().name || "User",
+            wallet: child.val().wallet || 0
+          });
+        });
+
+        users.reverse(); // High to low
+        let html = "";
+        users.forEach((u, i) => {
+          html += `
+            <div style="border-bottom:1px solid #ddd;padding:5px;">
+              <strong>#${i + 1}</strong> ${u.name} — ₹${u.wallet}
+            </div>
+          `;
+        });
+
+        listDiv.innerHTML = html || "No data available.";
       });
-    });
   }
 
-  auth.onAuthStateChanged(user => {
-    if (user) loadLeaderboard();
-  });
-</script>
+  // Load leaderboard every time it's shown
+  function showSection(id) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('visible'));
+    document.getElementById(id).classList.add('visible');
 
-<!-- Admin Panel to override result manually -->
-<div id="adminPanel" class="section">
-  <h3>Admin Panel</h3>
-  <input id="adminPeriod" placeholder="Period No" />
-  <select id="adminColor">
-    <option value="red">Red</option>
-    <option value="green">Green</option>
-    <option value="violet">Violet</option>
-  </select>
-  <button onclick="overrideResult()">Set Result</button>
+    if (id === "leaderboardSection") loadLeaderboard();
+    else if (id === "historySection") loadBetHistory();
+  }
+</script>
+<!-- Admin Panel Section -->
+<div id="adminPanelSection" class="section">
+  <h2>🛠️ Admin Result Panel</h2>
+  <div>
+    <label>Set Result for Period: <strong id="adminPeriodDisplay">...</strong></label><br/>
+    <select id="manualResultColor">
+      <option value="red">Red</option>
+      <option value="green">Green</option>
+      <option value="blue">Blue</option>
+      <option value="violet">Violet</option>
+    </select>
+    <button onclick="submitManualResult()">Submit Manual Result</button>
+    <p id="adminStatus"></p>
+  </div>
 </div>
 
 <script>
-  function overrideResult() {
-    const p = document.getElementById("adminPeriod").value;
-    const c = document.getElementById("adminColor").value;
-    db.ref("results/" + p).set({ color: c });
-    alert("Result set for period " + p);
+  const adminUIDs = [
+    "ADMIN_UID_HERE",  // replace with your Firebase UID
+  ];
+
+  function isAdmin() {
+    return currentUser && adminUIDs.includes(currentUser.uid);
+  }
+
+  function showAdminPanel() {
+    if (isAdmin()) {
+      document.getElementById("adminPanelSection").style.display = "block";
+      document.getElementById("adminPeriodDisplay").textContent = currentPeriod;
+    } else {
+      alert("Access denied: Admins only.");
+    }
+  }
+
+  function submitManualResult() {
+    const color = document.getElementById("manualResultColor").value;
+    db.ref("results/" + currentPeriod).set({
+      color: color,
+      manual: true,
+      time: Date.now()
+    });
+    document.getElementById("adminStatus").textContent = "Result set manually to " + color;
+    payWinners(color);
   }
 </script>
-<!-- Optional Footer -->
-<footer style="position:fixed; bottom:0; width:100%; background:#eee; padding:10px;">
-  <p>&copy; 2025 Wingo Game. All rights reserved.</p>
+<!-- Footer -->
+<footer style="position: fixed; bottom: 0; width: 100%; background: #333; color: white; padding: 10px; text-align: center;">
+  © 2025 Win89 - All rights reserved.
 </footer>
 
-<!-- Close body and html -->
 </body>
 </html>
