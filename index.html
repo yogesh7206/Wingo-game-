@@ -1,460 +1,497 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Win89 Casino Demo — Full</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Win89 - Demo VIP Earnings (Demo)</title>
+  <meta name="description" content="Demo VIP earnings site (educational). Use your Firebase config before publishing." />
   <style>
-    :root{--bg:#071022;--card:#0f1724;--accent:#ff9800;--muted:#9aa4b2;color:#eaf2ff}
-    body{margin:0;font-family:Inter,system-ui,Arial;background:linear-gradient(180deg,#051226,#081428);color:var(--muted)}
-    header{background:rgba(255,255,255,0.02);padding:12px 18px;display:flex;justify-content:space-between;align-items:center}
-    .brand{display:flex;gap:12px;align-items:center}
-    .logo{width:44px;height:44px;border-radius:8px;background:linear-gradient(135deg,#ffb86b,#6ee7b7);display:flex;align-items:center;justify-content:center;font-weight:800;color:#042027}
-    nav{display:flex;gap:8px;align-items:center}
-    .btn{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px 12px;border-radius:8px;color:var(--muted);cursor:pointer}
-    .btn-primary{background:var(--accent);color:#041017;border:0}
-    main{max-width:1100px;margin:18px auto;padding:18px;display:grid;grid-template-columns:1fr 360px;gap:16px}
-    .card{background:var(--card);padding:14px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.6)}
-    .hidden{display:none}
-    input,select{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit;margin-top:8px}
-    .bets{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-    .bet-option{padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);cursor:pointer}
-    .bet-option.selected{outline:2px solid rgba(255,255,255,0.06);box-shadow:0 4px 12px rgba(0,0,0,0.4)}
-    .small{font-size:13px;color:var(--muted)}
-    footer{max-width:1100px;margin:8px auto;color:#8f9aa6;font-size:13px}
-    .list{max-height:260px;overflow:auto;margin-top:8px;display:flex;flex-direction:column;gap:8px}
-    @media(max-width:980px){main{grid-template-columns:1fr}}
+    /* Simple responsive CSS */
+    body{font-family:Arial,Helvetica,sans-serif;margin:0;background:#f3f6f8;color:#222}
+    .container{max-width:980px;margin:18px auto;padding:16px}
+    header{display:flex;align-items:center;justify-content:space-between;padding:12px 0}
+    header h1{margin:0;font-size:20px;color:#0b6}
+    .card{background:#fff;border-radius:8px;padding:12px;margin:12px 0;box-shadow:0 1px 6px rgba(0,0,0,.05)}
+    .grid{display:grid;grid-template-columns:1fr 320px;gap:12px}
+    @media(max-width:880px){.grid{grid-template-columns:1fr}}
+    .center{text-align:center}
+    button{padding:8px 12px;border-radius:6px;border:none;background:#0b6;color:#fff;cursor:pointer}
+    input,select{padding:8px;border-radius:6px;border:1px solid #ddd;width:100%}
+    .muted{color:#666;font-size:13px}
+    .small{font-size:13px}
+    .plan{display:flex;align-items:center;justify-content:space-between;padding:10px;border:1px solid #e6eee9;border-radius:8px;margin:8px 0}
+    .plan .left{max-width:70%}
+    .tx{font-size:13px;padding:8px;border-bottom:1px solid #f0f0f0}
+    .nav{display:flex;gap:6px}
+    .danger{background:#e53935}
+    .info{background:#1976d2}
   </style>
-</head>
-<body>
-  <header>
-    <div class="brand">
-      <div class="logo">W89</div>
-      <div>
-        <div style="font-weight:700;color:#e6f5ff">Win89 Demo — Full</div>
-        <div class="small">Play-money demo — no real payments</div>
-      </div>
-    </div>
 
-    <nav>
-      <button class="btn" onclick="showLeftSection('auth')">Auth</button>
-      <button class="btn" onclick="showLeftSection('lottery')">Lottery</button>
-      <button class="btn" onclick="showLeftSection('history')">History</button>
-      <button class="btn" onclick="showLeftSection('leaderboard')">Leaderboard</button>
-      <button id="btnSignOut" class="btn hidden" onclick="logout()">Logout</button>
-      <div id="userBadge" style="margin-left:12px;color:var(--muted)">Not signed in</div>
-    </nav>
-  </header>
-
-  <main>
-    <section class="card">
-      <!-- Top: Period & Timer -->
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div>
-          <div class="small">Period</div>
-          <div id="periodNumber" style="font-size:22px;font-weight:700">—</div>
-        </div>
-        <div style="text-align:center">
-          <div class="small">Time left</div>
-          <div id="countdown" style="font-size:28px;font-weight:800">--:--</div>
-          <div class="small" style="margin-top:6px">Last result: <span id="lastResult">—</span></div>
-        </div>
-        <div style="text-align:right">
-          <div class="small">Round duration (sec)</div>
-          <input id="roundDuration" value="30" style="width:86px"/>
-        </div>
-      </div>
-
-      <!-- Tabs -->
-      <div style="margin-top:12px;display:flex;gap:8px">
-        <button class="btn tab active" data-section="game" onclick="switchTab('game')">Game</button>
-        <button class="btn tab" data-section="history" onclick="switchTab('history')">My Bets</button>
-        <button class="btn tab" data-section="leaderboard" onclick="switchTab('leaderboard')">Leaderboard</button>
-        <button class="btn tab" data-section="admin" onclick="switchTab('admin')">Admin</button>
-      </div>
-
-      <!-- Sections -->
-      <div id="section-game" style="margin-top:12px">
-        <div style="display:flex;gap:12px;flex-wrap:wrap">
-          <!-- Left: Wingo + Parity -->
-          <div style="flex:1;min-width:260px">
-            <div class="card">
-              <div style="font-weight:700">Wingo — Color Prediction</div>
-              <div class="small">Pick a color. Payout: x4</div>
-              <div class="bets" id="wingoOptions" style="margin-top:10px">
-                <div class="bet-option" data-bet="red" data-mult="4">Red</div>
-                <div class="bet-option" data-bet="green" data-mult="4">Green</div>
-                <div class="bet-option" data-bet="blue" data-mult="4">Blue</div>
-                <div class="bet-option" data-bet="yellow" data-mult="4">Yellow</div>
-              </div>
-            </div>
-
-            <div class="card" style="margin-top:10px">
-              <div style="font-weight:700">Place Bet</div>
-              <div class="small">Selected: <span id="selectedText">—</span></div>
-              <input id="betAmount" value="10" />
-              <div style="display:flex;gap:8px;margin-top:8px">
-                <button id="placeBetBtn" class="btn-primary btn">Place Bet</button>
-                <button id="btnAutoRepeat" class="btn">Auto: Off</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Right: Parity + Controls -->
-          <div style="width:320px;min-width:240px">
-            <div class="card">
-              <div style="font-weight:700">Parity — Odd / Even</div>
-              <div class="small">Payout: x2</div>
-              <div class="bets" id="parityOptions" style="margin-top:10px">
-                <div class="bet-option" data-bet="odd" data-mult="2">Odd</div>
-                <div class="bet-option" data-bet="even" data-mult="2">Even</div>
-              </div>
-            </div>
-
-            <div class="card" style="margin-top:10px">
-              <div style="font-weight:700">Quick Controls</div>
-              <div style="display:flex;gap:8px;margin-top:8px">
-                <button id="btnDemoDeposit" class="btn">Deposit +1000 (demo)</button>
-                <button id="btnClearLocal" class="btn">Clear Local Bets</button>
-              </div>
-              <div style="margin-top:8px" class="small">Referral: <span id="refLink">—</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="section-history" class="hidden" style="margin-top:12px">
-        <div class="card">
-          <div style="font-weight:700">My Bet History</div>
-          <div id="betHistoryList" class="list"></div>
-        </div>
-      </div>
-
-      <div id="section-leaderboard" class="hidden" style="margin-top:12px">
-        <div class="card">
-          <div style="font-weight:700">Leaderboard</div>
-          <div id="leaderboardList" class="list"></div>
-        </div>
-      </div>
-
-      <div id="section-admin" class="hidden" style="margin-top:12px">
-        <div class="card">
-          <div style="font-weight:700">Admin (demo)</div>
-          <div class="small">Make admin with secret 'admin-secret' (demo only)</div>
-          <input id="adminCode" placeholder="admin-secret" />
-          <div style="display:flex;gap:8px;margin-top:8px">
-            <button id="btnMakeAdmin" class="btn">Make Admin</button>
-            <button id="btnNextRound" class="btn">Next Round Now</button>
-          </div>
-
-          <div style="margin-top:8px" class="small">Force result:</div>
-          <div style="display:flex;gap:8px;margin-top:8px">
-            <select id="forceType"><option value="color">Color</option><option value="number">Number</option></select>
-            <input id="forceValue" placeholder="e.g. red or 7" />
-            <button id="btnForce" class="btn">Force</button>
-          </div>
-        </div>
-      </div>
-
-    </section>
-
-    <!-- Right column: Wallet / Recent rounds / Auth -->
-    <aside>
-      <div class="card">
-        <div style="font-weight:700">Wallet & Account</div>
-        <div class="small" style="margin-top:8px">Balance: <span id="balanceSidebar">—</span></div>
-        <div style="margin-top:8px">
-          <div class="small">Withdraw (demo)</div>
-          <input id="withdrawAmount" placeholder="Amount" />
-          <div style="margin-top:8px"><button id="btnWithdraw" class="btn">Withdraw (demo)</button></div>
-        </div>
-      </div>
-
-      <div class="card" style="margin-top:12px">
-        <div style="font-weight:700">Recent rounds</div>
-        <div id="recentRounds" class="list"></div>
-      </div>
-
-      <div class="card" style="margin-top:12px">
-        <div style="font-weight:700">Authentication</div>
-        <div id="authArea" style="margin-top:8px">
-          <input id="authEmail" placeholder="Email" />
-          <input id="authPassword" type="password" placeholder="Password" style="margin-top:6px" />
-          <div style="display:flex;gap:6px;margin-top:8px">
-            <button id="btnSignUp" class="btn">Register</button>
-            <button id="btnSignIn" class="btn">Login</button>
-          </div>
-          <div style="margin-top:8px" class="small">Or use the top nav to focus auth</div>
-        </div>
-      </div>
-    </aside>
-  </main>
-
-  <footer class="small">Demo app — do not use for real-money gambling. Configure your Firebase Realtime DB rules for authenticated use.</footer>
-
-  <!-- Firebase v8 (compat) -->
+  <!-- FIREBASE SDK (v8 - non-modular) - works on GitHub Pages -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-  <script>
-  /********** FIREBASE CONFIG (your config already inserted) **********/
-  const firebaseConfig = {
-    apiKey: "AIzaSyBe5kGOwYS3FsF_9_q1pjxaWrF1glUe87c",
-    authDomain: "wingologin.firebaseapp.com",
-    databaseURL: "https://wingologin-default-rtdb.firebaseio.com",
-    projectId: "wingologin",
-    storageBucket: "wingologin.firebasestorage.app",
-    messagingSenderId: "605536859710",
-    appId: "1:605536859710:web:ed9495775c8f8dd6a8836f",
-    measurementId: "G-FLDY936H9P"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.database();
+  <!-- NOTE: replace the firebaseConfig below with your project's config -->
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Win89 — VIP Earnings (Demo)</h1>
+      <div class="nav">
+        <div id="userBox" class="muted small">Not signed in</div>
+      </div>
+    </header>
 
-  /********** App state **********/
-  const state = {
-    user: null,
-    balance: 0,
-    period: 1,
-    roundDuration: 30,
-    timeLeft: 30,
-    selectedBet: null,
-    autoRepeat: false
-  };
+    <div class="grid">
+      <main>
+        <!-- Auth -->
+        <div id="authCard" class="card">
+          <div id="authForms">
+            <h3>Sign In / Register</h3>
+            <div style="display:flex;gap:8px;">
+              <input id="email" placeholder="Email" />
+              <input id="password" type="password" placeholder="Password" />
+            </div>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button id="btnSignIn">Sign In</button>
+              <button id="btnRegister">Register</button>
+              <button id="btnSignOut" style="display:none;background:#888">Sign Out</button>
+            </div>
+            <div style="margin-top:8px">
+              <input id="refCode" placeholder="Referral code (optional)" />
+            </div>
+            <p class="muted small">Note: This is a demo. No real payments. Replace Firebase config to run.</p>
+          </div>
 
-  /********** Helper functions **********/
-  function fmtTime(sec){
-    if(sec < 0) sec = 0;
-    const s = Math.floor(sec % 60).toString().padStart(2,'0');
-    const m = Math.floor(sec / 60).toString().padStart(2,'0');
-    return `${m}:${s}`;
-  }
+          <div id="accountPanel" style="display:none">
+            <h3>Your Account</h3>
+            <p><b>Wallet:</b> ₹<span id="walletBalance">0</span></p>
+            <p><b>Referral code:</b> <span id="myRefCode">-</span></p>
+            <p class="muted small">Invite friends with your referral code to earn referral bonuses.</p>
 
-  function switchTab(section){
-    document.getElementById('section-game').classList.toggle('hidden', section !== 'game');
-    document.getElementById('section-history').classList.toggle('hidden', section !== 'history');
-    document.getElementById('section-leaderboard').classList.toggle('hidden', section !== 'leaderboard');
-    document.getElementById('section-admin').classList.toggle('hidden', section !== 'admin');
-  }
+            <h4>VIP Plans</h4>
+            <div id="plansContainer"></div>
 
-  function showLeftSection(id){
-    // focus left UI sections (auth/lottery/history/leaderboard)
-    // we only have visual areas inside left column so just scroll
-    if(id === 'auth') document.getElementById('authEmail').focus();
-    if(id === 'lottery') switchTab('game');
-    if(id === 'history') switchTab('history');
-    if(id === 'leaderboard') switchTab('leaderboard');
-  }
+            <h4>Transactions</h4>
+            <div id="txList" style="max-height:220px;overflow:auto;border:1px solid #f0f0f0;border-radius:6px"></div>
 
-  /********** Auth: Register / Login / Logout **********/
-  document.getElementById('btnSignUp').addEventListener('click', async ()=>{
-    const email = document.getElementById('authEmail').value.trim();
-    const pw = document.getElementById('authPassword').value;
-    if(!email || !pw){ alert('Enter email and password'); return; }
-    try {
-      const cred = await auth.createUserWithEmailAndPassword(email, pw);
+            <h4>Withdraw</h4>
+            <input id="withdrawAmount" placeholder="Amount to withdraw" />
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button id="btnRequestWithdraw">Request Withdrawal</button>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <aside>
+        <div class="card">
+          <h3>Admin Panel</h3>
+          <p class="muted small">Admin actions (only works if signed in as adminEmail).</p>
+          <p><b>Current admin email:</b> <span id="adminEmailDisplay"></span></p>
+
+          <div id="adminControls" style="display:none">
+            <h4>Add / Edit VIP Plan</h4>
+            <input id="planName" placeholder="Name e.g., VIP1" />
+            <input id="planPrice" placeholder="Price (₹)" />
+            <input id="planDaily" placeholder="Daily earning (₹)" />
+            <input id="planDays" placeholder="Duration (days)" />
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button id="btnSavePlan">Save Plan</button>
+              <button id="btnReloadPlans" class="info">Reload Plans</button>
+            </div>
+
+            <h4 style="margin-top:12px">Run Daily Payouts</h4>
+            <p class="muted small">This credits daily earnings to eligible users.</p>
+            <div style="display:flex;gap:8px">
+              <button id="btnRunDaily" class="danger">Run Daily Payouts (Admin)</button>
+            </div>
+
+            <h4 style="margin-top:12px">Pending Withdrawals</h4>
+            <div id="withdrawRequests" style="max-height:200px;overflow:auto;border:1px solid #f0f0f0;border-radius:6px;margin-top:6px"></div>
+          </div>
+
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h4>How demo payouts work</h4>
+          <ol class="muted small">
+            <li>When a user buys a plan, we store start date & duration.</li>
+            <li>On each site open (or when admin runs payouts), missing daily credits are added to wallet.</li>
+            <li>Withdrawals are requests that admin approves (mocked).</li>
+          </ol>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+<script>
+/*
+  === IMPORTANT ===
+  1) Replace firebaseConfig below with your project's config (from Firebase Console).
+  2) Change adminEmail variable to your admin address.
+  3) This is a demo. Do NOT use for real money without legal compliance.
+*/
+
+// ---------- FIREBASE CONFIG (REPLACE this with your config) ----------
+var firebaseConfig = {
+  apiKey: "PASTE_API_KEY",
+  authDomain: "PASTE_PROJECT.firebaseapp.com",
+  databaseURL: "https://PASTE_PROJECT.firebaseio.com",
+  projectId: "PASTE_PROJECT",
+  storageBucket: "PASTE_PROJECT.appspot.com",
+  messagingSenderId: "XXXX",
+  appId: "1:XXXX:web:XXXX"
+};
+// ---------------------------------------------------------------------
+firebase.initializeApp(firebaseConfig);
+
+// Admin email you will use to access admin panel (change to your email)
+const adminEmail = "admin@example.com";
+document.getElementById('adminEmailDisplay').innerText = adminEmail;
+
+// Realtime DB refs
+const db = firebase.database();
+const auth = firebase.auth();
+
+const plansRef = db.ref('plans');
+const usersRef = db.ref('users');
+const txRef = db.ref('transactions');
+const withdrawRef = db.ref('withdrawals');
+
+// Sample plans - if DB empty we will seed them
+const defaultPlans = [
+  { id: 'vip1', name: 'VIP1', price: 290, daily: 234.9, days: 47 },
+  { id: 'vip2', name: 'VIP2', price: 3990, daily: 3313.7, days: 47 },
+  { id: 'vip3', name: 'VIP3', price: 9990, daily: 830, days: 47 } // sample numbers
+];
+
+// ---------- UI elements ----------
+const emailInput = document.getElementById('email');
+const passwordInput = document.getElementById('password');
+const btnSignIn = document.getElementById('btnSignIn');
+const btnRegister = document.getElementById('btnRegister');
+const btnSignOut = document.getElementById('btnSignOut');
+const userBox = document.getElementById('userBox');
+const accountPanel = document.getElementById('accountPanel');
+const authForms = document.getElementById('authForms');
+const walletBalanceSpan = document.getElementById('walletBalance');
+const myRefCodeSpan = document.getElementById('myRefCode');
+const plansContainer = document.getElementById('plansContainer');
+const txList = document.getElementById('txList');
+
+const btnRequestWithdraw = document.getElementById('btnRequestWithdraw');
+const withdrawAmountInput = document.getElementById('withdrawAmount');
+const refCodeInput = document.getElementById('refCode');
+
+const adminControls = document.getElementById('adminControls');
+const planName = document.getElementById('planName');
+const planPrice = document.getElementById('planPrice');
+const planDaily = document.getElementById('planDaily');
+const planDays = document.getElementById('planDays');
+const btnSavePlan = document.getElementById('btnSavePlan');
+const btnReloadPlans = document.getElementById('btnReloadPlans');
+const btnRunDaily = document.getElementById('btnRunDaily');
+const withdrawRequests = document.getElementById('withdrawRequests');
+const adminEmailDisplay = document.getElementById('adminEmailDisplay');
+
+// ---------- Auth handlers ----------
+btnSignIn.addEventListener('click', ()=> {
+  const e=emailInput.value.trim(), p=passwordInput.value;
+  if(!e||!p){alert('Email & password required');return;}
+  auth.signInWithEmailAndPassword(e,p).catch(err=>alert(err.message));
+});
+
+btnRegister.addEventListener('click', ()=> {
+  const e=emailInput.value.trim(), p=passwordInput.value;
+  const ref = refCodeInput.value.trim() || null;
+  if(!e||!p){alert('Email & password required');return;}
+  auth.createUserWithEmailAndPassword(e,p)
+    .then(cred=>{
+      // create user record in DB
       const uid = cred.user.uid;
-      const defaultBal = 1000;
-      await db.ref('users/' + uid).set({ email, balance: defaultBal, createdAt: Date.now() });
-      // referral credit if any
-      const ref = localStorage.getItem('wingo_ref');
+      const myRef = makeRefCode();
+      usersRef.child(uid).set({
+        email:e,
+        wallet:0,
+        refCode: myRef,
+        referredBy: ref,
+        createdAt: Date.now(),
+        activePlans: {}, // store purchased plans
+        lastPayout: Date.now()
+      });
+      // give referral bonus if referred
       if(ref){
-        const bonus = 50;
-        const refSnap = await db.ref('users/' + ref).once('value');
-        if(refSnap.exists()){
-          const prev = Number(refSnap.val().balance || 0);
-          await db.ref('users/' + ref + '/balance').set(prev + bonus);
-          await db.ref('referrals/' + uid).set({ refBy: ref, at: Date.now() });
-        }
-        const thisSnap = await db.ref('users/' + uid + '/balance').once('value');
-        const cur = Number(thisSnap.val() || 0);
-        await db.ref('users/' + uid + '/balance').set(cur + bonus);
-        localStorage.removeItem('wingo_ref');
+        // find user by refCode
+        usersRef.orderByChild('refCode').equalTo(ref).once('value', snap=>{
+          if(snap.exists()){
+            snap.forEach(ss=>{
+              const refUid = ss.key;
+              // credit small referral bonus (demo: ₹20)
+              const bonus = 20;
+              usersRef.child(refUid).transaction(u=>{
+                if(u){
+                  u.wallet = (u.wallet||0) + bonus;
+                }
+                return u;
+              });
+              txRef.push({ uid: refUid, type:'referral_bonus', amount:bonus, time:Date.now(), from:uid });
+            });
+          }
+        });
       }
-      alert('Registered — demo balance added (1000). You can now login.');
-      document.getElementById('authEmail').value = '';
-      document.getElementById('authPassword').value = '';
-    } catch (err){
-      console.error('SignUp error', err);
-      alert(err.message || 'Register error');
-    }
-  });
+    })
+    .catch(err=>alert(err.message));
+});
 
-  document.getElementById('btnSignIn').addEventListener('click', async ()=>{
-    const email = document.getElementById('authEmail').value.trim();
-    const pw = document.getElementById('authPassword').value;
-    if(!email || !pw){ alert('Enter email and password'); return; }
-    try {
-      await auth.signInWithEmailAndPassword(email, pw);
-    } catch (err){
-      console.error('SignIn error', err);
-      alert(err.message || 'Login error');
-    }
-  });
+btnSignOut.addEventListener('click', ()=> {
+  auth.signOut();
+});
 
-  function logout(){ auth.signOut().catch(e=>console.error(e)); }
+// ---------- Utility ----------
+function makeRefCode(){
+  return 'R' + Math.random().toString(36).substring(2,9).toUpperCase();
+}
+function formatRs(x){ return (Math.round(x*100)/100).toFixed(2); }
 
-  // Single auth state listener (reliable)
-  auth.onAuthStateChanged(async (user) => {
-    state.user = user;
-    if(user){
-      document.getElementById('userBadge').textContent = user.email || user.uid;
-      document.getElementById('btnSignOut').classList.remove('hidden');
-      // ensure user record exists (safeguard)
-      const snap = await db.ref('users/' + user.uid).once('value');
+// ---------- On auth state change ----------
+let currentUser = null;
+auth.onAuthStateChanged(user => {
+  if(user){
+    currentUser = user;
+    userBox.innerText = user.email;
+    btnSignOut.style.display = 'inline-block';
+    authForms.style.display = 'none';
+    accountPanel.style.display = 'block';
+
+    // load user data
+    usersRef.child(user.uid).once('value', snap => {
       if(!snap.exists()){
-        await db.ref('users/' + user.uid).set({ email: user.email || null, balance: 1000, createdAt: Date.now() });
+        // ensure user record exists (in case created via console)
+        usersRef.child(user.uid).set({ email: user.email, wallet:0, refCode: makeRefCode(), createdAt: Date.now(), activePlans:{}, lastPayout: Date.now()});
       }
-      await refreshBalance();
-      document.getElementById('refLink').textContent = `${location.origin + location.pathname}?ref=${user.uid}`;
+      refreshUserUI();
+    });
+
+    // show admin controls if current user is adminEmail
+    if(user.email === adminEmail){
+      adminControls.style.display = 'block';
     } else {
-      document.getElementById('userBadge').textContent = 'Not signed in';
-      document.getElementById('btnSignOut').classList.add('hidden');
-      document.getElementById('balanceSidebar').textContent = '—';
-      document.getElementById('refLink').textContent = '—';
-      refreshBetHistoryUI();
+      adminControls.style.display = 'none';
     }
-  });
 
-  /********** Wallet controls (demo) **********/
-  document.getElementById('btnDemoDeposit').addEventListener('click', async ()=>{
-    if(!state.user){ alert('Please login'); return; }
-    const uid = state.user.uid;
-    const delta = 1000;
-    const snap = await db.ref('users/' + uid + '/balance').once('value');
-    const cur = Number(snap.val() || 0);
-    await db.ref('users/' + uid + '/balance').set(cur + delta);
-    await refreshBalance();
-    alert('Demo +1000 added');
-  });
-
-  document.getElementById('btnWithdraw').addEventListener('click', async ()=>{
-    if(!state.user){ alert('Please login'); return; }
-    const amt = Number(document.getElementById('withdrawAmount').value);
-    if(!amt || amt <= 0) { alert('Enter valid amount'); return; }
-    const uid = state.user.uid;
-    const snap = await db.ref('users/' + uid + '/balance').once('value');
-    const cur = Number(snap.val() || 0);
-    if(cur < amt){ alert('Insufficient'); return; }
-    await db.ref('users/' + uid + '/balance').set(cur - amt);
-    await refreshBalance();
-    alert('Demo withdraw recorded (no real transfer).');
-  });
-
-  async function refreshBalance(){
-    if(!state.user) return;
-    const snap = await db.ref('users/' + state.user.uid + '/balance').once('value');
-    const bal = Number(snap.val() || 0);
-    state.balance = bal;
-    document.getElementById('balanceSidebar').textContent = bal;
+    // run automatic payouts for this user (on-open)
+    runAutoPayoutForUser(user.uid);
+    loadWithdrawRequests(); // admin list
+  } else {
+    currentUser = null;
+    userBox.innerText = 'Not signed in';
+    btnSignOut.style.display = 'none';
+    authForms.style.display = 'block';
+    accountPanel.style.display = 'none';
+    adminControls.style.display = 'none';
   }
+  document.getElementById('adminEmailDisplay').innerText = adminEmail;
+  loadPlansToUI();
+});
 
-  /********** Betting UI selection **********/
-  function clearSelection(){
-    document.querySelectorAll('.bet-option').forEach(el => el.classList.remove('selected'));
-    state.selectedBet = null;
-    document.getElementById('selectedText').textContent = '—';
+// ---------- Seed default plans if none exist ----------
+plansRef.once('value', snap=>{
+  if(!snap.exists()){
+    defaultPlans.forEach(p=>{
+      plansRef.child(p.id).set(p);
+    });
   }
+  loadPlansToUI();
+});
 
-  document.querySelectorAll('.bet-option').forEach(el=>{
-    el.addEventListener('click', ()=>{
-      const was = el.classList.contains('selected');
-      clearSelection();
-      if(!was){
-        el.classList.add('selected');
-        const bet = el.getAttribute('data-bet');
-        const mult = Number(el.getAttribute('data-mult') || 2);
-        const type = (bet === 'odd' || bet === 'even') ? 'parity' : 'wingo';
-        state.selectedBet = { type, value: bet, mult };
-        document.getElementById('selectedText').textContent = `${type} → ${bet} (x${mult})`;
-      }
+// ---------- Load Plans UI ----------
+function loadPlansToUI(){
+  plansRef.once('value', snap=>{
+    plansContainer.innerHTML = '';
+    if(!snap.exists()) return;
+    snap.forEach(child=>{
+      const p = child.val(); p.id = child.key;
+      const div = document.createElement('div'); div.className='plan';
+      div.innerHTML = `
+        <div class="left">
+          <b>${p.name}</b> <div class="muted small">₹${formatRs(p.price)} — ${p.days} days</div>
+          <div class="muted small">Daily earning: ₹${formatRs(p.daily)}</div>
+        </div>
+        <div class="right">
+          <button data-plan='${p.id}' class="buyBtn">Buy</button>
+        </div>
+      `;
+      plansContainer.appendChild(div);
+    });
+
+    // attach buy handlers
+    Array.from(document.getElementsByClassName('buyBtn')).forEach(btn=>{
+      btn.addEventListener('click', e=>{
+        if(!currentUser){ alert('Sign in first'); return; }
+        const planId = btn.getAttribute('data-plan');
+        buyPlan(planId);
+      });
     });
   });
+}
 
-  document.getElementById('btnAutoRepeat').addEventListener('click', ()=>{
-    state.autoRepeat = !state.autoRepeat;
-    document.getElementById('btnAutoRepeat').textContent = state.autoRepeat ? 'Auto: On' : 'Auto: Off';
+// ---------- Buy Plan (Demo flow) ----------
+function buyPlan(planId){
+  // In demo we instantly 'pay' by deducting price from user's wallet (or allow negative for demo)
+  usersRef.child(currentUser.uid).once('value', snap=>{
+    const u = snap.val();
+    plansRef.child(planId).once('value', psnap=>{
+      if(!psnap.exists()) return alert('Plan not found');
+      const plan = psnap.val();
+      // For demo: require enough balance OR let user "deposit" using a fake deposit
+      const proceed = confirm(`Buy ${plan.name} for ₹${plan.price}? (Demo: will deduct from wallet)`);
+      if(!proceed) return;
+      // Deduct price and add active plan with startDate
+      usersRef.child(currentUser.uid).transaction(user=>{
+        if(user){
+          user.wallet = (user.wallet||0) - plan.price;
+          if(!user.activePlans) user.activePlans = {};
+          const key = planId + '_' + Date.now();
+          user.activePlans[key] = { planId: planId, name: plan.name, price: plan.price, daily: plan.daily, days: plan.days, start: Date.now(), creditedDays:0 };
+        }
+        return user;
+      }, (err,snap2)=> {
+        if(err) return alert('Error purchasing plan');
+        txRef.push({ uid: currentUser.uid, type:'buy', planId:planId, amount: plan.price, time:Date.now() });
+        alert('Plan purchased (demo).');
+        refreshUserUI();
+      });
+    });
   });
+}
 
-  /********** Place Bet **********/
-  document.getElementById('placeBetBtn').addEventListener('click', async ()=>{
-    if(!state.user){ alert('Please login to place bets'); return; }
-    if(!state.selectedBet){ alert('Select bet option'); return; }
-    const amt = Number(document.getElementById('betAmount').value);
-    if(!amt || amt <= 0){ alert('Enter valid amount'); return; }
+// ---------- Refresh user UI ----------
+function refreshUserUI(){
+  if(!currentUser) return;
+  usersRef.child(currentUser.uid).on('value', snap=>{
+    const u = snap.val();
+    walletBalanceSpan.innerText = formatRs(u.wallet || 0);
+    myRefCodeSpan.innerText = u.refCode || '-';
+    // transactions
+    txRef.orderByChild('uid').equalTo(currentUser.uid).limitToLast(50).once('value', tsnap=>{
+      txList.innerHTML = '';
+      if(tsnap.exists()){
+        const arr = [];
+        tsnap.forEach(t=>{
+          arr.push(t.val());
+        });
+        arr.reverse();
+        arr.forEach(t=>{
+          const el = document.createElement('div');
+          el.className = 'tx';
+          el.innerHTML = `<div><b>${t.type}</b> <span class="muted small">₹${formatRs(t.amount||0)}</span></div>
+                          <div class="muted small">${new Date((t.time||0)).toLocaleString()}</div>`;
+          txList.appendChild(el);
+        });
+      } else {
+        txList.innerHTML = '<div class="muted small">No transactions yet.</div>';
+      }
+    });
 
-    // check and debit (hold)
-    const uid = state.user.uid;
-    const userSnap = await db.ref('users/' + uid).once('value');
-    const curBal = Number((userSnap.val() && userSnap.val().balance) || 0);
-    if(curBal < amt){ alert('Insufficient balance'); return; }
-    await db.ref('users/' + uid + '/balance').set(curBal - amt);
-    await refreshBalance();
-
-    // write bet to DB under current period
-    const period = state.period;
-    const betData = {
-      uid,
-      email: state.user.email || null,
-      type: state.selectedBet.type,
-      value: state.selectedBet.value,
-      amount: amt,
-      mult: state.selectedBet.mult,
-      period,
-      status: 'pending',
-      createdAt: Date.now()
-    };
-    const newRef = db.ref('bets/' + period).push();
-    await newRef.set(betData);
-
-    // local feedback
-    alert('Bet placed for period ' + period);
-    if(state.autoRepeat){
-      // store last bet in localStorage for auto repeat (simple)
-      localStorage.setItem('wingo_lastbet', JSON.stringify(betData));
+    // update active plans list inside account panel (simple)
+    const activeHtml = document.createElement('div');
+    activeHtml.innerHTML = '<h4>Active Plans</h4>';
+    const ap = u.activePlans || {};
+    let any=false;
+    for(const k in ap){
+      any=true;
+      const p = ap[k];
+      const daysPassed = Math.floor((Date.now() - p.start) / (1000*60*60*24));
+      const remaining = Math.max(0, p.days - daysPassed);
+      const div = document.createElement('div');
+      div.className = 'muted small';
+      div.innerHTML = `<b>${p.name}</b> — started ${new Date(p.start).toLocaleDateString()} — remaining days: ${remaining}`;
+      activeHtml.appendChild(div);
     }
-    clearSelection();
-    refreshBetHistoryUI();
-  });
-
-  /********** Timer & Round logic **********/
-  function startRound(){
-    const dur = Number(document.getElementById('roundDuration').value) || 30;
-    state.roundDuration = dur;
-    state.timeLeft = dur;
-    document.getElementById('periodNumber').textContent = state.period;
-    document.getElementById('countdown').textContent = fmtTime(state.timeLeft);
-  }
-
-  let tickInterval = null;
-  function tick(){
-    state.timeLeft -= 1;
-    document.getElementById('countdown').textContent = fmtTime(state.timeLeft);
-    if(state.timeLeft <= 0){
-      resolveRound(state.period).catch(e => console.error(e));
-      state.period += 1;
-      startRound();
+    if(!any) {
+      const div = document.createElement('div'); div.className='muted small'; div.innerText='No active plans';
+      activeHtml.appendChild(div);
     }
-  }
-
-  // start ticking
-  startRound();
-  if(tickInterval) clearInterval(tickInterval);
-  tickInterval = setInterval(tick, 1000);
-
-  document.getElementById('roundDuration').addEventListener('change', ()=>{
-    const newDur = Number(document.getElementById('roundDuration').value) || 30;
-    state.roundDuration = newDur;
-    state.timeLeft = newDur;
+    // inject below plans container
+    if(document.getElementById('activePlansView')) document.getElementById('activePlansView').remove();
+    activeHtml.id = 'activePlansView';
+    plansContainer.parentNode.insertBefore(activeHtml, plansContainer.nextSibling);
   });
+}
 
-  document.getElementById('btnNextRound').addEventListener('click', ()=> {
-    state.timeLeft = 0; // will trigger resolve on next tick
+// ---------- Withdraw request (demo) ----------
+btnRequestWithdraw.addEventListener('click', ()=>{
+  if(!currentUser) return alert('Sign in');
+  const amt = parseFloat(withdrawAmountInput.value);
+  if(!amt || amt<=0) return alert('Enter valid amount');
+  // create withdraw request record
+  withdrawRef.push({ uid: currentUser.uid, amount: amt, time: Date.now(), status:'pending' });
+  alert('Withdrawal requested (demo). Admin must approve.');
+  withdrawAmountInput.value = '';
+});
+
+// ---------- Admin: load withdraw requests ----------
+function loadWithdrawRequests(){
+  withdrawRef.orderByChild('status').equalTo('pending').on('value', snap=>{
+    withdrawRequests.innerHTML = '';
+    if(!snap.exists()) return withdrawRequests.innerHTML = '<div class="muted small">No pending withdrawals</div>';
+    snap.forEach(child=>{
+      const r = child.val(); r.key = child.key;
+      const div = document.createElement('div'); div.className = 'tx';
+      div.innerHTML = `<div><b>UID:</b> ${r.uid} — ₹${formatRs(r.amount)}</div>
+                       <div class="muted small">${new Date(r.time).toLocaleString()}</div>
+                       <div style="margin-top:6px"><button data-key="${r.key}" class="approveBtn">Approve</button></div>`;
+      withdrawRequests.appendChild(div);
+    });
+    Array.from(document.getElementsByClassName('approveBtn')).forEach(btn=>{
+      btn.addEventListener('click', e=>{
+        const key = btn.getAttribute('data-key');
+        approveWithdraw(key);
+      });
+    });
   });
+}
 
-  /********** Result generation & settlement **********/
-  function generateResult(){
-    const number = Math.floor(Math.random()*10);
-    const colors = ['red','green','blue','ye
+// Admin approve withdrawal (demo): mark as paid and decrease wallet if needed
+function approveWithdraw(key){
+  if(!currentUser || currentUser.email !== adminEmail) return alert('Admin only');
+  withdrawRef.child(key).once('value', snap=>{
+    if(!snap.exists()) return alert('Not found');
+    const r = snap.val();
+    // subtract from user's wallet (demo)
+    usersRef.child(r.uid).transaction(u=>{
+      if(u){
+        u.wallet = (u.wallet||0) - r.amount;
+      }
+      return u;
+    }, (err, ss)=>{
+      if(err) return alert('Error processing');
+      withdrawRef.child(key).update({ status:'paid', paidAt: Date.now(), processedBy: currentUser.uid });
+      txRef.push({ uid: r.uid, type:'withdrawal', amount: -r.amount, time: Date.now() });
+      alert('Withdrawal approved (demo). Marked paid.');
+    });
+  });
+}
+
+// ---------- Admin: Save Plan ----------
+btnSavePlan.addEventListener('click', ()=>{
+  if(!currentUser || currentUser.email !== adminEmail) return alert('Admin only');
+  const name = planName.value.trim(), price = parseFloat(planPrice.value), daily = parseFloat(planDaily.value), days = parseInt(planDays.value);
+  if(!name || !price || !daily || !days) return alert('Fill plan fields');
+  const id = name.toLowerCase().replace(/\s+/g,'_') + '_' + Date.now();
+  plansRef.child(id).set({ id:id, name:name, price:price, daily:daily, days:days }, ()=> {
+    alert('Plan saved');
+    planName.value=''; planPrice.value=''; planDaily.value=''; planDays.value='';
+    loadPlansToUI();
+  });
+});
+
+btnReloadPlans.addEventListener('click', ()=> loadPlansToUI());
+
+// ---------- Payout logic (credits missed days) ----------
+/*
+ For each active plan in user.activePlans:
+   count daysPassed = floor((now - start) / 1day)
+   eligibleDays = min
