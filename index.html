@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Win89 Demo — Mobile</title>
+  <title>Win89 — Demo (Account with hidden detail-forms)</title>
   <style>
-    :root{--accent:#0b8;--muted:#777}
-    body{font-family:Arial,Helvetica,sans-serif;margin:0;background:#f6f7f9;color:#222;padding-bottom:72px}
+    :root{--accent:#0bb;--muted:#777}
+    body{font-family:Arial,Helvetica,sans-serif;margin:0;background:#f6f7f9;color:#222;padding-bottom:78px}
     .app{max-width:980px;margin:0 auto;padding:12px}
     .card{background:#fff;border-radius:10px;padding:12px;margin:10px 0;box-shadow:0 1px 6px rgba(0,0,0,.06)}
-    h3{margin:6px 0}
+    h2,h3{margin:6px 0}
     input,textarea,select,button{font-family:inherit}
     input,textarea,select{width:100%;padding:10px;margin:6px 0;border-radius:8px;border:1px solid #e0e0e0}
     button{padding:10px;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer}
@@ -29,7 +29,11 @@
     .small-muted{font-size:12px;color:#888}
     .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
     .chip{display:inline-block;padding:6px 8px;border-radius:999px;background:#f1f1f1;font-size:12px}
+    .list-row{display:flex;justify-content:space-between;align-items:center;padding:10px;border-bottom:1px solid #f2f2f2}
+    .list-row:last-child{border-bottom:none}
+    .link-like{background:none;border:none;color:#333;text-align:left;padding:0;font-size:16px;cursor:pointer;width:100%}
   </style>
+
   <!-- Firebase v8 (non-modular) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -38,68 +42,60 @@
 <body>
   <div class="app">
     <header>
-      <h2 style="margin:8px 0;color:var(--accent)">Win89 — Demo</h2>
+      <h2 style="color:var(--accent)">Win89 — Demo</h2>
+      <p class="muted small">Demo app — forms are shown only after clicking the appropriate button.</p>
     </header>
 
-    <!-- MAIN AREAS: Home, Invest, Blog, Notice, Account -->
+    <!-- Main pages (switch by bottom nav) -->
     <main>
       <!-- HOME -->
-      <section id="homeSection" class="card section">
+      <section id="homeSection" class="section card">
         <h3>Home</h3>
-        <p class="muted">Welcome to the demo Home screen. Use the bottom navigation to move between sections.</p>
         <div class="card">
-          <b>Featured</b>
-          <div class="muted small">Demo VIP plans and quick actions available under Invest & Account.</div>
+          <p class="muted small">From here you can navigate to Account to manage wallet, cards, products, support, etc.</p>
         </div>
       </section>
 
       <!-- INVEST -->
-      <section id="investSection" class="card section hidden">
+      <section id="investSection" class="section card hidden">
         <h3>Invest</h3>
-        <p class="muted">Buy VIP plans to earn daily payouts (demo logic).</p>
-        <div id="plansList" class="card"></div>
-        <div class="card">
-          <b>Quick Admin</b>
-          <div class="muted small">If you're admin, open Admin Panel on Account section.</div>
-        </div>
+        <div id="plansList" class="card muted small">Loading plans...</div>
       </section>
 
       <!-- BLOG -->
-      <section id="blogSection" class="card section hidden">
+      <section id="blogSection" class="section card hidden">
         <h3>Blog</h3>
-        <p class="muted">This is a placeholder blog area. Add articles in DB or static content here.</p>
-        <div class="card">
-          <b>Latest</b>
-          <div class="muted small">No articles yet (demo)</div>
-        </div>
+        <div class="card muted small">No posts (demo).</div>
       </section>
 
       <!-- NOTICE -->
-      <section id="noticeSection" class="card section hidden">
+      <section id="noticeSection" class="section card hidden">
         <h3>Notice</h3>
-        <p class="muted">Announcements & notices will appear here.</p>
-        <div id="noticeList" class="card muted small">No notices (demo)</div>
+        <div class="card muted small">No notices (demo).</div>
       </section>
 
       <!-- ACCOUNT -->
-      <section id="accountSection" class="card section hidden">
+      <section id="accountSection" class="section card hidden">
         <h3>Account</h3>
 
-        <!-- Auth -->
-        <div id="authArea">
-          <div id="signedOutUI">
-            <input id="email" placeholder="Email" />
-            <input id="password" type="password" placeholder="Password" />
-            <div class="row">
-              <button id="btnRegister">Register</button>
-              <button id="btnSignIn" class="btn-ghost">Sign In</button>
-            </div>
-            <input id="refInput" placeholder="Referral code (optional)" />
-            <p class="muted small">Have account? Sign in. New users get demo referral bonus if referred.</p>
+        <!-- signed out UI -->
+        <div id="signedOutUI">
+          <input id="email" placeholder="Email" />
+          <input id="password" type="password" placeholder="Password" />
+          <div class="row">
+            <button id="btnRegister">Register</button>
+            <button id="btnSignIn" class="btn-ghost">Sign In</button>
           </div>
+          <input id="refInput" placeholder="Referral code (optional)" />
+          <p class="muted small">New users can use referral code (demo bonus awarded).</p>
+        </div>
 
-          <div id="signedInUI" class="hidden">
-            <p><b id="userEmail">user@example.com</b></p>
+        <!-- signed in UI -->
+        <div id="signedInUI" class="hidden">
+          <p><b id="userEmail">user@example.com</b></p>
+
+          <!-- Wallet + quick actions -->
+          <div class="card">
             <div class="grid-2">
               <div>
                 <p class="small-muted">Wallet Balance</p>
@@ -114,129 +110,148 @@
               </div>
             </div>
 
-            <!-- Wallet actions -->
-            <div style="margin-top:10px" class="row">
-              <button id="btnAddFunds">Add Funds (Demo)</button>
-              <button id="btnWithdrawUI" class="btn-ghost">Request Withdraw</button>
-            </div>
-
-            <!-- Add funds modal (simple) -->
-            <div id="addFundsDiv" class="hidden card">
-              <h4>Add Funds (Demo)</h4>
-              <input id="addAmount" placeholder="Amount (₹)" />
-              <div class="row">
-                <button id="btnAddFundsConfirm">Confirm Add</button>
-                <button id="btnAddFundsCancel" class="btn-ghost">Cancel</button>
-              </div>
-            </div>
-
-            <!-- Withdraw UI -->
-            <div id="withdrawDiv" class="hidden card">
-              <h4>Request Withdrawal</h4>
-              <input id="withdrawAmount" placeholder="Amount (₹)" />
-              <input id="withdrawNote" placeholder="UPI / Bank note (for demo)" />
-              <div class="row">
-                <button id="btnSubmitWithdraw">Submit Request</button>
-                <button id="btnCancelWithdraw" class="btn-ghost">Cancel</button>
-              </div>
-            </div>
-
-            <!-- Bank cards -->
-            <div class="card">
-              <h4>Bank Cards</h4>
-              <div id="cardsList" class="muted small">No cards added.</div>
-              <div style="margin-top:8px">
-                <input id="cardNumber" placeholder="Card number (demo)" />
-                <input id="cardName" placeholder="Cardholder name" />
-                <div class="row">
-                  <button id="btnAddCard">Add Card</button>
-                  <button id="btnClearCards" class="btn-ghost">Clear Cards</button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Transactions -->
-            <div class="card">
-              <h4>Transactions</h4>
-              <div id="txList" class="muted small">No transactions yet.</div>
-            </div>
-
-            <!-- My Product -->
-            <div class="card">
-              <h4>My Product</h4>
-              <div id="productsList" class="muted small">No products yet.</div>
-              <input id="prodName" placeholder="Product name" />
-              <input id="prodPrice" placeholder="Price (₹)" />
-              <div class="row">
-                <button id="btnAddProduct">Add Product</button>
-                <button id="btnClearProducts" class="btn-ghost">Clear</button>
-              </div>
-            </div>
-
-            <!-- Customer Service / Support -->
-            <div class="card">
-              <h4>Customer Service</h4>
-              <textarea id="supportMsg" rows="3" placeholder="Write your issue or question"></textarea>
-              <div class="row">
-                <button id="btnSendSupport">Send</button>
-                <button id="btnViewSupport" class="btn-ghost">My Messages</button>
-              </div>
-              <div id="supportList" class="muted small hidden"></div>
-            </div>
-
-            <!-- Reset password -->
-            <div class="card">
-              <h4>Reset Password</h4>
-              <div class="row">
-                <input id="resetEmail" placeholder="Email to reset (or leave blank for your email)" />
-                <button id="btnResetPass" class="btn-ghost">Send Reset Email</button>
-              </div>
-            </div>
-
             <div style="margin-top:8px" class="row">
-              <button id="btnSignOut" class="btn-ghost">Sign Out</button>
-              <button id="btnAdminPanel" class="btn-ghost hidden">Admin Panel</button>
+              <!-- Instead of directly showing add funds form, create deposit request -->
+              <button id="showDepositForm">Add Funds (Create Deposit Request)</button>
+              <button id="showWithdrawForm" class="btn-ghost">Request Withdraw</button>
             </div>
-
-            <!-- Admin Panel area (shown if admin) -->
-            <div id="adminPanel" class="card hidden">
-              <h4>Admin Panel</h4>
-              <p class="muted small">Admin: create plans, run payouts, approve withdraws, view support.</p>
-              <input id="planName" placeholder="Plan name"/>
-              <input id="planPrice" placeholder="Price (₹)"/>
-              <input id="planDaily" placeholder="Daily earning (₹)"/>
-              <input id="planDays" placeholder="Duration (days)"/>
-              <div class="row">
-                <button id="btnSavePlan">Save Plan</button>
-                <button id="btnSeedPlans" class="btn-ghost">Seed Default Plans</button>
-              </div>
-              <div style="margin-top:8px" class="row">
-                <button id="btnRunDaily" class="btn-danger">Run Daily Payouts</button>
-                <button id="btnViewWithdraws" class="btn-ghost">Pending Withdrawals</button>
-              </div>
-              <div id="adminWithdraws" class="muted small"></div>
-              <div id="adminSupport" class="muted small"></div>
-            </div>
-
           </div>
+
+          <!-- Deposit (hidden until clicked): creates a deposit request for admin approval -->
+          <div id="depositDiv" class="card hidden">
+            <h4>Create Deposit Request</h4>
+            <input id="depositAmount" placeholder="Amount (₹)" />
+            <input id="depositNote" placeholder="Note (UPI/Txn id etc.)" />
+            <div class="row">
+              <button id="btnCreateDeposit">Create Request</button>
+              <button id="btnCancelDeposit" class="btn-ghost">Cancel</button>
+            </div>
+            <div class="muted small">Admin will approve deposit request to credit your wallet (demo).</div>
+          </div>
+
+          <!-- Withdraw (hidden until clicked): creates withdraw request -->
+          <div id="withdrawDiv" class="card hidden">
+            <h4>Request Withdraw</h4>
+            <input id="withdrawAmount" placeholder="Amount (₹)" />
+            <input id="withdrawNote" placeholder="UPI/Bank details (demo)" />
+            <div class="row">
+              <button id="btnCreateWithdraw">Submit Withdraw Request</button>
+              <button id="btnCancelWithdraw" class="btn-ghost">Cancel</button>
+            </div>
+            <div class="muted small">Admin must approve withdrawals (demo).</div>
+          </div>
+
+          <!-- Account menu list: clicking opens a detail view (not shown by default) -->
+          <div class="card">
+            <div class="list-row"><button class="link-like" data-open="bankCardDetail">Bank Card <span class="muted small">›</span></button></div>
+            <div class="list-row"><button class="link-like" data-open="transactionsDetail">Transactions <span class="muted small">›</span></button></div>
+            <div class="list-row"><button class="link-like" data-open="productsDetail">My Product <span class="muted small">›</span></button></div>
+            <div class="list-row"><button class="link-like" data-open="supportDetail">Customer Service <span class="muted small">›</span></button></div>
+            <div class="list-row"><button class="link-like" data-open="resetDetail">Reset Password <span class="muted small">›</span></button></div>
+          </div>
+
+          <!-- --- DETAILS views (each hidden until user clicks) --- -->
+
+          <!-- Bank Card detail -->
+          <div id="bankCardDetail" class="card hidden">
+            <h4>Bank Cards</h4>
+            <div id="cardsList" class="muted small">No cards added.</div>
+            <input id="cardNumber" placeholder="Card number (demo)" />
+            <input id="cardName" placeholder="Cardholder name" />
+            <div class="row">
+              <button id="btnAddCard">Add Card</button>
+              <button id="btnClearCards" class="btn-ghost">Clear Cards</button>
+              <button class="btn-ghost" data-close="bankCardDetail">Close</button>
+            </div>
+          </div>
+
+          <!-- Transactions detail -->
+          <div id="transactionsDetail" class="card hidden">
+            <h4>Transactions</h4>
+            <div id="txList" class="muted small">No transactions yet.</div>
+            <div style="margin-top:8px" class="row">
+              <button class="btn-ghost" data-close="transactionsDetail">Close</button>
+            </div>
+          </div>
+
+          <!-- Products detail -->
+          <div id="productsDetail" class="card hidden">
+            <h4>My Products</h4>
+            <div id="productsList" class="muted small">No products.</div>
+            <input id="prodName" placeholder="Product name" />
+            <input id="prodPrice" placeholder="Price (₹)" />
+            <div class="row">
+              <button id="btnAddProduct">Add Product</button>
+              <button id="btnClearProducts" class="btn-ghost">Clear</button>
+              <button class="btn-ghost" data-close="productsDetail">Close</button>
+            </div>
+          </div>
+
+          <!-- Support detail -->
+          <div id="supportDetail" class="card hidden">
+            <h4>Customer Service</h4>
+            <textarea id="supportMsg" rows="3" placeholder="Write your issue"></textarea>
+            <div class="row">
+              <button id="btnSendSupport">Send</button>
+              <button id="btnViewSupport" class="btn-ghost">My Messages</button>
+              <button class="btn-ghost" data-close="supportDetail">Close</button>
+            </div>
+            <div id="supportList" class="muted small hidden"></div>
+          </div>
+
+          <!-- Reset password -->
+          <div id="resetDetail" class="card hidden">
+            <h4>Reset Password</h4>
+            <input id="resetEmail" placeholder="Email (leave blank to use your email)" />
+            <div class="row">
+              <button id="btnResetPass">Send Reset Email</button>
+              <button class="btn-ghost" data-close="resetDetail">Close</button>
+            </div>
+          </div>
+
+          <!-- Admin panel toggle & sign out -->
+          <div style="margin-top:10px" class="row">
+            <button id="btnSignOut" class="btn-ghost">Sign Out</button>
+            <button id="btnAdmin" class="btn-ghost hidden">Admin Panel</button>
+          </div>
+
+          <!-- Admin area (shown if admin) -->
+          <div id="adminPanel" class="card hidden">
+            <h4>Admin Panel</h4>
+            <div class="muted small">Deposit requests, withdraws, support & plans.</div>
+
+            <h5>Deposit Requests</h5>
+            <div id="depositRequests" class="muted small">No deposit requests</div>
+
+            <h5 style="margin-top:10px">Withdraw Requests</h5>
+            <div id="withdrawRequests" class="muted small">No withdraw requests</div>
+
+            <h5 style="margin-top:10px">Support Messages</h5>
+            <div id="adminSupport" class="muted small">No messages</div>
+
+            <div style="margin-top:10px" class="row">
+              <button id="btnSeed" class="btn-ghost">Seed Plans</button>
+              <button id="btnRunPayouts" class="btn-danger">Run Payouts</button>
+            </div>
+          </div>
+
         </div>
+
       </section>
     </main>
   </div>
 
-  <!-- Bottom nav -->
+  <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
-    <div class="nav-item" data-target="homeSection"><span class="icon">🏠</span>Home</div>
-    <div class="nav-item" data-target="investSection"><span class="icon">💹</span>Invest</div>
+    <div class="nav-item active" data-target="homeSection"><span class="icon">🏠</span>Home</div>
+    <div class="nav-item" data-target="investSection"><span class="icon">📈</span>Invest</div>
     <div class="nav-item" data-target="blogSection"><span class="icon">✍️</span>Blog</div>
     <div class="nav-item" data-target="noticeSection"><span class="icon">📢</span>Notice</div>
     <div class="nav-item" data-target="accountSection"><span class="icon">👤</span>Account</div>
   </nav>
 
 <script>
-/* ---------------------------
-  Firebase config (your project)
-  --------------------------- */
+/* ====== Firebase config (your project) ====== */
 var firebaseConfig = {
   apiKey: "AIzaSyDvF1KrDDRZJucp-78dbvmQ34Oi3j17Rrk",
   authDomain: "investment-website-deml.firebaseapp.com",
@@ -250,139 +265,104 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-// admin email
-const adminEmail = "sandhyabaghel905@gmail.com";
-
-/* ---------------------------
-  DB refs
---------------------------- */
-const plansRef = db.ref('plans');
+/* ====== DB refs ====== */
 const usersRef = db.ref('users');
 const txRef = db.ref('transactions');
+const plansRef = db.ref('plans');
 const withdrawRef = db.ref('withdrawals');
+const depositRef = db.ref('deposits');
 const cardsRef = db.ref('cards');
 const productsRef = db.ref('products');
 const supportRef = db.ref('support');
-const teamRef = db.ref('team');
 
-/* ---------------------------
-  Simple UI helpers
---------------------------- */
-function q(id){ return document.getElementById(id); }
-function showSection(id){
-  document.querySelectorAll('.section').forEach(s=>s.classList.add('hidden'));
-  q(id).classList.remove('hidden');
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n=>{ if(n.dataset.target===id) n.classList.add('active') });
-}
-// default show home
-showSection('homeSection');
+/* ====== Admin email ====== */
+const adminEmail = "sandhyabaghel905@gmail.com";
 
-/* bottom nav clicks */
-document.querySelectorAll('.nav-item').forEach(el=>{
-  el.addEventListener('click', ()=> showSection(el.dataset.target));
+/* ====== Basic UI helpers ====== */
+function $(id){ return document.getElementById(id); }
+function show(id){ $(id).classList.remove('hidden'); }
+function hide(id){ $(id).classList.add('hidden'); }
+
+/* ====== Bottom nav switching ====== */
+document.querySelectorAll('.nav-item').forEach(it=>{
+  it.addEventListener('click', ()=>{
+    document.querySelectorAll('.section').forEach(s=>s.classList.add('hidden'));
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    $(it.dataset.target).classList.remove('hidden');
+    it.classList.add('active');
+  });
 });
 
-/* ---------------------------
-  Auth & Account logic
---------------------------- */
-let currentUser = null;
-
-q('btnSignIn').addEventListener('click', ()=>{
-  const e = q('email').value.trim(), p = q('password').value;
-  if(!e||!p) return alert('Enter email & password');
+/* ====== Auth handlers ====== */
+$('btnSignIn').addEventListener('click', ()=>{
+  const e = $('email').value.trim(), p = $('password').value;
+  if(!e||!p) return alert('Email & password required');
   auth.signInWithEmailAndPassword(e,p).catch(err=>alert(err.message));
 });
-
-q('btnRegister').addEventListener('click', ()=>{
-  const e = q('email').value.trim(), p = q('password').value;
-  const referred = q('refInput').value.trim() || null;
-  if(!e||!p) return alert('Enter email & password');
+$('btnRegister').addEventListener('click', ()=>{
+  const e = $('email').value.trim(), p = $('password').value;
+  const ref = $('refInput').value.trim() || null;
+  if(!e||!p) return alert('Email & password required');
   auth.createUserWithEmailAndPassword(e,p)
     .then(cred=>{
       const uid = cred.user.uid;
-      const myRef = makeRef();
-      usersRef.child(uid).set({
-        email:e, wallet:0, refCode: myRef, referredBy: referred, createdAt: Date.now(), activePlans:{}, lastPayout: Date.now()
-      });
-      // referral bonus demo
-      if(referred){
-        usersRef.orderByChild('refCode').equalTo(referred).once('value', snap=>{
-          if(snap.exists()){
-            snap.forEach(s=>{
-              const refUid = s.key;
-              usersRef.child(refUid).transaction(u=>{
-                if(u) u.wallet = (u.wallet||0)+20;
-                return u;
-              });
-              txRef.push({ uid: refUid, type: 'referral', amount:20, from:uid, time:Date.now() });
-            });
-          }
+      const myRef = 'R'+Math.random().toString(36).substr(2,8).toUpperCase();
+      usersRef.child(uid).set({ email:e, wallet:0, refCode: myRef, referredBy: ref, createdAt: Date.now(), activePlans:{}, lastPayout: Date.now() });
+      // demo referral bonus
+      if(ref){
+        usersRef.orderByChild('refCode').equalTo(ref).once('value', snap=>{
+          snap.forEach(s=>{
+            const refUid = s.key;
+            usersRef.child(refUid).transaction(u=>{ if(u) u.wallet = (u.wallet||0)+20; return u; });
+            txRef.push({ uid: refUid, type:'referral', amount:20, from: uid, time: Date.now() });
+          });
         });
       }
     }).catch(err=>alert(err.message));
 });
+$('btnSignOut').addEventListener('click', ()=> auth.signOut());
 
-q('btnSignOut').addEventListener('click', ()=> auth.signOut());
-
+/* ====== Auth state change ====== */
+let currentUser = null;
 auth.onAuthStateChanged(user=>{
   currentUser = user;
   if(user){
-    q('signedOutUI').classList.add('hidden');
-    q('signedInUI').classList.remove('hidden');
-    q('userEmail').innerText = user.email;
-    // show admin panel if admin
-    if(user.email === adminEmail){
-      q('btnAdminPanel').classList.remove('hidden');
-    } else {
-      q('btnAdminPanel').classList.add('hidden');
-    }
+    hide('signedOutUI'); show('signedInUI');
+    $('userEmail').innerText = user.email;
+    // admin button
+    if(user.email === adminEmail) { show('btnAdmin'); show('adminPanel'); } else { hide('btnAdmin'); hide('adminPanel'); }
     loadUserData(user.uid);
-    // auto payout for this user
     runAutoPayoutForUser(user.uid);
+    loadPlans();
+    loadDepositRequestsAdmin();
+    loadWithdrawRequestsAdmin();
+    loadSupportAdmin();
   } else {
-    q('signedOutUI').classList.remove('hidden');
-    q('signedInUI').classList.add('hidden');
+    show('signedOutUI'); hide('signedInUI');
   }
 });
 
-/* ---------------------------
-  Utility functions
---------------------------- */
-function makeRef(){ return 'R'+Math.random().toString(36).substr(2,8).toUpperCase(); }
-function formatRs(v){ return (Math.round((v||0)*100)/100).toFixed(2); }
-function maskCard(num){ if(!num) return ''; num = num.replace(/\s+/g,''); return '**** **** **** ' + num.slice(-4); }
-
-/* ---------------------------
-  Load Plans & Invest UI
---------------------------- */
+/* ====== Load plans for Invest page ====== */
 function loadPlans(){
-  plansRef.once('value', snap=>{
-    const el = q('plansList'); el.innerHTML = '';
+  plansRef.on('value', snap=>{
+    const el = $('plansList'); el.innerHTML = '';
     if(!snap.exists()){ el.innerHTML = '<div class="muted small">No plans</div>'; return; }
     snap.forEach(child=>{
       const p = child.val();
       const d = document.createElement('div'); d.className='card';
-      d.innerHTML = `<b>${p.name}</b><div class="muted small">Price: ₹${formatRs(p.price)} • ${p.days} days • Daily ₹${formatRs(p.daily)}</div>
-        <div style="margin-top:8px"><button class="buyBtn" data-id="${child.key}">Buy</button></div>`;
+      d.innerHTML = `<b>${p.name}</b><div class="muted small">Price: ₹${p.price} • ${p.days} days • Daily ₹${p.daily}</div>
+      <div style="margin-top:8px"><button onclick="buyPlan('${child.key}')">Buy</button></div>`;
       el.appendChild(d);
-    });
-    Array.from(document.getElementsByClassName('buyBtn')).forEach(b=>{
-      b.addEventListener('click', ()=> {
-        if(!currentUser) return alert('Sign in first');
-        buyPlan(b.dataset.id);
-      });
     });
   });
 }
-loadPlans();
 
-/* Buy plan (demo: deducts wallet & creates activePlan) */
+/* ====== Buy plan demo (deduct wallet & add active plan) ====== */
 function buyPlan(planKey){
-  if(!currentUser) return alert('Sign in first');
-  plansRef.child(planKey).once('value', psnap=>{
-    if(!psnap.exists()) return alert('Plan not found');
-    const plan = psnap.val();
+  if(!currentUser) return alert('Sign in');
+  plansRef.child(planKey).once('value', snap=>{
+    const plan = snap.val();
+    if(!plan) return alert('Plan not found');
     if(!confirm(`Buy ${plan.name} for ₹${plan.price}? (Demo)`)) return;
     usersRef.child(currentUser.uid).transaction(u=>{
       if(u){
@@ -392,226 +372,212 @@ function buyPlan(planKey){
         u.activePlans[k] = { planId: planKey, name: plan.name, price: plan.price, daily: plan.daily, days: plan.days, start: Date.now(), creditedDays:0 };
       }
       return u;
-    }, (err,res)=>{
-      if(err) return alert('Error');
-      txRef.push({ uid: currentUser.uid, type:'buy', amount: plan.price, plan: plan.name, time:Date.now() });
-      alert('Plan purchased (demo).');
-      loadUserData(currentUser.uid);
-    });
+    }, (err)=>{ if(err) alert('Error'); else { txRef.push({ uid: currentUser.uid, type:'buy', amount: plan.price, plan: plan.name, time: Date.now() }); alert('Purchased (demo)'); }});
   });
 }
 
-/* ---------------------------
-  User data load + wallet/actions
---------------------------- */
+/* ====== User data load ====== */
 function loadUserData(uid){
   usersRef.child(uid).on('value', snap=>{
     const u = snap.val();
     if(!u) return;
-    q('walletBalance').innerText = '₹' + formatRs(u.wallet||0);
-    q('myRef').innerText = u.refCode || '-';
+    $('walletBalance').innerText = '₹' + (Math.round((u.wallet||0)*100)/100).toFixed(2);
+    $('myRef').innerText = u.refCode || '-';
+    // load transactions/cards/products/support lists
     loadTransactions(uid);
-    loadActivePlans(uid);
     loadCards(uid);
     loadProducts(uid);
     loadSupportMessages(uid);
   });
 }
 
-/* Add Funds (fake deposit) */
-q('btnAddFunds').addEventListener('click', ()=> q('addFundsDiv').classList.toggle('hidden'));
-q('btnAddFundsCancel').addEventListener('click', ()=> q('addFundsDiv').classList.add('hidden'));
-q('btnAddFundsConfirm').addEventListener('click', ()=>{
+/* ====== Deposit request (create, admin approve) ====== */
+$('showDepositForm').addEventListener('click', ()=> { $('depositDiv').classList.toggle('hidden'); });
+$('btnCancelDeposit').addEventListener('click', ()=> hide('depositDiv'));
+$('btnCreateDeposit').addEventListener('click', ()=>{
   if(!currentUser) return alert('Sign in');
-  const amt = parseFloat(q('addAmount').value);
+  const amt = parseFloat($('depositAmount').value);
   if(!amt || amt<=0) return alert('Enter valid amount');
-  usersRef.child(currentUser.uid).transaction(u=>{
-    if(u) u.wallet = (u.wallet||0) + amt;
-    return u;
-  }, (err,res)=>{
-    if(err) return alert('Error adding funds');
-    txRef.push({ uid: currentUser.uid, type:'deposit', amount: amt, time: Date.now() });
-    alert('Added to wallet (demo).');
-    q('addFundsDiv').classList.add('hidden');
-    q('addAmount').value = '';
+  const payload = { uid: currentUser.uid, amount: amt, note: $('depositNote').value || '', status: 'pending', time: Date.now() };
+  depositRef.push(payload, ()=> {
+    txRef.push({ uid: currentUser.uid, type:'deposit_request', amount: amt, time: Date.now() });
+    alert('Deposit request created. Admin will approve.');
+    $('depositAmount').value=''; $('depositNote').value=''; hide('depositDiv');
+    loadDepositRequestsAdmin();
   });
 });
 
-/* Withdraw request UI */
-q('btnWithdrawUI').addEventListener('click', ()=> q('withdrawDiv').classList.toggle('hidden'));
-q('btnCancelWithdraw').addEventListener('click', ()=> q('withdrawDiv').classList.add('hidden'));
-q('btnSubmitWithdraw').addEventListener('click', ()=>{
-  if(!currentUser) return alert('Sign in');
-  const amt = parseFloat(q('withdrawAmount').value);
-  if(!amt || amt<=0) return alert('Enter valid amount');
-  withdrawRef.push({ uid: currentUser.uid, amount: amt, note: q('withdrawNote').value || '', status:'pending', time: Date.now() });
-  txRef.push({ uid: currentUser.uid, type:'withdraw_request', amount: -amt, time: Date.now() });
-  alert('Withdrawal requested (demo). Admin must approve.');
-  q('withdrawDiv').classList.add('hidden'); q('withdrawAmount').value=''; q('withdrawNote').value='';
-});
-
-/* Transactions listing */
-function loadTransactions(uid){
-  txRef.orderByChild('uid').equalTo(uid).limitToLast(200).once('value', snap=>{
-    const el = q('txList'); el.innerHTML = '';
-    if(!snap.exists()){ el.innerHTML = '<div class="muted small">No transactions</div>'; return; }
-    const arr = [];
-    snap.forEach(s=> arr.push(s.val()));
-    arr.reverse();
-    arr.forEach(t=>{
-      const d = document.createElement('div'); d.className='tx';
-      d.innerHTML = `<div><b>${t.type}</b> <span class="muted small">₹${formatRs(t.amount||0)}</span></div>
-                     <div class="muted small">${t.plan||t.from||''} — ${new Date(t.time||Date.now()).toLocaleString()}</div>`;
-      el.appendChild(d);
+/* Admin: load deposit requests and approve */
+function loadDepositRequestsAdmin(){
+  if(!currentUser) return;
+  depositRef.orderByChild('status').equalTo('pending').on('value', snap=>{
+    const el = $('depositRequests'); el.innerHTML = '';
+    if(!snap.exists()){ el.innerText = 'No deposit requests'; return; }
+    snap.forEach(child=>{
+      const r = child.val();
+      const row = document.createElement('div'); row.className='muted small';
+      row.innerHTML = `User:${r.uid} — ₹${r.amount} — ${new Date(r.time).toLocaleString()} <button data-key="${child.key}" class="approveDeposit">Approve</button> <button data-key="${child.key}" class="declineDeposit btn-ghost">Decline</button>`;
+      el.appendChild(row);
+    });
+    Array.from(document.getElementsByClassName('approveDeposit')).forEach(b=> b.addEventListener('click', ()=> approveDeposit(b.dataset.key) ));
+    Array.from(document.getElementsByClassName('declineDeposit')).forEach(b=> b.addEventListener('click', ()=> declineDeposit(b.dataset.key) ));
+  });
+}
+function approveDeposit(key){
+  if(!currentUser || currentUser.email !== adminEmail) return alert('Admin only');
+  depositRef.child(key).once('value', snap=>{
+    if(!snap.exists()) return alert('Not found');
+    const r = snap.val();
+    // credit user's wallet
+    usersRef.child(r.uid).transaction(u=>{ if(u) u.wallet = (u.wallet||0) + (r.amount||0); return u; }, ()=>{
+      depositRef.child(key).update({ status:'approved', approvedAt: Date.now(), approvedBy: currentUser.uid });
+      txRef.push({ uid: r.uid, type:'deposit_approved', amount: r.amount, time: Date.now(), admin: currentUser.uid });
+      alert('Deposit approved & wallet credited (demo).');
+      loadDepositRequestsAdmin();
     });
   });
 }
-
-/* Active plans view */
-function loadActivePlans(uid){
-  usersRef.child(uid).once('value', snap=>{
-    const u = snap.val(); const ap = u.activePlans || {};
-    let html = ''; let any=false;
-    for(const k in ap){
-      any=true;
-      const p = ap[k];
-      const daysPassed = Math.floor((Date.now() - p.start) / (1000*60*60*24));
-      const remaining = Math.max(0, p.days - daysPassed);
-      html += `<div class="muted small"><b>${p.name}</b> — started ${new Date(p.start).toLocaleDateString()} — remaining ${remaining} days</div>`;
-    }
-    q('activePlansDiv').innerHTML = any ? html : 'No active plans';
+function declineDeposit(key){
+  if(!currentUser || currentUser.email !== adminEmail) return alert('Admin only');
+  depositRef.child(key).update({ status:'declined', declinedAt: Date.now(), declinedBy: currentUser.uid }, ()=> {
+    alert('Deposit declined.');
+    loadDepositRequestsAdmin();
   });
 }
 
-/* ---------------------------
-  Cards (store masked)
---------------------------- */
-q('btnAddCard').addEventListener('click', ()=>{
+/* ====== Withdraw request (user creates; admin approves) ====== */
+$('showWithdrawForm').addEventListener('click', ()=> $('withdrawDiv').classList.toggle('hidden'));
+$('btnCancelWithdraw').addEventListener('click', ()=> hide('withdrawDiv'));
+$('btnCreateWithdraw').addEventListener('click', ()=>{
   if(!currentUser) return alert('Sign in');
-  const num = q('cardNumber').value.trim();
-  const name = q('cardName').value.trim() || 'Unknown';
-  if(!num) return alert('Enter card number (demo)');
-  const masked = maskCard(num);
-  const payload = { uid: currentUser.uid, numberMask: masked, name: name, addedAt: Date.now() };
-  cardsRef.push(payload, ()=> {
-    alert('Card saved (demo)');
-    q('cardNumber').value=''; q('cardName').value='';
-    loadCards(currentUser.uid);
+  const amt = parseFloat($('withdrawAmount').value);
+  if(!amt || amt<=0) return alert('Enter valid amount');
+  withdrawRef.push({ uid: currentUser.uid, amount: amt, note: $('withdrawNote').value||'', status:'pending', time: Date.now() }, ()=>{
+    txRef.push({ uid: currentUser.uid, type:'withdraw_request', amount: -amt, time: Date.now() });
+    alert('Withdraw requested (admin approval required).');
+    $('withdrawAmount').value=''; $('withdrawNote').value=''; hide('withdrawDiv');
+    loadWithdrawRequestsAdmin();
   });
-});
-q('btnClearCards').addEventListener('click', ()=>{
-  if(!currentUser) return alert('Sign in');
-  // remove cards for user
-  cardsRef.orderByChild('uid').equalTo(currentUser.uid).once('value', snap=>{
-    snap.forEach(s=> cardsRef.child(s.key).remove());
-  });
-  alert('Cleared cards (demo).');
-  q('cardsList').innerText = 'No cards added.';
 });
 
+/* Admin load & approve withdraws */
+function loadWithdrawRequestsAdmin(){
+  if(!currentUser) return;
+  withdrawRef.orderByChild('status').equalTo('pending').on('value', snap=>{
+    const el = $('withdrawRequests'); el.innerHTML = '';
+    if(!snap.exists()){ el.innerText = 'No withdraw requests'; return; }
+    snap.forEach(child=>{
+      const r = child.val(); const row = document.createElement('div'); row.className='muted small';
+      row.innerHTML = `User:${r.uid} — ₹${r.amount} — ${new Date(r.time).toLocaleString()} <button data-key="${child.key}" class="approveW">Approve</button> <button data-key="${child.key}" class="declineW btn-ghost">Decline</button>`;
+      el.appendChild(row);
+    });
+    Array.from(document.getElementsByClassName('approveW')).forEach(b=> b.addEventListener('click', ()=> approveWithdrawAdmin(b.dataset.key) ));
+    Array.from(document.getElementsByClassName('declineW')).forEach(b=> b.addEventListener('click', ()=> declineWithdrawAdmin(b.dataset.key) ));
+  });
+}
+function approveWithdrawAdmin(key){
+  if(!currentUser || currentUser.email !== adminEmail) return alert('Admin only');
+  withdrawRef.child(key).once('value', snap=>{
+    const r = snap.val();
+    usersRef.child(r.uid).transaction(u=>{ if(u) u.wallet = (u.wallet||0) - (r.amount||0); return u; }, ()=>{
+      withdrawRef.child(key).update({ status:'paid', paidAt: Date.now(), paidBy: currentUser.uid });
+      txRef.push({ uid: r.uid, type:'withdraw_paid', amount: -r.amount, admin: currentUser.uid, time: Date.now() });
+      alert('Withdraw marked as paid (demo).');
+      loadWithdrawRequestsAdmin();
+    });
+  });
+}
+function declineWithdrawAdmin(key){
+  if(!currentUser || currentUser.email !== adminEmail) return alert('Admin only');
+  withdrawRef.child(key).update({ status:'declined', declinedAt: Date.now(), declinedBy: currentUser.uid }, ()=> { alert('Withdraw declined'); loadWithdrawRequestsAdmin(); });
+}
+
+/* ====== Cards (add/clear) ====== */
+$('btnAddCard').addEventListener('click', ()=>{
+  if(!currentUser) return alert('Sign in');
+  const num = $('cardNumber').value.trim(), name = $('cardName').value.trim()||'Unknown';
+  if(!num) return alert('Enter card number (demo)');
+  const masked = '**** **** **** ' + num.replace(/\s+/g,'').slice(-4);
+  cardsRef.push({ uid: currentUser.uid, mask: masked, name: name, addedAt: Date.now() }, ()=> { alert('Card added (demo)'); $('cardNumber').value=''; $('cardName').value=''; loadCards(currentUser.uid); });
+});
+$('btnClearCards').addEventListener('click', ()=>{
+  if(!currentUser) return alert('Sign in');
+  cardsRef.orderByChild('uid').equalTo(currentUser.uid).once('value', snap=>{ snap.forEach(s=> cardsRef.child(s.key).remove()); alert('Cards cleared (demo)'); $('cardsList').innerText = 'No cards added.'; });
+});
 function loadCards(uid){
   cardsRef.orderByChild('uid').equalTo(uid).once('value', snap=>{
-    const el = q('cardsList'); el.innerHTML = '';
-    if(!snap.exists()) return el.innerHTML = '<div class="muted small">No cards</div>';
-    snap.forEach(child=>{
-      const c = child.val();
-      const d = document.createElement('div'); d.className='muted small';
-      d.innerText = `${c.numberMask} — ${c.name} — ${new Date(c.addedAt).toLocaleDateString()}`;
-      el.appendChild(d);
-    });
+    const el = $('cardsList'); el.innerHTML = '';
+    if(!snap.exists()) return el.innerHTML = '<div class="muted small">No cards added.</div>';
+    snap.forEach(child=> { const c = child.val(); const d = document.createElement('div'); d.className='muted small'; d.innerText = `${c.mask} — ${c.name}`; el.appendChild(d); });
   });
 }
 
-/* ---------------------------
-  Products
---------------------------- */
-q('btnAddProduct').addEventListener('click', ()=>{
+/* ====== Products add/clear/list ====== */
+$('btnAddProduct').addEventListener('click', ()=> {
   if(!currentUser) return alert('Sign in');
-  const name = q('prodName').value.trim(), price = parseFloat(q('prodPrice').value);
-  if(!name||!price) return alert('Enter product name & price');
-  productsRef.push({ uid: currentUser.uid, name:name, price:price, createdAt: Date.now() }, ()=> {
-    q('prodName').value=''; q('prodPrice').value='';
-    loadProducts(currentUser.uid);
-  });
+  const name = $('prodName').value.trim(), price = parseFloat($('prodPrice').value);
+  if(!name||!price) return alert('Enter product details');
+  productsRef.push({ uid: currentUser.uid, name:name, price:price, time: Date.now() }, ()=> { $('prodName').value=''; $('prodPrice').value=''; loadProducts(currentUser.uid); alert('Product added (demo)'); });
 });
-q('btnClearProducts').addEventListener('click', ()=>{
+$('btnClearProducts').addEventListener('click', ()=> {
   if(!currentUser) return alert('Sign in');
-  productsRef.orderByChild('uid').equalTo(currentUser.uid).once('value', snap=>{
-    snap.forEach(s=> productsRef.child(s.key).remove());
-  });
-  q('productsList').innerText = 'No products';
+  productsRef.orderByChild('uid').equalTo(currentUser.uid).once('value', snap=> { snap.forEach(s=> productsRef.child(s.key).remove()); $('productsList').innerText='No products'; alert('Cleared products (demo)'); });
 });
 function loadProducts(uid){
   productsRef.orderByChild('uid').equalTo(uid).once('value', snap=>{
-    const el = q('productsList'); el.innerHTML = '';
-    if(!snap.exists()) return el.innerHTML = '<div class="muted small">No products</div>';
-    snap.forEach(c=>{
-      const p = c.val();
-      const d = document.createElement('div'); d.className='muted small';
-      d.innerText = `${p.name} — ₹${formatRs(p.price)}`;
-      el.appendChild(d);
-    });
+    const el = $('productsList'); el.innerHTML = '';
+    if(!snap.exists()) return el.innerHTML = '<div class="muted small">No products.</div>';
+    snap.forEach(child=> { const p = child.val(); const d = document.createElement('div'); d.className='muted small'; d.innerText = `${p.name} — ₹${(Math.round((p.price||0)*100)/100).toFixed(2)}`; el.appendChild(d); });
   });
 }
 
-/* ---------------------------
-  Support messages
---------------------------- */
-q('btnSendSupport').addEventListener('click', ()=>{
+/* ====== Support messages (user & admin) ====== */
+$('btnSendSupport').addEventListener('click', ()=> {
   if(!currentUser) return alert('Sign in');
-  const msg = q('supportMsg').value.trim();
-  if(!msg) return alert('Enter message');
-  supportRef.push({ uid: currentUser.uid, message: msg, time: Date.now(), status:'open' }, ()=> {
-    alert('Support message sent (demo).');
-    q('supportMsg').value = '';
-    loadSupportMessages(currentUser.uid);
-  });
+  const msg = $('supportMsg').value.trim(); if(!msg) return alert('Enter message');
+  supportRef.push({ uid: currentUser.uid, message: msg, status:'open', time: Date.now() }, ()=> { alert('Support message sent (demo)'); $('supportMsg').value=''; loadSupportMessages(currentUser.uid); });
 });
-q('btnViewSupport').addEventListener('click', ()=>{
-  q('supportList').classList.toggle('hidden');
-});
+$('btnViewSupport').addEventListener('click', ()=> $('supportList').classList.toggle('hidden'));
 function loadSupportMessages(uid){
   supportRef.orderByChild('uid').equalTo(uid).once('value', snap=>{
-    const el = q('supportList'); el.innerHTML = '';
+    const el = $('supportList'); el.innerHTML = '';
     if(!snap.exists()) return el.innerHTML = '<div class="muted small">No messages</div>';
-    snap.forEach(s=>{
-      const m = s.val();
-      const d = document.createElement('div'); d.className='muted small';
-      d.innerHTML = `<b>${m.status}</b> — ${new Date(m.time).toLocaleString()}<div>${m.message}</div><hr/>`;
-      el.appendChild(d);
-    });
+    snap.forEach(child=> { const m = child.val(); const d = document.createElement('div'); d.className='muted small'; d.innerHTML = `<b>${m.status}</b> — ${new Date(m.time).toLocaleString()}<div>${m.message}</div><hr/>`; el.appendChild(d); });
+  });
+}
+/* admin support list */
+function loadSupportAdmin(){
+  supportRef.on('value', snap=>{
+    const el = $('adminSupport'); el.innerHTML = '';
+    if(!snap.exists()) return el.innerText = 'No messages';
+    snap.forEach(child=> { const m = child.val(); el.innerHTML += `<div class="muted small">From:${m.uid} — ${new Date(m.time).toLocaleString()} — ${m.message} — ${m.status}</div>`; });
   });
 }
 
-/* ---------------------------
-  Reset password
---------------------------- */
-q('btnResetPass').addEventListener('click', ()=>{
-  const email = q('resetEmail').value.trim() || (currentUser && currentUser.email);
-  if(!email) return alert('Enter email');
-  auth.sendPasswordResetEmail(email).then(()=> alert('Password reset email sent')).catch(err=>alert(err.message));
-});
-
-/* ---------------------------
-  Referral copy link & URL prefill
---------------------------- */
-q('copyRef').addEventListener('click', ()=>{
-  if(!currentUser) return alert('Sign in');
-  usersRef.child(currentUser.uid).once('value', snap=>{
-    const u = snap.val(); const code = u.refCode || '';
-    const url = window.location.origin + window.location.pathname + '?ref=' + code;
-    navigator.clipboard.writeText(url).then(()=> alert('Referral link copied'));
+/* ====== Transactions listing ====== */
+function loadTransactions(uid){
+  txRef.orderByChild('uid').equalTo(uid).limitToLast(200).once('value', snap=>{
+    const el = $('txList'); el.innerHTML = '';
+    if(!snap.exists()) return el.innerHTML = '<div class="muted small">No transactions</div>';
+    const arr = [];
+    snap.forEach(s=> arr.push(s.val()));
+    arr.reverse();
+    arr.forEach(t=> { const d = document.createElement('div'); d.className='tx'; d.innerHTML = `<div><b>${t.type}</b> <span class="muted small">₹${(Math.round((t.amount||0)*100)/100).toFixed(2)}</span></div><div class="muted small">${t.plan||t.from||''} — ${new Date(t.time||Date.now()).toLocaleString()}</div>`; el.appendChild(d); });
   });
-});
-(function prefillRef(){
-  const p = new URLSearchParams(window.location.search);
-  const r = p.get('ref'); if(r) q('refInput').value = r;
-})();
+}
 
-/* ---------------------------
-  Admin features: seed plans, run payouts, approve withdrawals, view support
---------------------------- */
-q('btnSeedPlans').addEventListener('click', ()=>{
+/* ====== Reset password ====== */
+$('btnResetPass').addEventListener('click', ()=> {
+  const email = $('resetEmail').value.trim() || (currentUser && currentUser.email);
+  if(!email) return alert('Enter email');
+  auth.sendPasswordResetEmail(email).then(()=> alert('Reset email sent')).catch(err=>alert(err.message));
+});
+
+/* ====== Transactions request placeholders when user creates deposit/withdraw ====== */
+/* already pushed in flows above */
+
+/* ====== Admin seed plans & run payouts (demo) ====== */
+$('btnSeed').addEventListener('click', ()=> {
   if(!currentUser || currentUser.email !== adminEmail) return alert('Admin only');
   const defaults = [
     { id:'vip1', name:'VIP1', price:290, daily:234.9, days:47 },
@@ -619,148 +585,81 @@ q('btnSeedPlans').addEventListener('click', ()=>{
     { id:'vip3', name:'VIP3', price:9990, daily:830, days:47 }
   ];
   defaults.forEach(p=> plansRef.child(p.id).set(p));
-  loadPlans(); alert('Seeded plans');
+  alert('Seeded plans');
 });
-q('btnSavePlan').addEventListener('click', ()=>{
+$('btnRunPayouts').addEventListener('click', ()=> {
   if(!currentUser || currentUser.email !== adminEmail) return alert('Admin only');
-  const name = q('planName').value.trim(), price = parseFloat(q('planPrice').value), daily = parseFloat(q('planDaily').value), days = parseInt(q('planDays').value);
-  if(!name||!price||!daily||!days) return alert('Fill fields');
-  const id = name.toLowerCase().replace(/\s+/g,'_') + '_' + Date.now();
-  plansRef.child(id).set({ id:id, name:name, price:price, daily:daily, days:days }, ()=> { loadPlans(); alert('Plan saved'); });
-});
-
-/* Run daily payouts for all users (admin) */
-q('btnRunDaily').addEventListener('click', ()=> {
-  if(!currentUser || currentUser.email !== adminEmail) return alert('Admin only');
-  if(!confirm('Run daily payouts for all users now?')) return;
+  if(!confirm('Run payouts for all users?')) return;
   usersRef.once('value', snap=>{
     const now = Date.now();
     snap.forEach(child=>{
       const uid = child.key; const u = child.val(); const aps = u.activePlans || {};
-      let updates = {}; let txs = [];
+      const updates = {}; const txs = [];
       for(const k in aps){
         const p = aps[k];
         const daysPassed = Math.floor((now - p.start)/(1000*60*60*24));
         const eligible = Math.min(p.days, daysPassed);
         const toCredit = Math.max(0, eligible - (p.creditedDays||0));
         if(toCredit>0){
-          updates['activePlans/'+k+'/creditedDays'] = (p.creditedDays||0)+toCredit;
+          updates['activePlans/'+k+'/creditedDays'] = (p.creditedDays||0) + toCredit;
           updates['wallet'] = (u.wallet||0) + (toCredit * p.daily);
           txs.push({ uid: uid, type:'payout', amount: toCredit * p.daily, plan: p.name, days: toCredit, time: Date.now() });
         }
       }
-      if(Object.keys(updates).length>0){
-        usersRef.child(uid).update(updates, ()=> txs.forEach(t=> txRef.push(t)));
-      }
+      if(Object.keys(updates).length>0) usersRef.child(uid).update(updates, ()=> txs.forEach(t=> txRef.push(t)));
     });
-    alert('Admin: payouts completed (demo).');
+    alert('Payout run (demo).');
   });
 });
 
-/* Admin view pending withdraws & approve */
-q('btnViewWithdraws').addEventListener('click', ()=> {
-  if(!currentUser || currentUser.email !== adminEmail) return alert('Admin only');
-  withdrawRef.orderByChild('status').equalTo('pending').once('value', snap=>{
-    const el = q('adminWithdraws'); el.innerHTML = '';
-    if(!snap.exists()) return el.innerHTML = '<div class="muted small">No pending withdraws</div>';
-    snap.forEach(s=>{
-      const r = s.val(); const div = document.createElement('div'); div.className='muted small';
-      div.innerHTML = `Req: ${r.uid} — ₹${formatRs(r.amount)} — ${new Date(r.time).toLocaleString()} <button data-key="${s.key}" class="approveBtn">Approve</button>`;
-      el.appendChild(div);
-    });
-    Array.from(document.getElementsByClassName('approveBtn')).forEach(b=>{
-      b.addEventListener('click', ()=> approveWithdraw(b.dataset.key));
-    });
+/* ====== Admin support/withdraw/deposit load already set earlier (listeners) ====== */
+/* Make sure admin panels are loaded when admin logs in (handled in onAuthStateChanged) */
+
+/* ====== Detail open/close actions (toggle detail views) ====== */
+document.querySelectorAll('[data-open]').forEach(btn=>{
+  btn.addEventListener('click', ()=> {
+    const id = btn.getAttribute('data-open');
+    document.querySelectorAll('[id$="Detail"]').forEach(d=> d.classList.add('hidden'));
+    $(id).classList.remove('hidden');
+    // scroll into view
+    $(id).scrollIntoView({behavior:'smooth', block:'center'});
   });
 });
-function approveWithdraw(key){
-  withdrawRef.child(key).once('value', snap=>{
-    if(!snap.exists()) return alert('Not found');
-    const r = snap.val();
-    usersRef.child(r.uid).transaction(u=>{
-      if(u) u.wallet = (u.wallet||0) - r.amount;
-      return u;
-    }, ()=> {
-      withdrawRef.child(key).update({ status:'paid', paidAt: Date.now(), processedBy: currentUser.uid });
-      txRef.push({ uid: r.uid, type:'withdrawal', amount: -r.amount, time: Date.now() });
-      alert('Withdraw approved (demo).');
-    });
-  });
-}
-
-/* Admin view support messages */
-q('btnViewSupport')?.addEventListener('click', ()=> {
-  if(!currentUser || currentUser.email !== adminEmail) return alert('Admin only');
-});
-q('btnAdminPanel').addEventListener('click', ()=> q('adminPanel').classList.toggle('hidden'));
-
-supportRef.on('value', snap=>{
-  if(!snap.exists()) return;
-  const el = q('adminSupport'); el.innerHTML = '';
-  snap.forEach(s=>{
-    const m = s.val();
-    el.innerHTML += `<div class="muted small">From:${m.uid} — ${new Date(m.time).toLocaleString()} — ${m.message} — status:${m.status}</div>`;
-  });
+document.querySelectorAll('[data-close]').forEach(btn=>{
+  btn.addEventListener('click', ()=> { const id = btn.getAttribute('data-close'); hide(id); });
 });
 
-/* ---------------------------
-  Run auto payout for single user (on open)
---------------------------- */
+/* ====== Load admin lists initially if admin ====== */
+function loadDepositRequestsAdmin() { /* hooked earlier */ }
+function loadWithdrawRequestsAdmin() { /* hooked earlier */ }
+
+/* ====== run auto payout for user on open (credits missed days) ====== */
 function runAutoPayoutForUser(uid){
   usersRef.child(uid).once('value', snap=>{
     if(!snap.exists()) return;
     const u = snap.val(); const now = Date.now(); const aps = u.activePlans || {};
-    let updates = {}; let txs = [];
+    const updates = {}; const txs = [];
     for(const k in aps){
       const p = aps[k];
       const daysPassed = Math.floor((now - p.start)/(1000*60*60*24));
       const eligible = Math.min(p.days, daysPassed);
       const toCredit = Math.max(0, eligible - (p.creditedDays||0));
       if(toCredit>0){
-        updates['activePlans/'+k+'/creditedDays'] = (p.creditedDays||0)+toCredit;
+        updates['activePlans/'+k+'/creditedDays'] = (p.creditedDays||0) + toCredit;
         updates['wallet'] = (u.wallet||0) + (toCredit * p.daily);
         txs.push({ uid: uid, type:'payout', amount: toCredit * p.daily, plan: p.name, days: toCredit, time: Date.now() });
       }
     }
-    if(Object.keys(updates).length>0){
-      usersRef.child(uid).update(updates, ()=> txs.forEach(t=> txRef.push(t)));
-    }
+    if(Object.keys(updates).length>0) usersRef.child(uid).update(updates, ()=> txs.forEach(t=> txRef.push(t)));
   });
 }
 
-/* ---------------------------
-  Load team (demo static if DB empty)
---------------------------- */
-function loadTeam(){
-  teamRef.once('value', snap=>{
-    if(!snap.exists()){
-      // seed demo
-      const demo = [
-        {name:'Alice', role:'Support'},
-        {name:'Bob', role:'Dev'},
-        {name:'Charlie', role:'Marketing'}
-      ];
-      demo.forEach(m=> teamRef.push(m));
-    }
-  });
-}
-loadTeam();
+/* ====== Utility: try prefill ref from URL ====== */
+(function(){ const p = new URLSearchParams(window.location.search); const r = p.get('ref'); if(r) $('refInput').value = r; })();
 
-/* ---------------------------
-  Load products & support for user
---------------------------- */
-function loadSupportMessages(uid){ supportRef.orderByChild('uid').equalTo(uid).once('value', snap=>{/* handled in loadUserData */}); }
-/* Already implemented loadProducts() earlier */
-
-/* ---------------------------
-  Initial UI: try prefill ref from url
---------------------------- */
-(function(){ const p = new URLSearchParams(window.location.search); const r = p.get('ref'); if(r) q('refInput').value = r; })();
-
-/* ---------------------------
-  Initial load of notices / blog placeholders
---------------------------- */
-q('noticeList').innerText = 'No notices (demo)';
+/* ====== Initial UI state ====== */
+hide('signedInUI'); hide('depositDiv'); hide('withdrawDiv');
+document.querySelectorAll('.section').forEach((s,i)=> { if(i!==0) s.classList.add('hidden'); });
 </script>
 </body>
 </html>
