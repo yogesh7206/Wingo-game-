@@ -3,10 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Win89 - Demo VIP Earnings (Demo)</title>
+  <title>Win89 - VIP Earnings (Demo)</title>
   <meta name="description" content="Demo VIP earnings site (educational). Use your Firebase config before publishing." />
   <style>
-    /* Simple responsive CSS */
     body{font-family:Arial,Helvetica,sans-serif;margin:0;background:#f3f6f8;color:#222}
     .container{max-width:980px;margin:18px auto;padding:16px}
     header{display:flex;align-items:center;justify-content:space-between;padding:12px 0}
@@ -31,8 +30,6 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
-  <!-- NOTE: replace the firebaseConfig below with your project's config -->
 </head>
 <body>
   <div class="container">
@@ -45,11 +42,11 @@
 
     <div class="grid">
       <main>
-        <!-- Auth -->
+        <!-- Auth / Account Card -->
         <div id="authCard" class="card">
           <div id="authForms">
             <h3>Sign In / Register</h3>
-            <div style="display:flex;gap:8px;">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
               <input id="email" placeholder="Email" />
               <input id="password" type="password" placeholder="Password" />
             </div>
@@ -66,12 +63,15 @@
 
           <div id="accountPanel" style="display:none">
             <h3>Your Account</h3>
-            <p><b>Wallet:</b> ₹<span id="walletBalance">0</span></p>
+            <p><b>Wallet:</b> ₹<span id="walletBalance">0.00</span></p>
             <p><b>Referral code:</b> <span id="myRefCode">-</span></p>
-            <p class="muted small">Invite friends with your referral code to earn referral bonuses.</p>
+            <p class="muted small">Invite friends with your referral code to earn referral bonuses (demo).</p>
 
             <h4>VIP Plans</h4>
             <div id="plansContainer"></div>
+
+            <h4>Active Plans</h4>
+            <div id="activePlansDiv" class="muted small">No active plans</div>
 
             <h4>Transactions</h4>
             <div id="txList" style="max-height:220px;overflow:auto;border:1px solid #f0f0f0;border-radius:6px"></div>
@@ -103,7 +103,7 @@
             </div>
 
             <h4 style="margin-top:12px">Run Daily Payouts</h4>
-            <p class="muted small">This credits daily earnings to eligible users.</p>
+            <p class="muted small">This credits daily earnings to eligible users (demo).</p>
             <div style="display:flex;gap:8px">
               <button id="btnRunDaily" class="danger">Run Daily Payouts (Admin)</button>
             </div>
@@ -118,7 +118,7 @@
           <h4>How demo payouts work</h4>
           <ol class="muted small">
             <li>When a user buys a plan, we store start date & duration.</li>
-            <li>On each site open (or when admin runs payouts), missing daily credits are added to wallet.</li>
+            <li>On each site open (or when admin runs payouts), missed daily credits are added to wallet.</li>
             <li>Withdrawals are requests that admin approves (mocked).</li>
           </ol>
         </div>
@@ -129,20 +129,20 @@
 <script>
 /*
   === IMPORTANT ===
-  1) Replace firebaseConfig below with your project's config (from Firebase Console).
-  2) Change adminEmail variable to your admin address.
+  1) The firebaseConfig below is set to your project (as requested).
+  2) Change adminEmail variable to your real admin email to access admin controls.
   3) This is a demo. Do NOT use for real money without legal compliance.
 */
 
-// ---------- FIREBASE CONFIG (REPLACE this with your config) ----------
+// ---------- FIREBASE CONFIG (your config) ----------
 var firebaseConfig = {
-  apiKey: "PASTE_API_KEY",
-  authDomain: "PASTE_PROJECT.firebaseapp.com",
-  databaseURL: "https://PASTE_PROJECT.firebaseio.com",
-  projectId: "PASTE_PROJECT",
-  storageBucket: "PASTE_PROJECT.appspot.com",
-  messagingSenderId: "XXXX",
-  appId: "1:XXXX:web:XXXX"
+  apiKey: "AIzaSyDvF1KrDDRZJucp-78dbvmQ34Oi3j17Rrk",
+  authDomain: "investment-website-deml.firebaseapp.com",
+  projectId: "investment-website-deml",
+  storageBucket: "investment-website-deml.firebasestorage.app",
+  messagingSenderId: "814451995593",
+  appId: "1:814451995593:web:55e3280d9cb43200f1ee18",
+  measurementId: "G-8FKZE5NNSX"
 };
 // ---------------------------------------------------------------------
 firebase.initializeApp(firebaseConfig);
@@ -164,7 +164,7 @@ const withdrawRef = db.ref('withdrawals');
 const defaultPlans = [
   { id: 'vip1', name: 'VIP1', price: 290, daily: 234.9, days: 47 },
   { id: 'vip2', name: 'VIP2', price: 3990, daily: 3313.7, days: 47 },
-  { id: 'vip3', name: 'VIP3', price: 9990, daily: 830, days: 47 } // sample numbers
+  { id: 'vip3', name: 'VIP3', price: 9990, daily: 830, days: 47 }
 ];
 
 // ---------- UI elements ----------
@@ -194,7 +194,6 @@ const btnSavePlan = document.getElementById('btnSavePlan');
 const btnReloadPlans = document.getElementById('btnReloadPlans');
 const btnRunDaily = document.getElementById('btnRunDaily');
 const withdrawRequests = document.getElementById('withdrawRequests');
-const adminEmailDisplay = document.getElementById('adminEmailDisplay');
 
 // ---------- Auth handlers ----------
 btnSignIn.addEventListener('click', ()=> {
@@ -209,7 +208,6 @@ btnRegister.addEventListener('click', ()=> {
   if(!e||!p){alert('Email & password required');return;}
   auth.createUserWithEmailAndPassword(e,p)
     .then(cred=>{
-      // create user record in DB
       const uid = cred.user.uid;
       const myRef = makeRefCode();
       usersRef.child(uid).set({
@@ -218,18 +216,16 @@ btnRegister.addEventListener('click', ()=> {
         refCode: myRef,
         referredBy: ref,
         createdAt: Date.now(),
-        activePlans: {}, // store purchased plans
+        activePlans: {},
         lastPayout: Date.now()
       });
       // give referral bonus if referred
       if(ref){
-        // find user by refCode
         usersRef.orderByChild('refCode').equalTo(ref).once('value', snap=>{
           if(snap.exists()){
             snap.forEach(ss=>{
               const refUid = ss.key;
-              // credit small referral bonus (demo: ₹20)
-              const bonus = 20;
+              const bonus = 20; // demo referral bonus
               usersRef.child(refUid).transaction(u=>{
                 if(u){
                   u.wallet = (u.wallet||0) + bonus;
@@ -253,7 +249,7 @@ btnSignOut.addEventListener('click', ()=> {
 function makeRefCode(){
   return 'R' + Math.random().toString(36).substring(2,9).toUpperCase();
 }
-function formatRs(x){ return (Math.round(x*100)/100).toFixed(2); }
+function formatRs(x){ return (Math.round((x||0)*100)/100).toFixed(2); }
 
 // ---------- On auth state change ----------
 let currentUser = null;
@@ -265,10 +261,9 @@ auth.onAuthStateChanged(user => {
     authForms.style.display = 'none';
     accountPanel.style.display = 'block';
 
-    // load user data
+    // create user record if missing
     usersRef.child(user.uid).once('value', snap => {
       if(!snap.exists()){
-        // ensure user record exists (in case created via console)
         usersRef.child(user.uid).set({ email: user.email, wallet:0, refCode: makeRefCode(), createdAt: Date.now(), activePlans:{}, lastPayout: Date.now()});
       }
       refreshUserUI();
@@ -339,16 +334,13 @@ function loadPlansToUI(){
 
 // ---------- Buy Plan (Demo flow) ----------
 function buyPlan(planId){
-  // In demo we instantly 'pay' by deducting price from user's wallet (or allow negative for demo)
   usersRef.child(currentUser.uid).once('value', snap=>{
     const u = snap.val();
     plansRef.child(planId).once('value', psnap=>{
       if(!psnap.exists()) return alert('Plan not found');
       const plan = psnap.val();
-      // For demo: require enough balance OR let user "deposit" using a fake deposit
       const proceed = confirm(`Buy ${plan.name} for ₹${plan.price}? (Demo: will deduct from wallet)`);
       if(!proceed) return;
-      // Deduct price and add active plan with startDate
       usersRef.child(currentUser.uid).transaction(user=>{
         if(user){
           user.wallet = (user.wallet||0) - plan.price;
@@ -395,29 +387,18 @@ function refreshUserUI(){
       }
     });
 
-    // update active plans list inside account panel (simple)
-    const activeHtml = document.createElement('div');
-    activeHtml.innerHTML = '<h4>Active Plans</h4>';
+    // update active plans list
     const ap = u.activePlans || {};
     let any=false;
+    let html = '';
     for(const k in ap){
       any=true;
       const p = ap[k];
       const daysPassed = Math.floor((Date.now() - p.start) / (1000*60*60*24));
       const remaining = Math.max(0, p.days - daysPassed);
-      const div = document.createElement('div');
-      div.className = 'muted small';
-      div.innerHTML = `<b>${p.name}</b> — started ${new Date(p.start).toLocaleDateString()} — remaining days: ${remaining}`;
-      activeHtml.appendChild(div);
+      html += `<div class="muted small"><b>${p.name}</b> — started ${new Date(p.start).toLocaleDateString()} — remaining days: ${remaining}</div>`;
     }
-    if(!any) {
-      const div = document.createElement('div'); div.className='muted small'; div.innerText='No active plans';
-      activeHtml.appendChild(div);
-    }
-    // inject below plans container
-    if(document.getElementById('activePlansView')) document.getElementById('activePlansView').remove();
-    activeHtml.id = 'activePlansView';
-    plansContainer.parentNode.insertBefore(activeHtml, plansContainer.nextSibling);
+    document.getElementById('activePlansDiv').innerHTML = any ? html : 'No active plans';
   });
 }
 
@@ -426,7 +407,6 @@ btnRequestWithdraw.addEventListener('click', ()=>{
   if(!currentUser) return alert('Sign in');
   const amt = parseFloat(withdrawAmountInput.value);
   if(!amt || amt<=0) return alert('Enter valid amount');
-  // create withdraw request record
   withdrawRef.push({ uid: currentUser.uid, amount: amt, time: Date.now(), status:'pending' });
   alert('Withdrawal requested (demo). Admin must approve.');
   withdrawAmountInput.value = '';
@@ -454,13 +434,12 @@ function loadWithdrawRequests(){
   });
 }
 
-// Admin approve withdrawal (demo): mark as paid and decrease wallet if needed
+// Admin approve withdrawal (demo)
 function approveWithdraw(key){
   if(!currentUser || currentUser.email !== adminEmail) return alert('Admin only');
   withdrawRef.child(key).once('value', snap=>{
     if(!snap.exists()) return alert('Not found');
     const r = snap.val();
-    // subtract from user's wallet (demo)
     usersRef.child(r.uid).transaction(u=>{
       if(u){
         u.wallet = (u.wallet||0) - r.amount;
@@ -487,7 +466,6 @@ btnSavePlan.addEventListener('click', ()=>{
     loadPlansToUI();
   });
 });
-
 
 btnReloadPlans.addEventListener('click', ()=> loadPlansToUI());
 
@@ -518,18 +496,16 @@ function runAutoPayoutForUser(uid){
       const toCredit = Math.max(0, eligible - (p.creditedDays||0));
       if(toCredit>0){
         any=true;
-        // update creditedDays
         updates['activePlans/'+key+'/creditedDays'] = (p.creditedDays||0) + toCredit;
-        // credit wallet
         updates['wallet'] = (u.wallet||0) + (toCredit * p.daily);
         txs.push({ uid: uid, type:'payout', amount: toCredit * p.daily, plan: p.name, days: toCredit, time: Date.now() });
       }
     }
     if(any){
-      usersRef.child(uid).update(updates, err=>{
-        if(!err){
+      usersRef.child(uid).update(updates, 
+                                            err=>{if(!err){
           txs.forEach(t => txRef.push(t));
-          alert('Auto-payouts credited on open (demo).');
+          // optional: notify user
         }
       });
     }
