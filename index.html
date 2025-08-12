@@ -24,6 +24,7 @@
     .nav{display:flex;gap:6px}
     .danger{background:#e53935}
     .info{background:#1976d2}
+    .copyBtn{padding:6px 8px;border-radius:6px;border:1px solid #ddd;background:#fff;cursor:pointer}
   </style>
 
   <!-- FIREBASE SDK (v8 - non-modular) - works on GitHub Pages -->
@@ -34,7 +35,7 @@
 <body>
   <div class="container">
     <header>
-      <h1>win89 investment (Demo)</h1>
+      <h1>Win89 — VIP Earnings (Demo)</h1>
       <div class="nav">
         <div id="userBox" class="muted small">Not signed in</div>
       </div>
@@ -64,7 +65,7 @@
           <div id="accountPanel" style="display:none">
             <h3>Your Account</h3>
             <p><b>Wallet:</b> ₹<span id="walletBalance">0.00</span></p>
-            <p><b>Referral code:</b> <span id="myRefCode">-</span></p>
+            <p><b>Referral code:</b> <span id="myRefCode">-</span> <button id="copyRefBtn" class="copyBtn">Copy Ref</button></p>
             <p class="muted small">Invite friends with your referral code to earn referral bonuses (demo).</p>
 
             <h4>VIP Plans</h4>
@@ -89,7 +90,7 @@
         <div class="card">
           <h3>Admin Panel</h3>
           <p class="muted small">Admin actions (only works if signed in as adminEmail).</p>
-          <p><b>Current admin email:</b> <span id="adminemaildisplay"></span></p>
+          <p><b>Current admin email:</b> <span id="adminEmailDisplay"></span></p>
 
           <div id="adminControls" style="display:none">
             <h4>Add / Edit VIP Plan</h4>
@@ -130,7 +131,7 @@
 /*
   === IMPORTANT ===
   1) The firebaseConfig below is set to your project (as requested).
-  2) Change adminEmail variable to your real admin email to access admin controls.
+  2) Admin email is set to sandhyabaghel905@gmail.com.
   3) This is a demo. Do NOT use for real money without legal compliance.
 */
 
@@ -147,8 +148,8 @@ var firebaseConfig = {
 // ---------------------------------------------------------------------
 firebase.initializeApp(firebaseConfig);
 
-// Admin email you will use to access admin panel (change to your email)
-const adminEmail = "admin@example.com";
+// Admin email you will use to access admin panel
+const adminEmail = "sandhyabaghel905@gmail.com";
 document.getElementById('adminEmailDisplay').innerText = adminEmail;
 
 // Realtime DB refs
@@ -194,6 +195,7 @@ const btnSavePlan = document.getElementById('btnSavePlan');
 const btnReloadPlans = document.getElementById('btnReloadPlans');
 const btnRunDaily = document.getElementById('btnRunDaily');
 const withdrawRequests = document.getElementById('withdrawRequests');
+const copyRefBtn = document.getElementById('copyRefBtn');
 
 // ---------- Auth handlers ----------
 btnSignIn.addEventListener('click', ()=> {
@@ -502,8 +504,8 @@ function runAutoPayoutForUser(uid){
       }
     }
     if(any){
-      usersRef.child(uid).update(updates, 
-                                            err=>{if(!err){
+      usersRef.child(uid).update(updates, err=>{
+        if(!err){
           txs.forEach(t => txRef.push(t));
           // optional: notify user
         }
@@ -570,6 +572,27 @@ function loadWithdrawRequests(){
   });
 }
 
+// ---------- Referral copy button ----------
+copyRefBtn.addEventListener('click', ()=>{
+  if(!currentUser) return alert('Sign in');
+  usersRef.child(currentUser.uid).once('value', snap=>{
+    const u = snap.val();
+    const code = u.refCode || '';
+    const url = window.location.origin + window.location.pathname + '?ref=' + code;
+    navigator.clipboard.writeText(url).then(()=> alert('Referral link copied to clipboard'));
+  });
+});
+
+// ---------- Referral prefill from URL ----------
+function tryPrefillRefFromUrl(){
+  const params = new URLSearchParams(window.location.search);
+  const r = params.get('ref');
+  if(r){
+    refCodeInput.value = r;
+  }
+}
+tryPrefillRefFromUrl();
+
 // initial load (plans + withdraws)
 loadPlansToUI();
 loadWithdrawRequests();
@@ -577,4 +600,3 @@ loadWithdrawRequests();
 </script>
 </body>
 </html>
-   
