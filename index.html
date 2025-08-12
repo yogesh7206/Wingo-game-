@@ -488,10 +488,117 @@ btnSavePlan.addEventListener('click', ()=>{
   });
 });
 
+
 btnReloadPlans.addEventListener('click', ()=> loadPlansToUI());
 
 // ---------- Payout logic (credits missed days) ----------
 /*
  For each active plan in user.activePlans:
    count daysPassed = floor((now - start) / 1day)
-   eligibleDays = min
+   eligibleDays = min(days, daysPassed) - creditedDays
+   if eligibleDays > 0:
+     credit eligibleDays * daily to user.wallet
+     increment creditedDays
+     record transaction(s)
+*/
+
+function runAutoPayoutForUser(uid){
+  usersRef.child(uid).once('value', snap=>{
+    if(!snap.exists()) return;
+    const u = snap.val();
+    let updates = {};
+    let txs = [];
+    const now = Date.now();
+    const aps = u.activePlans || {};
+    let any=false;
+    for(const key in aps){
+      const p = aps[key];
+      const daysPassed = Math.floor((now - p.start) / (1000*60*60*24));
+      const eligible = Math.min(p.days, daysPassed);
+      const toCredit = Math.max(0, eligible - (p.creditedDays||0));
+      if(toCredit>0){
+        any=true;
+        // update creditedDays
+        updates['activePlans/'+key+'/creditedDays'] = (p.creditedDays||0) + toCredit;
+        // credit wallet
+        updates['wallet'] = (u.wallet||0) + (toCredit * p.daily);
+        txs.push({ uid: uid, type:'payout', amount: toCredit * p.daily, plan: p.name, days: toCredit, time: Date.now() });
+      }
+    }
+    if(any){
+      usersRef.child(uid).update(updates, err=>{
+        if(!err){
+          txs.forEach(t => txRef.push(t));
+          alert('Auto-payouts credited on open (demo).');
+        }
+      });
+    }
+  });
+}
+
+// ---------- Admin: Run daily payouts for all users ----------
+btnRunDaily.addEventListener('click', ()=>{
+  if(!currentUser || currentUser.email !== adminEmail) return alert('Admin only');
+  if(!confirm('Run daily payouts for ALL users now?')) return;
+  usersRef.once('value', snap=>{
+    const now = Date.now();
+    snap.forEach(child=>{
+      const uid = child.key; const u = child.val();
+      let updates = {};
+      let txs = [];
+      const aps = u.activePlans || {};
+      let any=false;
+      for(const key in aps){
+        const p = aps[key];
+        const daysPassed = Math.floor((now - p.start) / (1000*60*60*24));
+        const eligible = Math.min(p.days, daysPassed);
+        const toCredit = Math.max(0, eligible - (p.creditedDays||0));
+        if(toCredit>0){
+          any=true;
+          updates['activePlans/'+key+'/creditedDays'] = (p.creditedDays||0) + toCredit;
+          updates['wallet'] = (u.wallet||0) + (toCredit * p.daily);
+          txs.push({ uid: uid, type:'payout', amount: toCredit * p.daily, plan: p.name, days: toCredit, time: Date.now() });
+        }
+      }
+      if(any){
+        usersRef.child(uid).update(updates, err=>{
+          if(!err){
+            txs.forEach(t=> txRef.push(t));
+          }
+        });
+      }
+    });
+    alert('Admin: daily payouts run (demo).');
+  });
+});
+
+// ---------- Load withdraw requests (admin) ----------
+function loadWithdrawRequests(){
+  withdrawRef.orderByChild('status').equalTo('pending').on('value', snap=>{
+    withdrawRequests.innerHTML = '';
+    if(!snap.exists()) return withdrawRequests.innerHTML = '<div class="muted small">No pending withdrawals</div>';
+    snap.forEach(child=>{
+      const r = child.val(); r.key = child.key;
+      const div = document.createElement('div'); div.className = 'tx';
+      div.innerHTML = `<div><b>User:</b> ${r.uid} — ₹${formatRs(r.amount)}</div>
+                       <div class="muted small">${new Date(r.time).toLocaleString()}</div>
+                       <div style="margin-top:6px"><button data-key="${r.key}" class="approveBtn">Approve</button></div>`;
+      withdrawRequests.appendChild(div);
+    });
+    Array.from(document.getElementsByClassName('approveBtn')).forEach(btn=>{
+      btn.addEventListener('click', e=>{
+        const key = btn.getAttribute('data-key');
+        approveWithdraw(key);
+      });
+    });
+  });
+}
+
+// initial load (plans + withdraws)
+loadPlansToUI();
+loadWithdrawRequests();
+
+</script>
+</body>
+</html>
+   
