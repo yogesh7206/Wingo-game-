@@ -1,141 +1,242 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Win89 - VIP Earnings (Demo)</title>
-  <meta name="description" content="Demo VIP earnings site (educational). Use your Firebase config before publishing." />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Win89 Demo — Mobile</title>
   <style>
-    body{font-family:Arial,Helvetica,sans-serif;margin:0;background:#f3f6f8;color:#222}
-    .container{max-width:980px;margin:18px auto;padding:16px}
-    header{display:flex;align-items:center;justify-content:space-between;padding:12px 0}
-    header h1{margin:0;font-size:20px;color:#0b6}
-    .card{background:#fff;border-radius:8px;padding:12px;margin:12px 0;box-shadow:0 1px 6px rgba(0,0,0,.05)}
-    .grid{display:grid;grid-template-columns:1fr 320px;gap:12px}
-    @media(max-width:880px){.grid{grid-template-columns:1fr}}
-    .center{text-align:center}
-    button{padding:8px 12px;border-radius:6px;border:none;background:#0b6;color:#fff;cursor:pointer}
-    input,select{padding:8px;border-radius:6px;border:1px solid #ddd;width:100%}
-    .muted{color:#666;font-size:13px}
+    :root{--accent:#0b8;--muted:#777}
+    body{font-family:Arial,Helvetica,sans-serif;margin:0;background:#f6f7f9;color:#222;padding-bottom:72px}
+    .app{max-width:980px;margin:0 auto;padding:12px}
+    .card{background:#fff;border-radius:10px;padding:12px;margin:10px 0;box-shadow:0 1px 6px rgba(0,0,0,.06)}
+    h3{margin:6px 0}
+    input,textarea,select,button{font-family:inherit}
+    input,textarea,select{width:100%;padding:10px;margin:6px 0;border-radius:8px;border:1px solid #e0e0e0}
+    button{padding:10px;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer}
+    .muted{color:var(--muted);font-size:13px}
     .small{font-size:13px}
-    .plan{display:flex;align-items:center;justify-content:space-between;padding:10px;border:1px solid #e6eee9;border-radius:8px;margin:8px 0}
-    .plan .left{max-width:70%}
-    .tx{font-size:13px;padding:8px;border-bottom:1px solid #f0f0f0}
-    .nav{display:flex;gap:6px}
-    .danger{background:#e53935}
-    .info{background:#1976d2}
-    .copyBtn{padding:6px 8px;border-radius:6px;border:1px solid #ddd;background:#fff;cursor:pointer}
+    .flex{display:flex;gap:8px;align-items:center}
+    .row{display:flex;gap:8px}
+    .col{flex:1}
+    .bottom-nav{position:fixed;left:0;right:0;bottom:0;height:64px;background:#ffd85a;border-top:1px solid #f0c94a;display:flex;justify-content:space-around;align-items:center;padding-bottom:4px;z-index:999}
+    .nav-item{text-align:center;font-size:12px;color:#9a9a9a}
+    .nav-item.active{color:var(--accent);font-weight:700}
+    .nav-item .icon{font-size:20px;display:block;margin-bottom:2px}
+    .hidden{display:none}
+    .tx{border-bottom:1px solid #f0f0f0;padding:8px 0}
+    .btn-ghost{background:#fff;color:#333;border:1px solid #ddd}
+    .btn-danger{background:#e53935}
+    .small-muted{font-size:12px;color:#888}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .chip{display:inline-block;padding:6px 8px;border-radius:999px;background:#f1f1f1;font-size:12px}
   </style>
-
-  <!-- FIREBASE SDK (v8 - non-modular) - works on GitHub Pages -->
+  <!-- Firebase v8 (non-modular) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
-  <div class="container">
+  <div class="app">
     <header>
-      <h1>Win89 — VIP Earnings (Demo)</h1>
-      <div class="nav">
-        <div id="userBox" class="muted small">Not signed in</div>
-      </div>
+      <h2 style="margin:8px 0;color:var(--accent)">Win89 — Demo</h2>
     </header>
 
-    <div class="grid">
-      <main>
-        <!-- Auth / Account Card -->
-        <div id="authCard" class="card">
-          <div id="authForms">
-            <h3>Sign In / Register</h3>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;">
-              <input id="email" placeholder="Email" />
-              <input id="password" type="password" placeholder="Password" />
-            </div>
-            <div style="display:flex;gap:8px;margin-top:8px">
-              <button id="btnSignIn">Sign In</button>
-              <button id="btnRegister">Register</button>
-              <button id="btnSignOut" style="display:none;background:#888">Sign Out</button>
-            </div>
-            <div style="margin-top:8px">
-              <input id="refCode" placeholder="Referral code (optional)" />
-            </div>
-            <p class="muted small">Note: This is a demo. No real payments. Replace Firebase config to run.</p>
-          </div>
-
-          <div id="accountPanel" style="display:none">
-            <h3>Your Account</h3>
-            <p><b>Wallet:</b> ₹<span id="walletBalance">0.00</span></p>
-            <p><b>Referral code:</b> <span id="myRefCode">-</span> <button id="copyRefBtn" class="copyBtn">Copy Ref</button></p>
-            <p class="muted small">Invite friends with your referral code to earn referral bonuses (demo).</p>
-
-            <h4>VIP Plans</h4>
-            <div id="plansContainer"></div>
-
-            <h4>Active Plans</h4>
-            <div id="activePlansDiv" class="muted small">No active plans</div>
-
-            <h4>Transactions</h4>
-            <div id="txList" style="max-height:220px;overflow:auto;border:1px solid #f0f0f0;border-radius:6px"></div>
-
-            <h4>Withdraw</h4>
-            <input id="withdrawAmount" placeholder="Amount to withdraw" />
-            <div style="display:flex;gap:8px;margin-top:8px">
-              <button id="btnRequestWithdraw">Request Withdrawal</button>
-            </div>
-          </div>
-        </div>
-      </main>
-
-      <aside>
+    <!-- MAIN AREAS: Home, Invest, Blog, Notice, Account -->
+    <main>
+      <!-- HOME -->
+      <section id="homeSection" class="card section">
+        <h3>Home</h3>
+        <p class="muted">Welcome to the demo Home screen. Use the bottom navigation to move between sections.</p>
         <div class="card">
-          <h3>Admin Panel</h3>
-          <p class="muted small">Admin actions (only works if signed in as adminEmail).</p>
-          <p><b>Current admin email:</b> <span id="adminEmailDisplay"></span></p>
+          <b>Featured</b>
+          <div class="muted small">Demo VIP plans and quick actions available under Invest & Account.</div>
+        </div>
+      </section>
 
-          <div id="adminControls" style="display:none">
-            <h4>Add / Edit VIP Plan</h4>
-            <input id="planName" placeholder="Name e.g., VIP1" />
-            <input id="planPrice" placeholder="Price (₹)" />
-            <input id="planDaily" placeholder="Daily earning (₹)" />
-            <input id="planDays" placeholder="Duration (days)" />
-            <div style="display:flex;gap:8px;margin-top:8px">
-              <button id="btnSavePlan">Save Plan</button>
-              <button id="btnReloadPlans" class="info">Reload Plans</button>
+      <!-- INVEST -->
+      <section id="investSection" class="card section hidden">
+        <h3>Invest</h3>
+        <p class="muted">Buy VIP plans to earn daily payouts (demo logic).</p>
+        <div id="plansList" class="card"></div>
+        <div class="card">
+          <b>Quick Admin</b>
+          <div class="muted small">If you're admin, open Admin Panel on Account section.</div>
+        </div>
+      </section>
+
+      <!-- BLOG -->
+      <section id="blogSection" class="card section hidden">
+        <h3>Blog</h3>
+        <p class="muted">This is a placeholder blog area. Add articles in DB or static content here.</p>
+        <div class="card">
+          <b>Latest</b>
+          <div class="muted small">No articles yet (demo)</div>
+        </div>
+      </section>
+
+      <!-- NOTICE -->
+      <section id="noticeSection" class="card section hidden">
+        <h3>Notice</h3>
+        <p class="muted">Announcements & notices will appear here.</p>
+        <div id="noticeList" class="card muted small">No notices (demo)</div>
+      </section>
+
+      <!-- ACCOUNT -->
+      <section id="accountSection" class="card section hidden">
+        <h3>Account</h3>
+
+        <!-- Auth -->
+        <div id="authArea">
+          <div id="signedOutUI">
+            <input id="email" placeholder="Email" />
+            <input id="password" type="password" placeholder="Password" />
+            <div class="row">
+              <button id="btnRegister">Register</button>
+              <button id="btnSignIn" class="btn-ghost">Sign In</button>
             </div>
-
-            <h4 style="margin-top:12px">Run Daily Payouts</h4>
-            <p class="muted small">This credits daily earnings to eligible users (demo).</p>
-            <div style="display:flex;gap:8px">
-              <button id="btnRunDaily" class="danger">Run Daily Payouts (Admin)</button>
-            </div>
-
-            <h4 style="margin-top:12px">Pending Withdrawals</h4>
-            <div id="withdrawRequests" style="max-height:200px;overflow:auto;border:1px solid #f0f0f0;border-radius:6px;margin-top:6px"></div>
+            <input id="refInput" placeholder="Referral code (optional)" />
+            <p class="muted small">Have account? Sign in. New users get demo referral bonus if referred.</p>
           </div>
 
-        </div>
+          <div id="signedInUI" class="hidden">
+            <p><b id="userEmail">user@example.com</b></p>
+            <div class="grid-2">
+              <div>
+                <p class="small-muted">Wallet Balance</p>
+                <h2 id="walletBalance">₹0.00</h2>
+              </div>
+              <div>
+                <p class="small-muted">Referral Code</p>
+                <div class="flex">
+                  <div id="myRef" class="chip">-</div>
+                  <button id="copyRef" class="btn-ghost">Copy Link</button>
+                </div>
+              </div>
+            </div>
 
-        <div class="card" style="margin-top:12px">
-          <h4>How demo payouts work</h4>
-          <ol class="muted small">
-            <li>When a user buys a plan, we store start date & duration.</li>
-            <li>On each site open (or when admin runs payouts), missed daily credits are added to wallet.</li>
-            <li>Withdrawals are requests that admin approves (mocked).</li>
-          </ol>
+            <!-- Wallet actions -->
+            <div style="margin-top:10px" class="row">
+              <button id="btnAddFunds">Add Funds (Demo)</button>
+              <button id="btnWithdrawUI" class="btn-ghost">Request Withdraw</button>
+            </div>
+
+            <!-- Add funds modal (simple) -->
+            <div id="addFundsDiv" class="hidden card">
+              <h4>Add Funds (Demo)</h4>
+              <input id="addAmount" placeholder="Amount (₹)" />
+              <div class="row">
+                <button id="btnAddFundsConfirm">Confirm Add</button>
+                <button id="btnAddFundsCancel" class="btn-ghost">Cancel</button>
+              </div>
+            </div>
+
+            <!-- Withdraw UI -->
+            <div id="withdrawDiv" class="hidden card">
+              <h4>Request Withdrawal</h4>
+              <input id="withdrawAmount" placeholder="Amount (₹)" />
+              <input id="withdrawNote" placeholder="UPI / Bank note (for demo)" />
+              <div class="row">
+                <button id="btnSubmitWithdraw">Submit Request</button>
+                <button id="btnCancelWithdraw" class="btn-ghost">Cancel</button>
+              </div>
+            </div>
+
+            <!-- Bank cards -->
+            <div class="card">
+              <h4>Bank Cards</h4>
+              <div id="cardsList" class="muted small">No cards added.</div>
+              <div style="margin-top:8px">
+                <input id="cardNumber" placeholder="Card number (demo)" />
+                <input id="cardName" placeholder="Cardholder name" />
+                <div class="row">
+                  <button id="btnAddCard">Add Card</button>
+                  <button id="btnClearCards" class="btn-ghost">Clear Cards</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Transactions -->
+            <div class="card">
+              <h4>Transactions</h4>
+              <div id="txList" class="muted small">No transactions yet.</div>
+            </div>
+
+            <!-- My Product -->
+            <div class="card">
+              <h4>My Product</h4>
+              <div id="productsList" class="muted small">No products yet.</div>
+              <input id="prodName" placeholder="Product name" />
+              <input id="prodPrice" placeholder="Price (₹)" />
+              <div class="row">
+                <button id="btnAddProduct">Add Product</button>
+                <button id="btnClearProducts" class="btn-ghost">Clear</button>
+              </div>
+            </div>
+
+            <!-- Customer Service / Support -->
+            <div class="card">
+              <h4>Customer Service</h4>
+              <textarea id="supportMsg" rows="3" placeholder="Write your issue or question"></textarea>
+              <div class="row">
+                <button id="btnSendSupport">Send</button>
+                <button id="btnViewSupport" class="btn-ghost">My Messages</button>
+              </div>
+              <div id="supportList" class="muted small hidden"></div>
+            </div>
+
+            <!-- Reset password -->
+            <div class="card">
+              <h4>Reset Password</h4>
+              <div class="row">
+                <input id="resetEmail" placeholder="Email to reset (or leave blank for your email)" />
+                <button id="btnResetPass" class="btn-ghost">Send Reset Email</button>
+              </div>
+            </div>
+
+            <div style="margin-top:8px" class="row">
+              <button id="btnSignOut" class="btn-ghost">Sign Out</button>
+              <button id="btnAdminPanel" class="btn-ghost hidden">Admin Panel</button>
+            </div>
+
+            <!-- Admin Panel area (shown if admin) -->
+            <div id="adminPanel" class="card hidden">
+              <h4>Admin Panel</h4>
+              <p class="muted small">Admin: create plans, run payouts, approve withdraws, view support.</p>
+              <input id="planName" placeholder="Plan name"/>
+              <input id="planPrice" placeholder="Price (₹)"/>
+              <input id="planDaily" placeholder="Daily earning (₹)"/>
+              <input id="planDays" placeholder="Duration (days)"/>
+              <div class="row">
+                <button id="btnSavePlan">Save Plan</button>
+                <button id="btnSeedPlans" class="btn-ghost">Seed Default Plans</button>
+              </div>
+              <div style="margin-top:8px" class="row">
+                <button id="btnRunDaily" class="btn-danger">Run Daily Payouts</button>
+                <button id="btnViewWithdraws" class="btn-ghost">Pending Withdrawals</button>
+              </div>
+              <div id="adminWithdraws" class="muted small"></div>
+              <div id="adminSupport" class="muted small"></div>
+            </div>
+
+          </div>
         </div>
-      </aside>
-    </div>
+      </section>
+    </main>
   </div>
 
-<script>
-/*
-  === IMPORTANT ===
-  1) The firebaseConfig below is set to your project (as requested).
-  2) Admin email is set to sandhyabaghel905@gmail.com.
-  3) This is a demo. Do NOT use for real money without legal compliance.
-*/
+  <!-- Bottom nav -->
+  <nav class="bottom-nav">
+    <div class="nav-item" data-target="homeSection"><span class="icon">🏠</span>Home</div>
+    <div class="nav-item" data-target="investSection"><span class="icon">💹</span>Invest</div>
+    <div class="nav-item" data-target="blogSection"><span class="icon">✍️</span>Blog</div>
+    <div class="nav-item" data-target="noticeSection"><span class="icon">📢</span>Notice</div>
+    <div class="nav-item" data-target="accountSection"><span class="icon">👤</span>Account</div>
+  </nav>
 
-// ---------- FIREBASE CONFIG (your config) ----------
+<script>
+/* ---------------------------
+  Firebase config (your project)
+  --------------------------- */
 var firebaseConfig = {
   apiKey: "AIzaSyDvF1KrDDRZJucp-78dbvmQ34Oi3j17Rrk",
   authDomain: "investment-website-deml.firebaseapp.com",
@@ -145,458 +246,521 @@ var firebaseConfig = {
   appId: "1:814451995593:web:55e3280d9cb43200f1ee18",
   measurementId: "G-8FKZE5NNSX"
 };
-// ---------------------------------------------------------------------
 firebase.initializeApp(firebaseConfig);
-
-// Admin email you will use to access admin panel
-const adminEmail = "sandhyabaghel905@gmail.com";
-document.getElementById('adminEmailDisplay').innerText = adminEmail;
-
-// Realtime DB refs
-const db = firebase.database();
 const auth = firebase.auth();
+const db = firebase.database();
 
+// admin email
+const adminEmail = "sandhyabaghel905@gmail.com";
+
+/* ---------------------------
+  DB refs
+--------------------------- */
 const plansRef = db.ref('plans');
 const usersRef = db.ref('users');
 const txRef = db.ref('transactions');
 const withdrawRef = db.ref('withdrawals');
+const cardsRef = db.ref('cards');
+const productsRef = db.ref('products');
+const supportRef = db.ref('support');
+const teamRef = db.ref('team');
 
-// Sample plans - if DB empty we will seed them
-const defaultPlans = [
-  { id: 'vip1', name: 'VIP1', price: 290, daily: 234.9, days: 47 },
-  { id: 'vip2', name: 'VIP2', price: 3990, daily: 3313.7, days: 47 },
-  { id: 'vip3', name: 'VIP3', price: 9990, daily: 830, days: 47 }
-];
+/* ---------------------------
+  Simple UI helpers
+--------------------------- */
+function q(id){ return document.getElementById(id); }
+function showSection(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.add('hidden'));
+  q(id).classList.remove('hidden');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>{ if(n.dataset.target===id) n.classList.add('active') });
+}
+// default show home
+showSection('homeSection');
 
-// ---------- UI elements ----------
-const emailInput = document.getElementById('email');
-const passwordInput = document.getElementById('password');
-const btnSignIn = document.getElementById('btnSignIn');
-const btnRegister = document.getElementById('btnRegister');
-const btnSignOut = document.getElementById('btnSignOut');
-const userBox = document.getElementById('userBox');
-const accountPanel = document.getElementById('accountPanel');
-const authForms = document.getElementById('authForms');
-const walletBalanceSpan = document.getElementById('walletBalance');
-const myRefCodeSpan = document.getElementById('myRefCode');
-const plansContainer = document.getElementById('plansContainer');
-const txList = document.getElementById('txList');
+/* bottom nav clicks */
+document.querySelectorAll('.nav-item').forEach(el=>{
+  el.addEventListener('click', ()=> showSection(el.dataset.target));
+});
 
-const btnRequestWithdraw = document.getElementById('btnRequestWithdraw');
-const withdrawAmountInput = document.getElementById('withdrawAmount');
-const refCodeInput = document.getElementById('refCode');
+/* ---------------------------
+  Auth & Account logic
+--------------------------- */
+let currentUser = null;
 
-const adminControls = document.getElementById('adminControls');
-const planName = document.getElementById('planName');
-const planPrice = document.getElementById('planPrice');
-const planDaily = document.getElementById('planDaily');
-const planDays = document.getElementById('planDays');
-const btnSavePlan = document.getElementById('btnSavePlan');
-const btnReloadPlans = document.getElementById('btnReloadPlans');
-const btnRunDaily = document.getElementById('btnRunDaily');
-const withdrawRequests = document.getElementById('withdrawRequests');
-const copyRefBtn = document.getElementById('copyRefBtn');
-
-// ---------- Auth handlers ----------
-btnSignIn.addEventListener('click', ()=> {
-  const e=emailInput.value.trim(), p=passwordInput.value;
-  if(!e||!p){alert('Email & password required');return;}
+q('btnSignIn').addEventListener('click', ()=>{
+  const e = q('email').value.trim(), p = q('password').value;
+  if(!e||!p) return alert('Enter email & password');
   auth.signInWithEmailAndPassword(e,p).catch(err=>alert(err.message));
 });
 
-btnRegister.addEventListener('click', ()=> {
-  const e=emailInput.value.trim(), p=passwordInput.value;
-  const ref = refCodeInput.value.trim() || null;
-  if(!e||!p){alert('Email & password required');return;}
+q('btnRegister').addEventListener('click', ()=>{
+  const e = q('email').value.trim(), p = q('password').value;
+  const referred = q('refInput').value.trim() || null;
+  if(!e||!p) return alert('Enter email & password');
   auth.createUserWithEmailAndPassword(e,p)
     .then(cred=>{
       const uid = cred.user.uid;
-      const myRef = makeRefCode();
+      const myRef = makeRef();
       usersRef.child(uid).set({
-        email:e,
-        wallet:0,
-        refCode: myRef,
-        referredBy: ref,
-        createdAt: Date.now(),
-        activePlans: {},
-        lastPayout: Date.now()
+        email:e, wallet:0, refCode: myRef, referredBy: referred, createdAt: Date.now(), activePlans:{}, lastPayout: Date.now()
       });
-      // give referral bonus if referred
-      if(ref){
-        usersRef.orderByChild('refCode').equalTo(ref).once('value', snap=>{
+      // referral bonus demo
+      if(referred){
+        usersRef.orderByChild('refCode').equalTo(referred).once('value', snap=>{
           if(snap.exists()){
-            snap.forEach(ss=>{
-              const refUid = ss.key;
-              const bonus = 20; // demo referral bonus
+            snap.forEach(s=>{
+              const refUid = s.key;
               usersRef.child(refUid).transaction(u=>{
-                if(u){
-                  u.wallet = (u.wallet||0) + bonus;
-                }
+                if(u) u.wallet = (u.wallet||0)+20;
                 return u;
               });
-              txRef.push({ uid: refUid, type:'referral_bonus', amount:bonus, time:Date.now(), from:uid });
+              txRef.push({ uid: refUid, type: 'referral', amount:20, from:uid, time:Date.now() });
             });
           }
         });
       }
-    })
-    .catch(err=>alert(err.message));
+    }).catch(err=>alert(err.message));
 });
 
-btnSignOut.addEventListener('click', ()=> {
-  auth.signOut();
-});
+q('btnSignOut').addEventListener('click', ()=> auth.signOut());
 
-// ---------- Utility ----------
-function makeRefCode(){
-  return 'R' + Math.random().toString(36).substring(2,9).toUpperCase();
-}
-function formatRs(x){ return (Math.round((x||0)*100)/100).toFixed(2); }
-
-// ---------- On auth state change ----------
-let currentUser = null;
-auth.onAuthStateChanged(user => {
+auth.onAuthStateChanged(user=>{
+  currentUser = user;
   if(user){
-    currentUser = user;
-    userBox.innerText = user.email;
-    btnSignOut.style.display = 'inline-block';
-    authForms.style.display = 'none';
-    accountPanel.style.display = 'block';
-
-    // create user record if missing
-    usersRef.child(user.uid).once('value', snap => {
-      if(!snap.exists()){
-        usersRef.child(user.uid).set({ email: user.email, wallet:0, refCode: makeRefCode(), createdAt: Date.now(), activePlans:{}, lastPayout: Date.now()});
-      }
-      refreshUserUI();
-    });
-
-    // show admin controls if current user is adminEmail
+    q('signedOutUI').classList.add('hidden');
+    q('signedInUI').classList.remove('hidden');
+    q('userEmail').innerText = user.email;
+    // show admin panel if admin
     if(user.email === adminEmail){
-      adminControls.style.display = 'block';
+      q('btnAdminPanel').classList.remove('hidden');
     } else {
-      adminControls.style.display = 'none';
+      q('btnAdminPanel').classList.add('hidden');
     }
-
-    // run automatic payouts for this user (on-open)
+    loadUserData(user.uid);
+    // auto payout for this user
     runAutoPayoutForUser(user.uid);
-    loadWithdrawRequests(); // admin list
   } else {
-    currentUser = null;
-    userBox.innerText = 'Not signed in';
-    btnSignOut.style.display = 'none';
-    authForms.style.display = 'block';
-    accountPanel.style.display = 'none';
-    adminControls.style.display = 'none';
+    q('signedOutUI').classList.remove('hidden');
+    q('signedInUI').classList.add('hidden');
   }
-  document.getElementById('adminEmailDisplay').innerText = adminEmail;
-  loadPlansToUI();
 });
 
-// ---------- Seed default plans if none exist ----------
-plansRef.once('value', snap=>{
-  if(!snap.exists()){
-    defaultPlans.forEach(p=>{
-      plansRef.child(p.id).set(p);
-    });
-  }
-  loadPlansToUI();
-});
+/* ---------------------------
+  Utility functions
+--------------------------- */
+function makeRef(){ return 'R'+Math.random().toString(36).substr(2,8).toUpperCase(); }
+function formatRs(v){ return (Math.round((v||0)*100)/100).toFixed(2); }
+function maskCard(num){ if(!num) return ''; num = num.replace(/\s+/g,''); return '**** **** **** ' + num.slice(-4); }
 
-// ---------- Load Plans UI ----------
-function loadPlansToUI(){
+/* ---------------------------
+  Load Plans & Invest UI
+--------------------------- */
+function loadPlans(){
   plansRef.once('value', snap=>{
-    plansContainer.innerHTML = '';
-    if(!snap.exists()) return;
+    const el = q('plansList'); el.innerHTML = '';
+    if(!snap.exists()){ el.innerHTML = '<div class="muted small">No plans</div>'; return; }
     snap.forEach(child=>{
-      const p = child.val(); p.id = child.key;
-      const div = document.createElement('div'); div.className='plan';
-      div.innerHTML = `
-        <div class="left">
-          <b>${p.name}</b> <div class="muted small">₹${formatRs(p.price)} — ${p.days} days</div>
-          <div class="muted small">Daily earning: ₹${formatRs(p.daily)}</div>
-        </div>
-        <div class="right">
-          <button data-plan='${p.id}' class="buyBtn">Buy</button>
-        </div>
-      `;
-      plansContainer.appendChild(div);
+      const p = child.val();
+      const d = document.createElement('div'); d.className='card';
+      d.innerHTML = `<b>${p.name}</b><div class="muted small">Price: ₹${formatRs(p.price)} • ${p.days} days • Daily ₹${formatRs(p.daily)}</div>
+        <div style="margin-top:8px"><button class="buyBtn" data-id="${child.key}">Buy</button></div>`;
+      el.appendChild(d);
     });
-
-    // attach buy handlers
-    Array.from(document.getElementsByClassName('buyBtn')).forEach(btn=>{
-      btn.addEventListener('click', e=>{
-        if(!currentUser){ alert('Sign in first'); return; }
-        const planId = btn.getAttribute('data-plan');
-        buyPlan(planId);
+    Array.from(document.getElementsByClassName('buyBtn')).forEach(b=>{
+      b.addEventListener('click', ()=> {
+        if(!currentUser) return alert('Sign in first');
+        buyPlan(b.dataset.id);
       });
     });
   });
 }
+loadPlans();
 
-// ---------- Buy Plan (Demo flow) ----------
-function buyPlan(planId){
-  usersRef.child(currentUser.uid).once('value', snap=>{
-    const u = snap.val();
-    plansRef.child(planId).once('value', psnap=>{
-      if(!psnap.exists()) return alert('Plan not found');
-      const plan = psnap.val();
-      const proceed = confirm(`Buy ${plan.name} for ₹${plan.price}? (Demo: will deduct from wallet)`);
-      if(!proceed) return;
-      usersRef.child(currentUser.uid).transaction(user=>{
-        if(user){
-          user.wallet = (user.wallet||0) - plan.price;
-          if(!user.activePlans) user.activePlans = {};
-          const key = planId + '_' + Date.now();
-          user.activePlans[key] = { planId: planId, name: plan.name, price: plan.price, daily: plan.daily, days: plan.days, start: Date.now(), creditedDays:0 };
-        }
-        return user;
-      }, (err,snap2)=> {
-        if(err) return alert('Error purchasing plan');
-        txRef.push({ uid: currentUser.uid, type:'buy', planId:planId, amount: plan.price, time:Date.now() });
-        alert('Plan purchased (demo).');
-        refreshUserUI();
-      });
-    });
-  });
-}
-
-// ---------- Refresh user UI ----------
-function refreshUserUI(){
-  if(!currentUser) return;
-  usersRef.child(currentUser.uid).on('value', snap=>{
-    const u = snap.val();
-    walletBalanceSpan.innerText = formatRs(u.wallet || 0);
-    myRefCodeSpan.innerText = u.refCode || '-';
-    // transactions
-    txRef.orderByChild('uid').equalTo(currentUser.uid).limitToLast(50).once('value', tsnap=>{
-      txList.innerHTML = '';
-      if(tsnap.exists()){
-        const arr = [];
-        tsnap.forEach(t=>{
-          arr.push(t.val());
-        });
-        arr.reverse();
-        arr.forEach(t=>{
-          const el = document.createElement('div');
-          el.className = 'tx';
-          el.innerHTML = `<div><b>${t.type}</b> <span class="muted small">₹${formatRs(t.amount||0)}</span></div>
-                          <div class="muted small">${new Date((t.time||0)).toLocaleString()}</div>`;
-          txList.appendChild(el);
-        });
-      } else {
-        txList.innerHTML = '<div class="muted small">No transactions yet.</div>';
+/* Buy plan (demo: deducts wallet & creates activePlan) */
+function buyPlan(planKey){
+  if(!currentUser) return alert('Sign in first');
+  plansRef.child(planKey).once('value', psnap=>{
+    if(!psnap.exists()) return alert('Plan not found');
+    const plan = psnap.val();
+    if(!confirm(`Buy ${plan.name} for ₹${plan.price}? (Demo)`)) return;
+    usersRef.child(currentUser.uid).transaction(u=>{
+      if(u){
+        u.wallet = (u.wallet||0) - plan.price;
+        if(!u.activePlans) u.activePlans = {};
+        const k = planKey + '_' + Date.now();
+        u.activePlans[k] = { planId: planKey, name: plan.name, price: plan.price, daily: plan.daily, days: plan.days, start: Date.now(), creditedDays:0 };
       }
+      return u;
+    }, (err,res)=>{
+      if(err) return alert('Error');
+      txRef.push({ uid: currentUser.uid, type:'buy', amount: plan.price, plan: plan.name, time:Date.now() });
+      alert('Plan purchased (demo).');
+      loadUserData(currentUser.uid);
     });
+  });
+}
 
-    // update active plans list
-    const ap = u.activePlans || {};
-    let any=false;
-    let html = '';
+/* ---------------------------
+  User data load + wallet/actions
+--------------------------- */
+function loadUserData(uid){
+  usersRef.child(uid).on('value', snap=>{
+    const u = snap.val();
+    if(!u) return;
+    q('walletBalance').innerText = '₹' + formatRs(u.wallet||0);
+    q('myRef').innerText = u.refCode || '-';
+    loadTransactions(uid);
+    loadActivePlans(uid);
+    loadCards(uid);
+    loadProducts(uid);
+    loadSupportMessages(uid);
+  });
+}
+
+/* Add Funds (fake deposit) */
+q('btnAddFunds').addEventListener('click', ()=> q('addFundsDiv').classList.toggle('hidden'));
+q('btnAddFundsCancel').addEventListener('click', ()=> q('addFundsDiv').classList.add('hidden'));
+q('btnAddFundsConfirm').addEventListener('click', ()=>{
+  if(!currentUser) return alert('Sign in');
+  const amt = parseFloat(q('addAmount').value);
+  if(!amt || amt<=0) return alert('Enter valid amount');
+  usersRef.child(currentUser.uid).transaction(u=>{
+    if(u) u.wallet = (u.wallet||0) + amt;
+    return u;
+  }, (err,res)=>{
+    if(err) return alert('Error adding funds');
+    txRef.push({ uid: currentUser.uid, type:'deposit', amount: amt, time: Date.now() });
+    alert('Added to wallet (demo).');
+    q('addFundsDiv').classList.add('hidden');
+    q('addAmount').value = '';
+  });
+});
+
+/* Withdraw request UI */
+q('btnWithdrawUI').addEventListener('click', ()=> q('withdrawDiv').classList.toggle('hidden'));
+q('btnCancelWithdraw').addEventListener('click', ()=> q('withdrawDiv').classList.add('hidden'));
+q('btnSubmitWithdraw').addEventListener('click', ()=>{
+  if(!currentUser) return alert('Sign in');
+  const amt = parseFloat(q('withdrawAmount').value);
+  if(!amt || amt<=0) return alert('Enter valid amount');
+  withdrawRef.push({ uid: currentUser.uid, amount: amt, note: q('withdrawNote').value || '', status:'pending', time: Date.now() });
+  txRef.push({ uid: currentUser.uid, type:'withdraw_request', amount: -amt, time: Date.now() });
+  alert('Withdrawal requested (demo). Admin must approve.');
+  q('withdrawDiv').classList.add('hidden'); q('withdrawAmount').value=''; q('withdrawNote').value='';
+});
+
+/* Transactions listing */
+function loadTransactions(uid){
+  txRef.orderByChild('uid').equalTo(uid).limitToLast(200).once('value', snap=>{
+    const el = q('txList'); el.innerHTML = '';
+    if(!snap.exists()){ el.innerHTML = '<div class="muted small">No transactions</div>'; return; }
+    const arr = [];
+    snap.forEach(s=> arr.push(s.val()));
+    arr.reverse();
+    arr.forEach(t=>{
+      const d = document.createElement('div'); d.className='tx';
+      d.innerHTML = `<div><b>${t.type}</b> <span class="muted small">₹${formatRs(t.amount||0)}</span></div>
+                     <div class="muted small">${t.plan||t.from||''} — ${new Date(t.time||Date.now()).toLocaleString()}</div>`;
+      el.appendChild(d);
+    });
+  });
+}
+
+/* Active plans view */
+function loadActivePlans(uid){
+  usersRef.child(uid).once('value', snap=>{
+    const u = snap.val(); const ap = u.activePlans || {};
+    let html = ''; let any=false;
     for(const k in ap){
       any=true;
       const p = ap[k];
       const daysPassed = Math.floor((Date.now() - p.start) / (1000*60*60*24));
       const remaining = Math.max(0, p.days - daysPassed);
-      html += `<div class="muted small"><b>${p.name}</b> — started ${new Date(p.start).toLocaleDateString()} — remaining days: ${remaining}</div>`;
+      html += `<div class="muted small"><b>${p.name}</b> — started ${new Date(p.start).toLocaleDateString()} — remaining ${remaining} days</div>`;
     }
-    document.getElementById('activePlansDiv').innerHTML = any ? html : 'No active plans';
+    q('activePlansDiv').innerHTML = any ? html : 'No active plans';
   });
 }
 
-// ---------- Withdraw request (demo) ----------
-btnRequestWithdraw.addEventListener('click', ()=>{
+/* ---------------------------
+  Cards (store masked)
+--------------------------- */
+q('btnAddCard').addEventListener('click', ()=>{
   if(!currentUser) return alert('Sign in');
-  const amt = parseFloat(withdrawAmountInput.value);
-  if(!amt || amt<=0) return alert('Enter valid amount');
-  withdrawRef.push({ uid: currentUser.uid, amount: amt, time: Date.now(), status:'pending' });
-  alert('Withdrawal requested (demo). Admin must approve.');
-  withdrawAmountInput.value = '';
+  const num = q('cardNumber').value.trim();
+  const name = q('cardName').value.trim() || 'Unknown';
+  if(!num) return alert('Enter card number (demo)');
+  const masked = maskCard(num);
+  const payload = { uid: currentUser.uid, numberMask: masked, name: name, addedAt: Date.now() };
+  cardsRef.push(payload, ()=> {
+    alert('Card saved (demo)');
+    q('cardNumber').value=''; q('cardName').value='';
+    loadCards(currentUser.uid);
+  });
+});
+q('btnClearCards').addEventListener('click', ()=>{
+  if(!currentUser) return alert('Sign in');
+  // remove cards for user
+  cardsRef.orderByChild('uid').equalTo(currentUser.uid).once('value', snap=>{
+    snap.forEach(s=> cardsRef.child(s.key).remove());
+  });
+  alert('Cleared cards (demo).');
+  q('cardsList').innerText = 'No cards added.';
 });
 
-// ---------- Admin: load withdraw requests ----------
-function loadWithdrawRequests(){
-  withdrawRef.orderByChild('status').equalTo('pending').on('value', snap=>{
-    withdrawRequests.innerHTML = '';
-    if(!snap.exists()) return withdrawRequests.innerHTML = '<div class="muted small">No pending withdrawals</div>';
+function loadCards(uid){
+  cardsRef.orderByChild('uid').equalTo(uid).once('value', snap=>{
+    const el = q('cardsList'); el.innerHTML = '';
+    if(!snap.exists()) return el.innerHTML = '<div class="muted small">No cards</div>';
     snap.forEach(child=>{
-      const r = child.val(); r.key = child.key;
-      const div = document.createElement('div'); div.className = 'tx';
-      div.innerHTML = `<div><b>UID:</b> ${r.uid} — ₹${formatRs(r.amount)}</div>
-                       <div class="muted small">${new Date(r.time).toLocaleString()}</div>
-                       <div style="margin-top:6px"><button data-key="${r.key}" class="approveBtn">Approve</button></div>`;
-      withdrawRequests.appendChild(div);
-    });
-    Array.from(document.getElementsByClassName('approveBtn')).forEach(btn=>{
-      btn.addEventListener('click', e=>{
-        const key = btn.getAttribute('data-key');
-        approveWithdraw(key);
-      });
+      const c = child.val();
+      const d = document.createElement('div'); d.className='muted small';
+      d.innerText = `${c.numberMask} — ${c.name} — ${new Date(c.addedAt).toLocaleDateString()}`;
+      el.appendChild(d);
     });
   });
 }
 
-// Admin approve withdrawal (demo)
-function approveWithdraw(key){
-  if(!currentUser || currentUser.email !== adminEmail) return alert('Admin only');
-  withdrawRef.child(key).once('value', snap=>{
-    if(!snap.exists()) return alert('Not found');
-    const r = snap.val();
-    usersRef.child(r.uid).transaction(u=>{
-      if(u){
-        u.wallet = (u.wallet||0) - r.amount;
-      }
-      return u;
-    }, (err, ss)=>{
-      if(err) return alert('Error processing');
-      withdrawRef.child(key).update({ status:'paid', paidAt: Date.now(), processedBy: currentUser.uid });
-      txRef.push({ uid: r.uid, type:'withdrawal', amount: -r.amount, time: Date.now() });
-      alert('Withdrawal approved (demo). Marked paid.');
-    });
-  });
-}
-
-// ---------- Admin: Save Plan ----------
-btnSavePlan.addEventListener('click', ()=>{
-  if(!currentUser || currentUser.email !== adminEmail) return alert('Admin only');
-  const name = planName.value.trim(), price = parseFloat(planPrice.value), daily = parseFloat(planDaily.value), days = parseInt(planDays.value);
-  if(!name || !price || !daily || !days) return alert('Fill plan fields');
-  const id = name.toLowerCase().replace(/\s+/g,'_') + '_' + Date.now();
-  plansRef.child(id).set({ id:id, name:name, price:price, daily:daily, days:days }, ()=> {
-    alert('Plan saved');
-    planName.value=''; planPrice.value=''; planDaily.value=''; planDays.value='';
-    loadPlansToUI();
+/* ---------------------------
+  Products
+--------------------------- */
+q('btnAddProduct').addEventListener('click', ()=>{
+  if(!currentUser) return alert('Sign in');
+  const name = q('prodName').value.trim(), price = parseFloat(q('prodPrice').value);
+  if(!name||!price) return alert('Enter product name & price');
+  productsRef.push({ uid: currentUser.uid, name:name, price:price, createdAt: Date.now() }, ()=> {
+    q('prodName').value=''; q('prodPrice').value='';
+    loadProducts(currentUser.uid);
   });
 });
-
-btnReloadPlans.addEventListener('click', ()=> loadPlansToUI());
-
-// ---------- Payout logic (credits missed days) ----------
-/*
- For each active plan in user.activePlans:
-   count daysPassed = floor((now - start) / 1day)
-   eligibleDays = min(days, daysPassed) - creditedDays
-   if eligibleDays > 0:
-     credit eligibleDays * daily to user.wallet
-     increment creditedDays
-     record transaction(s)
-*/
-
-function runAutoPayoutForUser(uid){
-  usersRef.child(uid).once('value', snap=>{
-    if(!snap.exists()) return;
-    const u = snap.val();
-    let updates = {};
-    let txs = [];
-    const now = Date.now();
-    const aps = u.activePlans || {};
-    let any=false;
-    for(const key in aps){
-      const p = aps[key];
-      const daysPassed = Math.floor((now - p.start) / (1000*60*60*24));
-      const eligible = Math.min(p.days, daysPassed);
-      const toCredit = Math.max(0, eligible - (p.creditedDays||0));
-      if(toCredit>0){
-        any=true;
-        updates['activePlans/'+key+'/creditedDays'] = (p.creditedDays||0) + toCredit;
-        updates['wallet'] = (u.wallet||0) + (toCredit * p.daily);
-        txs.push({ uid: uid, type:'payout', amount: toCredit * p.daily, plan: p.name, days: toCredit, time: Date.now() });
-      }
-    }
-    if(any){
-      usersRef.child(uid).update(updates, err=>{
-        if(!err){
-          txs.forEach(t => txRef.push(t));
-          // optional: notify user
-        }
-      });
-    }
+q('btnClearProducts').addEventListener('click', ()=>{
+  if(!currentUser) return alert('Sign in');
+  productsRef.orderByChild('uid').equalTo(currentUser.uid).once('value', snap=>{
+    snap.forEach(s=> productsRef.child(s.key).remove());
+  });
+  q('productsList').innerText = 'No products';
+});
+function loadProducts(uid){
+  productsRef.orderByChild('uid').equalTo(uid).once('value', snap=>{
+    const el = q('productsList'); el.innerHTML = '';
+    if(!snap.exists()) return el.innerHTML = '<div class="muted small">No products</div>';
+    snap.forEach(c=>{
+      const p = c.val();
+      const d = document.createElement('div'); d.className='muted small';
+      d.innerText = `${p.name} — ₹${formatRs(p.price)}`;
+      el.appendChild(d);
+    });
   });
 }
 
-// ---------- Admin: Run daily payouts for all users ----------
-btnRunDaily.addEventListener('click', ()=>{
+/* ---------------------------
+  Support messages
+--------------------------- */
+q('btnSendSupport').addEventListener('click', ()=>{
+  if(!currentUser) return alert('Sign in');
+  const msg = q('supportMsg').value.trim();
+  if(!msg) return alert('Enter message');
+  supportRef.push({ uid: currentUser.uid, message: msg, time: Date.now(), status:'open' }, ()=> {
+    alert('Support message sent (demo).');
+    q('supportMsg').value = '';
+    loadSupportMessages(currentUser.uid);
+  });
+});
+q('btnViewSupport').addEventListener('click', ()=>{
+  q('supportList').classList.toggle('hidden');
+});
+function loadSupportMessages(uid){
+  supportRef.orderByChild('uid').equalTo(uid).once('value', snap=>{
+    const el = q('supportList'); el.innerHTML = '';
+    if(!snap.exists()) return el.innerHTML = '<div class="muted small">No messages</div>';
+    snap.forEach(s=>{
+      const m = s.val();
+      const d = document.createElement('div'); d.className='muted small';
+      d.innerHTML = `<b>${m.status}</b> — ${new Date(m.time).toLocaleString()}<div>${m.message}</div><hr/>`;
+      el.appendChild(d);
+    });
+  });
+}
+
+/* ---------------------------
+  Reset password
+--------------------------- */
+q('btnResetPass').addEventListener('click', ()=>{
+  const email = q('resetEmail').value.trim() || (currentUser && currentUser.email);
+  if(!email) return alert('Enter email');
+  auth.sendPasswordResetEmail(email).then(()=> alert('Password reset email sent')).catch(err=>alert(err.message));
+});
+
+/* ---------------------------
+  Referral copy link & URL prefill
+--------------------------- */
+q('copyRef').addEventListener('click', ()=>{
+  if(!currentUser) return alert('Sign in');
+  usersRef.child(currentUser.uid).once('value', snap=>{
+    const u = snap.val(); const code = u.refCode || '';
+    const url = window.location.origin + window.location.pathname + '?ref=' + code;
+    navigator.clipboard.writeText(url).then(()=> alert('Referral link copied'));
+  });
+});
+(function prefillRef(){
+  const p = new URLSearchParams(window.location.search);
+  const r = p.get('ref'); if(r) q('refInput').value = r;
+})();
+
+/* ---------------------------
+  Admin features: seed plans, run payouts, approve withdrawals, view support
+--------------------------- */
+q('btnSeedPlans').addEventListener('click', ()=>{
   if(!currentUser || currentUser.email !== adminEmail) return alert('Admin only');
-  if(!confirm('Run daily payouts for ALL users now?')) return;
+  const defaults = [
+    { id:'vip1', name:'VIP1', price:290, daily:234.9, days:47 },
+    { id:'vip2', name:'VIP2', price:3990, daily:3313.7, days:47 },
+    { id:'vip3', name:'VIP3', price:9990, daily:830, days:47 }
+  ];
+  defaults.forEach(p=> plansRef.child(p.id).set(p));
+  loadPlans(); alert('Seeded plans');
+});
+q('btnSavePlan').addEventListener('click', ()=>{
+  if(!currentUser || currentUser.email !== adminEmail) return alert('Admin only');
+  const name = q('planName').value.trim(), price = parseFloat(q('planPrice').value), daily = parseFloat(q('planDaily').value), days = parseInt(q('planDays').value);
+  if(!name||!price||!daily||!days) return alert('Fill fields');
+  const id = name.toLowerCase().replace(/\s+/g,'_') + '_' + Date.now();
+  plansRef.child(id).set({ id:id, name:name, price:price, daily:daily, days:days }, ()=> { loadPlans(); alert('Plan saved'); });
+});
+
+/* Run daily payouts for all users (admin) */
+q('btnRunDaily').addEventListener('click', ()=> {
+  if(!currentUser || currentUser.email !== adminEmail) return alert('Admin only');
+  if(!confirm('Run daily payouts for all users now?')) return;
   usersRef.once('value', snap=>{
     const now = Date.now();
     snap.forEach(child=>{
-      const uid = child.key; const u = child.val();
-      let updates = {};
-      let txs = [];
-      const aps = u.activePlans || {};
-      let any=false;
-      for(const key in aps){
-        const p = aps[key];
-        const daysPassed = Math.floor((now - p.start) / (1000*60*60*24));
+      const uid = child.key; const u = child.val(); const aps = u.activePlans || {};
+      let updates = {}; let txs = [];
+      for(const k in aps){
+        const p = aps[k];
+        const daysPassed = Math.floor((now - p.start)/(1000*60*60*24));
         const eligible = Math.min(p.days, daysPassed);
         const toCredit = Math.max(0, eligible - (p.creditedDays||0));
         if(toCredit>0){
-          any=true;
-          updates['activePlans/'+key+'/creditedDays'] = (p.creditedDays||0) + toCredit;
+          updates['activePlans/'+k+'/creditedDays'] = (p.creditedDays||0)+toCredit;
           updates['wallet'] = (u.wallet||0) + (toCredit * p.daily);
           txs.push({ uid: uid, type:'payout', amount: toCredit * p.daily, plan: p.name, days: toCredit, time: Date.now() });
         }
       }
-      if(any){
-        usersRef.child(uid).update(updates, err=>{
-          if(!err){
-            txs.forEach(t=> txRef.push(t));
-          }
-        });
+      if(Object.keys(updates).length>0){
+        usersRef.child(uid).update(updates, ()=> txs.forEach(t=> txRef.push(t)));
       }
     });
-    alert('Admin: daily payouts run (demo).');
+    alert('Admin: payouts completed (demo).');
   });
 });
 
-// ---------- Load withdraw requests (admin) ----------
-function loadWithdrawRequests(){
-  withdrawRef.orderByChild('status').equalTo('pending').on('value', snap=>{
-    withdrawRequests.innerHTML = '';
-    if(!snap.exists()) return withdrawRequests.innerHTML = '<div class="muted small">No pending withdrawals</div>';
-    snap.forEach(child=>{
-      const r = child.val(); r.key = child.key;
-      const div = document.createElement('div'); div.className = 'tx';
-      div.innerHTML = `<div><b>User:</b> ${r.uid} — ₹${formatRs(r.amount)}</div>
-                       <div class="muted small">${new Date(r.time).toLocaleString()}</div>
-                       <div style="margin-top:6px"><button data-key="${r.key}" class="approveBtn">Approve</button></div>`;
-      withdrawRequests.appendChild(div);
+/* Admin view pending withdraws & approve */
+q('btnViewWithdraws').addEventListener('click', ()=> {
+  if(!currentUser || currentUser.email !== adminEmail) return alert('Admin only');
+  withdrawRef.orderByChild('status').equalTo('pending').once('value', snap=>{
+    const el = q('adminWithdraws'); el.innerHTML = '';
+    if(!snap.exists()) return el.innerHTML = '<div class="muted small">No pending withdraws</div>';
+    snap.forEach(s=>{
+      const r = s.val(); const div = document.createElement('div'); div.className='muted small';
+      div.innerHTML = `Req: ${r.uid} — ₹${formatRs(r.amount)} — ${new Date(r.time).toLocaleString()} <button data-key="${s.key}" class="approveBtn">Approve</button>`;
+      el.appendChild(div);
     });
-    Array.from(document.getElementsByClassName('approveBtn')).forEach(btn=>{
-      btn.addEventListener('click', e=>{
-        const key = btn.getAttribute('data-key');
-        approveWithdraw(key);
-      });
+    Array.from(document.getElementsByClassName('approveBtn')).forEach(b=>{
+      b.addEventListener('click', ()=> approveWithdraw(b.dataset.key));
+    });
+  });
+});
+function approveWithdraw(key){
+  withdrawRef.child(key).once('value', snap=>{
+    if(!snap.exists()) return alert('Not found');
+    const r = snap.val();
+    usersRef.child(r.uid).transaction(u=>{
+      if(u) u.wallet = (u.wallet||0) - r.amount;
+      return u;
+    }, ()=> {
+      withdrawRef.child(key).update({ status:'paid', paidAt: Date.now(), processedBy: currentUser.uid });
+      txRef.push({ uid: r.uid, type:'withdrawal', amount: -r.amount, time: Date.now() });
+      alert('Withdraw approved (demo).');
     });
   });
 }
 
-// ---------- Referral copy button ----------
-copyRefBtn.addEventListener('click', ()=>{
-  if(!currentUser) return alert('Sign in');
-  usersRef.child(currentUser.uid).once('value', snap=>{
-    const u = snap.val();
-    const code = u.refCode || '';
-    const url = window.location.origin + window.location.pathname + '?ref=' + code;
-    navigator.clipboard.writeText(url).then(()=> alert('Referral link copied to clipboard'));
+/* Admin view support messages */
+q('btnViewSupport')?.addEventListener('click', ()=> {
+  if(!currentUser || currentUser.email !== adminEmail) return alert('Admin only');
+});
+q('btnAdminPanel').addEventListener('click', ()=> q('adminPanel').classList.toggle('hidden'));
+
+supportRef.on('value', snap=>{
+  if(!snap.exists()) return;
+  const el = q('adminSupport'); el.innerHTML = '';
+  snap.forEach(s=>{
+    const m = s.val();
+    el.innerHTML += `<div class="muted small">From:${m.uid} — ${new Date(m.time).toLocaleString()} — ${m.message} — status:${m.status}</div>`;
   });
 });
 
-// ---------- Referral prefill from URL ----------
-function tryPrefillRefFromUrl(){
-  const params = new URLSearchParams(window.location.search);
-  const r = params.get('ref');
-  if(r){
-    refCodeInput.value = r;
-  }
+/* ---------------------------
+  Run auto payout for single user (on open)
+--------------------------- */
+function runAutoPayoutForUser(uid){
+  usersRef.child(uid).once('value', snap=>{
+    if(!snap.exists()) return;
+    const u = snap.val(); const now = Date.now(); const aps = u.activePlans || {};
+    let updates = {}; let txs = [];
+    for(const k in aps){
+      const p = aps[k];
+      const daysPassed = Math.floor((now - p.start)/(1000*60*60*24));
+      const eligible = Math.min(p.days, daysPassed);
+      const toCredit = Math.max(0, eligible - (p.creditedDays||0));
+      if(toCredit>0){
+        updates['activePlans/'+k+'/creditedDays'] = (p.creditedDays||0)+toCredit;
+        updates['wallet'] = (u.wallet||0) + (toCredit * p.daily);
+        txs.push({ uid: uid, type:'payout', amount: toCredit * p.daily, plan: p.name, days: toCredit, time: Date.now() });
+      }
+    }
+    if(Object.keys(updates).length>0){
+      usersRef.child(uid).update(updates, ()=> txs.forEach(t=> txRef.push(t)));
+    }
+  });
 }
-tryPrefillRefFromUrl();
 
-// initial load (plans + withdraws)
-loadPlansToUI();
-loadWithdrawRequests();
+/* ---------------------------
+  Load team (demo static if DB empty)
+--------------------------- */
+function loadTeam(){
+  teamRef.once('value', snap=>{
+    if(!snap.exists()){
+      // seed demo
+      const demo = [
+        {name:'Alice', role:'Support'},
+        {name:'Bob', role:'Dev'},
+        {name:'Charlie', role:'Marketing'}
+      ];
+      demo.forEach(m=> teamRef.push(m));
+    }
+  });
+}
+loadTeam();
 
+/* ---------------------------
+  Load products & support for user
+--------------------------- */
+function loadSupportMessages(uid){ supportRef.orderByChild('uid').equalTo(uid).once('value', snap=>{/* handled in loadUserData */}); }
+/* Already implemented loadProducts() earlier */
+
+/* ---------------------------
+  Initial UI: try prefill ref from url
+--------------------------- */
+(function(){ const p = new URLSearchParams(window.location.search); const r = p.get('ref'); if(r) q('refInput').value = r; })();
+
+/* ---------------------------
+  Initial load of notices / blog placeholders
+--------------------------- */
+q('noticeList').innerText = 'No notices (demo)';
 </script>
 </body>
 </html>
