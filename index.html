@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Win89 Casino Demo — Part 3 (Games & Timer)</title>
+  <title>Win89 Casino Demo — Full</title>
   <style>
     :root{--bg:#071022;--card:#0f1724;--accent:#ff9800;--muted:#9aa4b2;color:#eaf2ff}
     body{margin:0;font-family:Inter,system-ui,Arial;background:linear-gradient(180deg,#051226,#081428);color:var(--muted)}
@@ -31,17 +31,16 @@
     <div class="brand">
       <div class="logo">W89</div>
       <div>
-        <div style="font-weight:700;color:#e6f5ff">Win89 Demo — Games</div>
+        <div style="font-weight:700;color:#e6f5ff">Win89 Demo — Full</div>
         <div class="small">Play-money demo — no real payments</div>
       </div>
     </div>
 
     <nav>
-      <button class="btn" onclick="showSection('login')">Login</button>
-      <button class="btn" onclick="showSection('wallet')">Wallet</button>
-      <button class="btn" onclick="showSection('lottery')">Lottery</button>
-      <button class="btn" onclick="showSection('history')">History</button>
-      <button class="btn" onclick="showSection('leaderboard')">Leaderboard</button>
+      <button class="btn" onclick="showLeftSection('auth')">Auth</button>
+      <button class="btn" onclick="showLeftSection('lottery')">Lottery</button>
+      <button class="btn" onclick="showLeftSection('history')">History</button>
+      <button class="btn" onclick="showLeftSection('leaderboard')">Leaderboard</button>
       <button id="btnSignOut" class="btn hidden" onclick="logout()">Logout</button>
       <div id="userBadge" style="margin-left:12px;color:var(--muted)">Not signed in</div>
     </nav>
@@ -185,7 +184,7 @@
             <button id="btnSignUp" class="btn">Register</button>
             <button id="btnSignIn" class="btn">Login</button>
           </div>
-          <div style="margin-top:8px" class="small">Or use the top nav to login/register</div>
+          <div style="margin-top:8px" class="small">Or use the top nav to focus auth</div>
         </div>
       </div>
     </aside>
@@ -199,7 +198,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
   <script>
-  /********** FIREBASE CONFIG (your config inserted) **********/
+  /********** FIREBASE CONFIG (your config already inserted) **********/
   const firebaseConfig = {
     apiKey: "AIzaSyBe5kGOwYS3FsF_9_q1pjxaWrF1glUe87c",
     authDomain: "wingologin.firebaseapp.com",
@@ -225,7 +224,7 @@
     autoRepeat: false
   };
 
-  /********** Helpers **********/
+  /********** Helper functions **********/
   function fmtTime(sec){
     if(sec < 0) sec = 0;
     const s = Math.floor(sec % 60).toString().padStart(2,'0');
@@ -240,20 +239,16 @@
     document.getElementById('section-admin').classList.toggle('hidden', section !== 'admin');
   }
 
-  function showSection(name){
-    // map top nav to main behaviors
-    if(name === 'wallet') {
-      // open wallet area by focusing balance probably
-      switchTab('game');
-      window.scrollTo({top:400, behavior:'smooth'});
-    } else {
-      // simple: show login area or others - left column manages it
-      // We'll just set focus on auth if login
-      if(name === 'login') document.getElementById('authEmail').focus();
-    }
+  function showLeftSection(id){
+    // focus left UI sections (auth/lottery/history/leaderboard)
+    // we only have visual areas inside left column so just scroll
+    if(id === 'auth') document.getElementById('authEmail').focus();
+    if(id === 'lottery') switchTab('game');
+    if(id === 'history') switchTab('history');
+    if(id === 'leaderboard') switchTab('leaderboard');
   }
 
-  /********** Auth: Register/Login/Logout **********/
+  /********** Auth: Register / Login / Logout **********/
   document.getElementById('btnSignUp').addEventListener('click', async ()=>{
     const email = document.getElementById('authEmail').value.trim();
     const pw = document.getElementById('authPassword').value;
@@ -261,31 +256,29 @@
     try {
       const cred = await auth.createUserWithEmailAndPassword(email, pw);
       const uid = cred.user.uid;
-      // create user record with demo balance (also credit referral if present)
       const defaultBal = 1000;
       await db.ref('users/' + uid).set({ email, balance: defaultBal, createdAt: Date.now() });
-      // referral credit
+      // referral credit if any
       const ref = localStorage.getItem('wingo_ref');
       if(ref){
         const bonus = 50;
-        // credit referrer
         const refSnap = await db.ref('users/' + ref).once('value');
         if(refSnap.exists()){
           const prev = Number(refSnap.val().balance || 0);
           await db.ref('users/' + ref + '/balance').set(prev + bonus);
           await db.ref('referrals/' + uid).set({ refBy: ref, at: Date.now() });
         }
-        // credit new user
         const thisSnap = await db.ref('users/' + uid + '/balance').once('value');
         const cur = Number(thisSnap.val() || 0);
         await db.ref('users/' + uid + '/balance').set(cur + bonus);
         localStorage.removeItem('wingo_ref');
       }
-      alert('Registered. Demo balance added.');
+      alert('Registered — demo balance added (1000). You can now login.');
       document.getElementById('authEmail').value = '';
       document.getElementById('authPassword').value = '';
     } catch (err){
-      alert(err.message);
+      console.error('SignUp error', err);
+      alert(err.message || 'Register error');
     }
   });
 
@@ -296,31 +289,32 @@
     try {
       await auth.signInWithEmailAndPassword(email, pw);
     } catch (err){
-      alert(err.message);
+      console.error('SignIn error', err);
+      alert(err.message || 'Login error');
     }
   });
 
-  function logout(){ auth.signOut(); }
+  function logout(){ auth.signOut().catch(e=>console.error(e)); }
 
-  auth.onAuthStateChanged(async (user)=>{
+  // Single auth state listener (reliable)
+  auth.onAuthStateChanged(async (user) => {
     state.user = user;
     if(user){
       document.getElementById('userBadge').textContent = user.email || user.uid;
       document.getElementById('btnSignOut').classList.remove('hidden');
-      // ensure user record exists
+      // ensure user record exists (safeguard)
       const snap = await db.ref('users/' + user.uid).once('value');
       if(!snap.exists()){
         await db.ref('users/' + user.uid).set({ email: user.email || null, balance: 1000, createdAt: Date.now() });
       }
       await refreshBalance();
-      // update referral link
-      document.getElementById('refLink').textContent = `${location.origin+location.pathname}?ref=${user.uid}`;
+      document.getElementById('refLink').textContent = `${location.origin + location.pathname}?ref=${user.uid}`;
     } else {
       document.getElementById('userBadge').textContent = 'Not signed in';
       document.getElementById('btnSignOut').classList.add('hidden');
       document.getElementById('balanceSidebar').textContent = '—';
       document.getElementById('refLink').textContent = '—';
-      refreshBetHistoryUI(); // will show login prompt
+      refreshBetHistoryUI();
     }
   });
 
@@ -346,7 +340,7 @@
     if(cur < amt){ alert('Insufficient'); return; }
     await db.ref('users/' + uid + '/balance').set(cur - amt);
     await refreshBalance();
-    alert('Demo withdraw processed (no real money moved).');
+    alert('Demo withdraw recorded (no real transfer).');
   });
 
   async function refreshBalance(){
@@ -417,6 +411,10 @@
 
     // local feedback
     alert('Bet placed for period ' + period);
+    if(state.autoRepeat){
+      // store last bet in localStorage for auto repeat (simple)
+      localStorage.setItem('wingo_lastbet', JSON.stringify(betData));
+    }
     clearSelection();
     refreshBetHistoryUI();
   });
@@ -459,6 +457,4 @@
   /********** Result generation & settlement **********/
   function generateResult(){
     const number = Math.floor(Math.random()*10);
-    const colors = ['red','green','blue','yellow'];
-    const color = colors[Math.floor(Math.random()*colors.length)];
-    return { number,
+    const colors = ['red','green','blue','ye
