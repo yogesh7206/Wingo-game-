@@ -6,122 +6,140 @@
 <title>Investment Website</title>
 <style>
 body {
-  font-family: Arial, sans-serif;
   margin: 0;
-  background: #f4f4f4;
+  font-family: Arial, sans-serif;
+  background: #f5f5f5;
 }
 header {
-  background: #2196f3;
+  background: #2196F3;
   color: #fff;
-  padding: 15px;
-  text-align: center;
-}
-nav {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  background: #fff;
-  display: flex;
-  border-top: 1px solid #ccc;
-}
-nav button {
-  flex: 1;
   padding: 10px;
-  background: none;
-  border: none;
+  text-align: center;
+  position: relative;
+}
+header .wallet {
+  position: absolute;
+  right: 15px;
+  top: 10px;
   font-size: 14px;
+  font-weight: bold;
 }
 .page {
   display: none;
   padding: 15px;
 }
-.active {
+.page.active {
   display: block;
 }
-.menu-item {
+nav {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  display: flex;
   background: #fff;
+  border-top: 1px solid #ccc;
+}
+nav button {
+  flex: 1;
+  padding: 10px;
+  background: #fff;
+  border: none;
+  font-size: 14px;
+}
+nav button:focus {
+  outline: none;
+  background: #eee;
+}
+.menu-list {
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.menu-item {
   padding: 15px;
-  margin: 8px 0;
-  border-radius: 8px;
+  border-bottom: 1px solid #ddd;
   cursor: pointer;
-  font-weight: bold;
+}
+.menu-item:hover {
+  background: #f0f0f0;
 }
 .back-btn {
   display: inline-block;
   margin-bottom: 10px;
-  padding: 6px 12px;
-  background: #2196f3;
-  color: white;
-  border-radius: 4px;
+  padding: 8px 15px;
+  background: #2196F3;
+  color: #fff;
+  border-radius: 5px;
   cursor: pointer;
 }
-input, textarea {
-  width: 100%;
-  padding: 8px;
-  margin: 6px 0;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-button.action-btn {
-  background: #2196f3;
-  color: white;
-  padding: 10px;
-  border: none;
-  border-radius: 4px;
-  margin-top: 10px;
-}
 </style>
+<!-- Firebase App (v8) -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDvF1KrDDRZJucp-78dbvmQ34Oi3j17Rrk",
+  authDomain: "investment-website-deml.firebaseapp.com",
+  projectId: "investment-website-deml",
+  storageBucket: "investment-website-deml.firebasestorage.app",
+  messagingSenderId: "814451995593",
+  appId: "1:814451995593:web:55e3280d9cb43200f1ee18",
+  measurementId: "G-8FKZE5NNSX"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+let currentUser = null;
+</script>
 </head>
 <body>
 
 <header>
   <h2>Investment Website</h2>
-  <p>Wallet Balance: ₹0.00</p>
+  <div class="wallet">Balance: ₹<span id="walletBalance">0</span></div>
 </header>
 
-<!-- Home Page -->
+<!-- Pages -->
 <div id="homePage" class="page active">
   <h3>Home</h3>
-  <p>Welcome to the investment platform.</p>
+  <p>Welcome to our investment platform.</p>
 </div>
 
-<!-- Invest Page -->
 <div id="investPage" class="page">
   <h3>Invest</h3>
-  <p>Investment options will be shown here.</p>
+  <p>Investment plans will be shown here.</p>
 </div>
 
-<!-- Blog Page -->
 <div id="blogPage" class="page">
   <h3>Blog</h3>
-  <p>Latest updates and news.</p>
+  <p>Latest news and updates.</p>
 </div>
 
-<!-- Notice Page -->
 <div id="noticePage" class="page">
   <h3>Notice</h3>
-  <p>Important announcements will appear here.</p>
+  <p>Important announcements.</p>
 </div>
 
-<!-- Account Page -->
 <div id="accountPage" class="page">
   <h3>My Account</h3>
-  <div class="menu-item" onclick="openSubmenu('bankCardPage')">💳 Bank Card</div>
-  <div class="menu-item" onclick="openSubmenu('transactionPage')">📜 Transaction</div>
-  <div class="menu-item" onclick="openSubmenu('myProductPage')">📦 My Product</div>
-  <div class="menu-item" onclick="openSubmenu('customerServicePage')">💬 Customer Service</div>
-  <div class="menu-item" onclick="openSubmenu('resetPasswordPage')">🔒 Reset Password</div>
+  <div class="menu-list">
+    <div class="menu-item" onclick="openSubmenu('bankCardPage')">Bank Card</div>
+    <div class="menu-item" onclick="openSubmenu('transactionPage')">Transaction</div>
+    <div class="menu-item" onclick="openSubmenu('productPage')">My Product</div>
+    <div class="menu-item" onclick="openSubmenu('supportPage')">Customer Service</div>
+    <div class="menu-item" onclick="openSubmenu('resetPasswordPage')">Reset Password</div>
+  </div>
 </div>
 
 <!-- Submenu Pages -->
 <div id="bankCardPage" class="page">
   <div class="back-btn" onclick="goBack()">← Back</div>
   <h3>Bind Bank Card</h3>
-  <input type="text" placeholder="Bank Name">
-  <input type="text" placeholder="Account Holder Name">
-  <input type="text" placeholder="Account Number">
-  <input type="text" placeholder="IFSC Code">
-  <button class="action-btn">Save</button>
+  <input type="text" placeholder="IFSC Code"><br><br>
+  <input type="text" placeholder="Account Number"><br><br>
+  <input type="text" placeholder="Account Holder Name"><br><br>
+  <input type="text" placeholder="Bank Name"><br><br>
+  <button>Save</button>
 </div>
 
 <div id="transactionPage" class="page">
@@ -130,65 +148,80 @@ button.action-btn {
   <p>No transactions yet.</p>
 </div>
 
-<div id="myProductPage" class="page">
+<div id="productPage" class="page">
   <div class="back-btn" onclick="goBack()">← Back</div>
-  <h3>My Product</h3>
-  <p>Your purchased products will be shown here.</p>
+  <h3>My Products</h3>
+  <p>No products purchased yet.</p>
 </div>
 
-<div id="customerServicePage" class="page">
+<div id="supportPage" class="page">
   <div class="back-btn" onclick="goBack()">← Back</div>
   <h3>Customer Service</h3>
-  <textarea placeholder="Write your query here..."></textarea>
-  <button class="action-btn">Send</button>
+  <p>Contact us at support@example.com</p>
 </div>
 
 <div id="resetPasswordPage" class="page">
   <div class="back-btn" onclick="goBack()">← Back</div>
   <h3>Reset Password</h3>
-  <input type="password" placeholder="Old Password">
-  <input type="password" placeholder="New Password">
-  <input type="password" placeholder="Confirm New Password">
-  <button class="action-btn">Update Password</button>
+  <input type="password" placeholder="New Password"><br><br>
+  <button>Reset</button>
 </div>
 
-<!-- Bottom Navigation -->
 <nav>
-  <button onclick="showPage('homePage')">🏠 Home</button>
-  <button onclick="showPage('investPage')">💹 Invest</button>
-  <button onclick="showPage('blogPage')">📰 Blog</button>
-  <button onclick="showPage('noticePage')">📢 Notice</button>
-  <button onclick="showPage('accountPage')">👤 Account</button>
-</nav>
-<script>
-let lastMainPage = 'homePage'; // To remember where to return after submenu
+  <button onclick="showPage('homePage')">Home</button>
+  <button onclick="showPage('investPage')">Invest</button>
+  <button onclick="showPage('blogPage')">Blog</button>
+  <button onclick="showPage('noticePage')">Notice</button>
+  <button onclick="showPage('accountPage')">Account</button>
+    </nav>
+    <script>
+let lastPage = 'homePage';
 
 function showPage(pageId) {
-  // Hide all pages
-  document.querySelectorAll('.page').forEach(page => {
-    page.classList.remove('active');
-  });
-  // Show selected page
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById(pageId).classList.add('active');
-  // Update last main page if not submenu
-  if (!pageId.includes('Page') || pageId === 'homePage' || pageId === 'investPage' || pageId === 'blogPage' || pageId === 'noticePage' || pageId === 'accountPage') {
-    lastMainPage = pageId;
-  }
+  lastPage = pageId;
 }
 
 function openSubmenu(subPageId) {
-  document.querySelectorAll('.page').forEach(page => {
-    page.classList.remove('active');
-  });
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById(subPageId).classList.add('active');
 }
 
 function goBack() {
-  showPage('accountPage');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('accountPage').classList.add('active');
 }
 
-// Initialize with Home
-showPage('homePage');
+// Simulate login user and wallet load
+firebase.auth().onAuthStateChanged(user => {
+  if (user) {
+    currentUser = user;
+    loadWallet();
+  } else {
+    // Auto sign in anonymously for demo
+    firebase.auth().signInAnonymously();
+  }
+});
+
+// Load wallet balance
+function loadWallet() {
+  db.collection('wallets').doc(currentUser.uid).get().then(doc => {
+    if (doc.exists) {
+      document.getElementById('walletBalance').innerText = doc.data().balance;
+    } else {
+      db.collection('wallets').doc(currentUser.uid).set({ balance: 0 });
+      document.getElementById('walletBalance').innerText = 0;
+    }
+  });
+}
+
+// Example function to update wallet
+function updateWallet(amount) {
+  db.collection('wallets').doc(currentUser.uid).update({
+    balance: firebase.firestore.FieldValue.increment(amount)
+  }).then(() => loadWallet());
+}
 </script>
 
 </body>
