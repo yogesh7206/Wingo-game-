@@ -1,120 +1,157 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>Win89 - Investment Platform</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-body {font-family: Arial, sans-serif; margin:0; background:#f5f5f5;}
-header {background:#4CAF50; color:#fff; padding:15px; text-align:center;}
-nav {display:flex; justify-content:space-around; background:#333; position:fixed; bottom:0; width:100%;}
-nav a {color:white; padding:14px 20px; text-decoration:none; display:block;}
-nav a:hover {background:#575757;}
-section {display:none; padding:20px; margin-bottom:60px;}
-.active {display:block;}
-.card {background:#fff; padding:15px; margin:10px 0; border-radius:5px; box-shadow:0 2px 5px rgba(0,0,0,0.1);}
-button {padding:10px 15px; border:none; background:#4CAF50; color:white; border-radius:5px; cursor:pointer;}
-button:hover {background:#45a049;}
-input, textarea {width:100%; padding:8px; margin:5px 0; box-sizing:border-box;}
-</style>
+  <meta charset="UTF-8">
+  <title>Investment Website</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {margin:0; font-family:Arial, sans-serif; background:#f5f5f5;}
+    header {background:#4CAF50; color:white; padding:10px; text-align:center; font-size:18px;}
+    section {display:none; padding:15px; margin-bottom:60px;}
+    nav {display:flex; justify-content:space-around; background:#333; position:fixed; bottom:0; width:100%; padding:5px 0;}
+    nav a {color:white; text-decoration:none; text-align:center; flex:1;}
+    nav div {font-size:20px;}
+    nav small {display:block; font-size:12px;}
+    nav a:hover {background:#575757;}
+    .btn {display:block; width:100%; padding:10px; margin:5px 0; background:#4CAF50; color:white; border:none; border-radius:5px;}
+    .card {background:white; padding:15px; border-radius:5px; margin:10px 0;}
+    input, textarea, select {width:100%; padding:8px; margin:5px 0; border:1px solid #ccc; border-radius:4px;}
+  </style>
 </head>
 <body>
 
-<header>
-  <h1>Win89</h1>
-  <p>Wallet Balance: ₹<span id="wallet-balance">0</span></p>
-</header>
+<header>Investment Website</header>
 
-<!-- Navigation -->
-<nav>
-  <a href="#" onclick="showSection('home')">Home</a>
-  <a href="#" onclick="showSection('invest')">Invest</a>
-  <a href="#" onclick="showSection('blog')">Blog</a>
-  <a href="#" onclick="showSection('notice')">Notice</a>
-  <a href="#" onclick="showSection('account')">Account</a>
-</nav>
-
-<!-- Home -->
-<section id="home" class="active">
-  <div class="card"><h2>Welcome to Win89</h2><p>Your trusted investment platform.</p></div>
-  <div class="card">
-    <h3>Team</h3>
-    <button onclick="showSection('team')">View Team</button>
-  </div>
+<section id="home">
+  <h2>Home</h2>
+  <p>Welcome to our investment platform.</p>
 </section>
 
-<!-- Invest -->
 <section id="invest">
-  <div class="card"><h2>Investment Plans</h2><p>Coming soon...</p></div>
+  <h2>Invest</h2>
+  <p>Choose a plan to invest in.</p>
 </section>
 
-<!-- Blog -->
 <section id="blog">
-  <div class="card"><h2>Latest Blog</h2><p>Stay updated with tips.</p></div>
+  <h2>Blog</h2>
+  <p>Latest news and updates.</p>
 </section>
 
-<!-- Notice -->
 <section id="notice">
-  <div class="card"><h2>Notice Board</h2><p>Updates appear here.</p></div>
+  <h2>Notice</h2>
+  <p>Important announcements.</p>
 </section>
 
-<!-- Account -->
 <section id="account">
-  <div class="card"><h2>My Account</h2>
-    <button onclick="showSection('wallet-records')">Wallet Records</button>
-    <button onclick="showSection('withdrawal')">Withdrawal</button>
-    <button onclick="showSection('bank-card')">Bank Card</button>
-    <button onclick="showSection('transactions')">Transactions</button>
-    <button onclick="showSection('my-product')">My Product</button>
-    <button onclick="showSection('customer-service')">Customer Service</button>
-    <button onclick="resetPassword()">Reset Password</button>
+  <h2>Account</h2>
+  <div class="card">
+    <h3>Wallet Balance: ₹<span id="wallet-balance">0</span></h3>
+    <button class="btn" onclick="showSubPage('deposit')">Deposit</button>
+    <button class="btn" onclick="showSubPage('withdraw')">Withdraw</button>
+    <button class="btn" onclick="showSubPage('bank-card')">Bank Card</button>
+    <button class="btn" onclick="showSubPage('transactions')">Transaction History</button>
+    <button class="btn" onclick="showSubPage('my-product')">My Product</button>
+    <button class="btn" onclick="showSubPage('customer-service')">Customer Service</button>
+    <button class="btn" onclick="resetPassword()">Reset Password</button>
+    <button class="btn" onclick="logout()">Logout</button>
   </div>
 </section>
 
-<!-- Sub Pages -->
-<section id="team"><div class="card"><h2>My Team</h2></div></section>
-<section id="bank-card">
-  <div class="card"><h2>Bind Bank Card</h2>
-    <input type="text" id="bank-name" placeholder="Bank Name">
-    <input type="text" id="account-number" placeholder="Account Number">
-    <input type="text" id="ifsc-code" placeholder="IFSC Code">
-    <input type="text" id="account-holder" placeholder="Account Holder Name">
-    <button onclick="saveBankCard()">Save</button>
-  </div>
+<!-- Deposit Page -->
+<section id="deposit" class="subpage">
+  <h2>Deposit</h2>
+  <input type="number" id="deposit-amount" placeholder="Enter amount">
+  <button class="btn" onclick="deposit()">Request Deposit</button>
+  <button class="btn" onclick="backToAccount()">Back</button>
 </section>
-<section id="wallet-records"><div class="card"><h2>Wallet Records</h2><div id="wallet-record-list"></div></div></section>
-<section id="withdrawal">
-  <div class="card"><h2>Withdrawal</h2>
-    <input type="number" id="withdraw-amount" placeholder="Enter amount">
-    <button onclick="requestWithdrawal()">Request</button>
-  </div>
+
+<!-- Withdraw Page -->
+<section id="withdraw" class="subpage">
+  <h2>Withdraw</h2>
+  <input type="number" id="withdraw-amount" placeholder="Enter amount">
+  <button class="btn" onclick="withdraw()">Request Withdrawal</button>
+  <button class="btn" onclick="backToAccount()">Back</button>
 </section>
-<section id="transactions"><div class="card"><h2>Transactions</h2><div id="transactions-list"></div></div></section>
-<section id="my-product"><div class="card"><h2>My Product</h2></div></section>
-<section id="customer-service">
-  <div class="card"><h2>Customer Service</h2>
-    <textarea id="cs-message" placeholder="Write message"></textarea>
-    <button onclick="sendMessage()">Send</button>
-  </div>
+
+<!-- Bank Card Page -->
+<section id="bank-card" class="subpage">
+  <h2>Bank Card</h2>
+  <input type="text" id="bank-name" placeholder="Bank Name">
+  <input type="text" id="account-number" placeholder="Account Number">
+  <input type="text" id="ifsc-code" placeholder="IFSC Code">
+  <button class="btn" onclick="saveBankCard()">Save Bank Details</button>
+  <button class="btn" onclick="backToAccount()">Back</button>
 </section>
-<section id="admin-panel"><div class="card"><h2>Admin Panel</h2><div id="deposit-requests"></div><div id="withdrawal-requests"></div></div></section>
+
+<!-- Transactions Page -->
+<section id="transactions" class="subpage">
+  <h2>Transaction History</h2>
+  <div id="transactions-list"></div>
+  <button class="btn" onclick="backToAccount()">Back</button>
+</section>
+
+<!-- My Product Page -->
+<section id="my-product" class="subpage">
+  <h2>My Product</h2>
+  <div id="my-product-list"></div>
+  <button class="btn" onclick="backToAccount()">Back</button>
+</section>
+
+<!-- Customer Service Page -->
+<section id="customer-service" class="subpage">
+  <h2>Customer Service</h2>
+  <textarea id="cs-message" placeholder="Type your message"></textarea>
+  <button class="btn" onclick="sendMessage()">Send</button>
+  <button class="btn" onclick="backToAccount()">Back</button>
+</section>
+
+<!-- Bottom Navigation -->
+<nav>
+  <a href="#" onclick="showSection('home')">
+    <div>🏠</div>
+    <small>Home</small>
+  </a>
+  <a href="#" onclick="showSection('invest')">
+    <div>💹</div>
+    <small>Invest</small>
+  </a>
+  <a href="#" onclick="showSection('blog')">
+    <div>📰</div>
+    <small>Blog</small>
+  </a>
+  <a href="#" onclick="showSection('notice')">
+    <div>📢</div>
+    <small>Notice</small>
+  </a>
+  <a href="#" onclick="showSection('account')">
+    <div>👤</div>
+    <small>Account</small>
+  </a>
+</nav>
 
 <script>
 function showSection(id){
-  document.querySelectorAll("section").forEach(sec=>sec.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
+  document.querySelectorAll('section').forEach(sec => sec.style.display='none');
+  document.getElementById(id).style.display='block';
 }
+function showSubPage(id){
+  document.querySelectorAll('#account, .subpage').forEach(sec => sec.style.display='none');
+  document.getElementById(id).style.display='block';
+}
+function backToAccount(){
+  document.querySelectorAll('.subpage').forEach(sec => sec.style.display='none');
+  document.getElementById('account').style.display='block';
+}
+showSection('home');
 </script>
-<!-- ========= Part 2: Firebase + Logic (paste after Part 1) ========= -->
-
-<!-- Firebase v8 -->
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<!-- Firebase & App Logic -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
 <script>
-// ---------- 1) Firebase init (your config) ----------
-var firebaseConfig = {
+// Firebase config
+const firebaseConfig = {
   apiKey: "AIzaSyDvF1KrDDRZJucp-78dbvmQ34Oi3j17Rrk",
   authDomain: "investment-website-deml.firebaseapp.com",
   projectId: "investment-website-deml",
@@ -125,253 +162,159 @@ var firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
-const db   = firebase.database();
+const db = firebase.firestore();
 
-// Refs
-const usersRef    = db.ref('users');
-const cardsRef    = db.ref('bankCards');     // by uid
-const txRef       = db.ref('transactions');  // all tx
-const supportRef  = db.ref('support');
-const withdrawRef = db.ref('withdrawals');   // user requests
-const depositRef  = db.ref('deposits');      // user deposit requests (admin sees here)
+let currentUserId = null;
 
-// helpers
-const $ = id => document.getElementById(id);
-const formatRs = v => (Math.round((v||0)*100)/100).toFixed(2);
+// Auto login for testing (replace with real login UI)
+auth.signInAnonymously().then(user => {
+  currentUserId = user.user.uid;
+  loadWallet();
+}).catch(console.error);
 
-// ---------- 2) Sign-in (anonymous demo) ----------
-let currentUser = null;
-auth.signInAnonymously().catch(e=>console.warn('Anon sign-in error:', e));
+function loadWallet(){
+  db.collection("wallets").doc(currentUserId).get().then(doc=>{
+    if(doc.exists){
+      document.getElementById("wallet-balance").textContent = doc.data().balance || 0;
+    } else {
+      db.collection("wallets").doc(currentUserId).set({balance:0});
+      document.getElementById("wallet-balance").textContent = 0;
+    }
+  });
+}
 
-auth.onAuthStateChanged(async (user)=>{
-  currentUser = user;
-  if(!user) return;
-  const uid = user.uid;
+function deposit(){
+  let amount = parseFloat(document.getElementById("deposit-amount").value);
+  if(isNaN(amount) || amount <= 0) return alert("Enter valid amount");
+  db.collection("depositRequests").add({
+    userId: currentUserId,
+    amount: amount,
+    status: "pending",
+    time: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(()=>{
+    alert("Deposit request submitted");
+    document.getElementById("deposit-amount").value = "";
+  });
+}
 
-  // ensure profile
-  const snap = await usersRef.child(uid).once('value');
-  if(!snap.exists()){
-    await usersRef.child(uid).set({
-      wallet: 0,
-      createdAt: Date.now()
-    });
+function withdraw(){
+  let amount = parseFloat(document.getElementById("withdraw-amount").value);
+  if(isNaN(amount) || amount <= 0) return alert("Enter valid amount");
+  db.collection("withdrawRequests").add({
+    userId: currentUserId,
+    amount: amount,
+    status: "pending",
+    time: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(()=>{
+    alert("Withdrawal request submitted");
+    document.getElementById("withdraw-amount").value = "";
+  });
+}
+
+function saveBankCard(){
+  let bankName = document.getElementById("bank-name").value;
+  let accNumber = document.getElementById("account-number").value;
+  let ifsc = document.getElementById("ifsc-code").value;
+  if(!bankName || !accNumber || !ifsc) return alert("Fill all fields");
+  db.collection("bankCards").doc(currentUserId).set({
+    bankName, accNumber, ifsc
+  }).then(()=> alert("Bank details saved"));
+}
+
+function logout(){
+  auth.signOut().then(()=> location.reload());
+}
+
+function resetPassword(){
+  let email = prompt("Enter your email to reset password:");
+  if(email){
+    auth.sendPasswordResetEmail(email).then(()=> alert("Password reset email sent"))
+    .catch(err=> alert(err.message));
   }
+}
 
-  // live wallet balance
-  usersRef.child(uid).on('value', s=>{
-    const u = s.val() || {};
-    if($('wallet-balance')) $('wallet-balance').innerText = formatRs(u.wallet||0);
-  });
-
-  // load lists
-  loadTransactions(uid);
-  loadWalletRecords(uid);
-  loadAdminDepositList();
-  loadAdminWithdrawList();
-});
-
-// ---------- 3) BANK CARD ----------
-window.saveBankCard = async function(){
-  if(!currentUser) return alert('Please wait, signing in…');
-  const uid = currentUser.uid;
-
-  const bankName  = $('bank-name')?.value.trim();
-  const accountNo = $('account-number')?.value.trim();
-  const ifsc      = $('ifsc-code')?.value.trim();
-  const holder    = $('account-holder')?.value.trim();
-
-  if(!bankName || !accountNo || !ifsc || !holder){
-    return alert('Please fill all fields.');
-  }
-
-  await cardsRef.child(uid).set({
-    uid, bankName, accountNo, ifsc, holder, updatedAt: Date.now()
-  });
-
-  alert('Bank details saved.');
-};
-
-// ---------- 4) WITHDRAWAL ----------
-window.requestWithdrawal = async function(){
-  if(!currentUser) return alert('Please wait, signing in…');
-  const uid = currentUser.uid;
-  const amt = parseFloat($('withdraw-amount')?.value);
-
-  if(!amt || amt<=0) return alert('Enter valid amount');
-
-  // Create withdraw request (pending). Admin will approve/decline.
-  const req = await withdrawRef.push({
-    uid, amount: amt, status:'pending', time: Date.now()
-  });
-
-  // log a tx record (for user history)
-  await txRef.push({ uid, type:'withdraw_request', amount: -amt, time: Date.now(), wid: req.key });
-
-  $('withdraw-amount').value = '';
-  alert('Withdrawal request submitted.');
-  loadAdminWithdrawList(); // refresh admin view if open
-};
-
-// ---------- 5) CUSTOMER SERVICE ----------
-window.sendMessage = async function(){
-  if(!currentUser) return alert('Please wait, signing in…');
-  const uid = currentUser.uid;
-  const msg = $('cs-message')?.value.trim();
-  if(!msg) return alert('Write a message first.');
-  await supportRef.push({ uid, message: msg, status:'open', time: Date.now() });
-  $('cs-message').value = '';
-  alert('Message sent.');
-};
-
-// ---------- 6) RESET PASSWORD (email flow) ----------
-window.resetPassword = function(){
-  const email = prompt('Enter your email to receive reset link:');
-  if(!email) return;
-  auth.sendPasswordResetEmail(email)
-      .then(()=> alert('Password reset email sent.'))
-      .catch(err=> alert(err.message));
-};
-
-// ---------- 7) TRANSACTIONS & WALLET RECORDS ----------
-function loadTransactions(uid){
-  const list = $('transactions-list');
-  if(!list) return;
-  txRef.orderByChild('uid').equalTo(uid).limitToLast(200).on('value', snap=>{
-    list.innerHTML = '';
-    if(!snap.exists()) { list.innerHTML = '<p>No transactions.</p>'; return; }
-    const arr = [];
-    snap.forEach(s=>arr.push(s.val()));
-    arr.reverse();
-    arr.forEach(t=>{
-      const row = document.createElement('div');
-      row.className = 'card';
-      row.innerHTML = `<b>${t.type}</b> — ₹${formatRs(t.amount||0)}
-        <div class="muted">${new Date(t.time||Date.now()).toLocaleString()}</div>`;
-      list.appendChild(row);
-    });
+function sendMessage(){
+  let msg = document.getElementById("cs-message").value;
+  if(!msg) return alert("Enter message");
+  db.collection("customerService").add({
+    userId: currentUserId,
+    message: msg,
+    time: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(()=>{
+    alert("Message sent");
+    document.getElementById("cs-message").value = "";
   });
 }
 
-function loadWalletRecords(uid){
-  const list = $('wallet-record-list');
-  if(!list) return;
-  txRef.orderByChild('uid').equalTo(uid).limitToLast(200).on('value', snap=>{
-    list.innerHTML = '';
-    if(!snap.exists()) { list.innerHTML = '<p>No wallet records.</p>'; return; }
-    const arr = [];
-    snap.forEach(s=>arr.push(s.val()));
-    arr.reverse();
-    arr.forEach(t=>{
-      const row = document.createElement('div');
-      row.className = 'card';
-      row.innerHTML = `₹${formatRs(t.amount||0)} • ${t.type}
-        <div class="muted">${new Date(t.time||Date.now()).toLocaleString()}</div>`;
-      list.appendChild(row);
+// Load transactions
+function loadTransactions(){
+  let list = document.getElementById("transactions-list");
+  list.innerHTML = "Loading...";
+  db.collection("transactions").where("userId","==",currentUserId)
+    .orderBy("time","desc").get().then(snapshot=>{
+      list.innerHTML = "";
+      snapshot.forEach(doc=>{
+        let t = doc.data();
+        list.innerHTML += `<div class='card'>${t.type}: ₹${t.amount} (${t.status})</div>`;
+      });
     });
+}
+document.querySelector("[onclick=\"showSubPage('transactions')\"]").addEventListener("click", loadTransactions);
+
+// Admin: View deposit/withdraw requests
+function loadAdminPanel(){
+  let adminPass = prompt("Enter admin password:");
+  if(adminPass !== "admin123") return alert("Wrong password");
+  document.body.innerHTML = "<h2>Admin Panel</h2><div id='admin-deposits'></div><div id='admin-withdrawals'></div>";
+  
+  db.collection("depositRequests").orderBy("time","desc").onSnapshot(snapshot=>{
+    let html = "<h3>Deposit Requests</h3>";
+    snapshot.forEach(doc=>{
+      let d = doc.data();
+      html += `<div class='card'>User: ${d.userId} | ₹${d.amount} | ${d.status} 
+      <button onclick="approveDeposit('${doc.id}', ${d.amount}, '${d.userId}')">Approve</button>
+      </div>`;
+    });
+    document.getElementById("admin-deposits").innerHTML = html;
+  });
+
+  db.collection("withdrawRequests").orderBy("time","desc").onSnapshot(snapshot=>{
+    let html = "<h3>Withdrawal Requests</h3>";
+    snapshot.forEach(doc=>{
+      let d = doc.data();
+      html += `<div class='card'>User: ${d.userId} | ₹${d.amount} | ${d.status} 
+      <button onclick="approveWithdraw('${doc.id}', ${d.amount}, '${d.userId}')">Approve</button>
+      </div>`;
+    });
+    document.getElementById("admin-withdrawals").innerHTML = html;
   });
 }
 
-// ---------- 8) ADMIN PANEL: Deposit & Withdrawal lists ----------
-function loadAdminDepositList(){
-  const panel = $('deposit-requests');
-  if(!panel) return;
-  depositRef.orderByChild('status').equalTo('pending').on('value', snap=>{
-    panel.innerHTML = '';
-    if(!snap.exists()) { panel.innerHTML = '<p>No deposit requests.</p>'; return; }
-    snap.forEach(child=>{
-      const r = child.val();
-      const div = document.createElement('div');
-      div.className = 'card';
-      div.innerHTML = `
-        <b>Deposit:</b> ₹${formatRs(r.amount||0)}<br/>
-        <span class="muted small">UID: ${r.uid || '-'}</span><br/>
-        <span class="muted small">${new Date(r.time||Date.now()).toLocaleString()}</span>
-        <div style="margin-top:8px">
-          <button onclick="approveDeposit('${child.key}')">Approve</button>
-          <button class="btn-ghost" onclick="declineDeposit('${child.key}')">Decline</button>
-        </div>`;
-      panel.appendChild(div);
-    });
+function approveDeposit(docId, amount, userId){
+  db.collection("wallets").doc(userId).get().then(doc=>{
+    let bal = doc.exists ? doc.data().balance || 0 : 0;
+    db.collection("wallets").doc(userId).set({balance: bal + amount});
+    db.collection("transactions").add({userId, amount, type:"Deposit", status:"completed", time:firebase.firestore.FieldValue.serverTimestamp()});
+    db.collection("depositRequests").doc(docId).update({status:"approved"});
   });
 }
 
-function loadAdminWithdrawList(){
-  const panel = $('withdrawal-requests');
-  if(!panel) return;
-  withdrawRef.orderByChild('status').equalTo('pending').on('value', snap=>{
-    panel.innerHTML = '';
-    if(!snap.exists()) { panel.innerHTML = '<p>No withdrawal requests.</p>'; return; }
-    snap.forEach(child=>{
-      const r = child.val();
-      const div = document.createElement('div');
-      div.className = 'card';
-      div.innerHTML = `
-        <b>Withdraw:</b> ₹${formatRs(r.amount||0)}<br/>
-        <span class="muted small">UID: ${r.uid || '-'}</span><br/>
-        <span class="muted small">${new Date(r.time||Date.now()).toLocaleString()}</span>
-        <div style="margin-top:8px">
-          <button onclick="approveWithdraw('${child.key}')">Approve</button>
-          <button class="btn-ghost" onclick="declineWithdraw('${child.key}')">Decline</button>
-        </div>`;
-      panel.appendChild(div);
-    });
+function approveWithdraw(docId, amount, userId){
+  db.collection("wallets").doc(userId).get().then(doc=>{
+    let bal = doc.exists ? doc.data().balance || 0 : 0;
+    if(bal >= amount){
+      db.collection("wallets").doc(userId).set({balance: bal - amount});
+      db.collection("transactions").add({userId, amount, type:"Withdrawal", status:"completed", time:firebase.firestore.FieldValue.serverTimestamp()});
+      db.collection("withdrawRequests").doc(docId).update({status:"approved"});
+    } else {
+      alert("Insufficient funds");
+    }
   });
 }
-
-// Approve/Decline Deposit (credits wallet)
-window.approveDeposit = async function(key){
-  const snap = await depositRef.child(key).once('value');
-  if(!snap.exists()) return alert('Not found');
-  const r = snap.val();
-  // credit user wallet
-  await usersRef.child(r.uid).transaction(u => {
-    if(!u) u = { wallet: 0 };
-    u.wallet = (u.wallet||0) + (r.amount||0);
-    return u;
-  });
-  // mark approved
-  await depositRef.child(key).update({ status:'approved', approvedAt: Date.now() });
-  await txRef.push({ uid:r.uid, type:'deposit_approved', amount:r.amount, time: Date.now() });
-  alert('Deposit approved.');
-};
-
-window.declineDeposit = async function(key){
-  await depositRef.child(key).update({ status:'declined', declinedAt: Date.now() });
-  alert('Deposit declined.');
-};
-
-// Approve/Decline Withdraw (debits wallet)
-window.approveWithdraw = async function(key){
-  const snap = await withdrawRef.child(key).once('value');
-  if(!snap.exists()) return alert('Not found');
-  const r = snap.val();
-  // debit user wallet
-  await usersRef.child(r.uid).transaction(u => {
-    if(!u) u = { wallet: 0 };
-    u.wallet = (u.wallet||0) - (r.amount||0);
-    return u;
-  });
-  // mark paid
-  await withdrawRef.child(key).update({ status:'paid', paidAt: Date.now() });
-  await txRef.push({ uid:r.uid, type:'withdraw_paid', amount:-r.amount, time: Date.now() });
-  alert('Withdrawal marked as paid.');
-};
-
-window.declineWithdraw = async function(key){
-  await withdrawRef.child(key).update({ status:'declined', declinedAt: Date.now() });
-  alert('Withdrawal declined.');
-};
-
-// ---------- 9) (Optional) User creates a Deposit Request (no UI in Part 1) ----------
-// If you later add a "Deposit" form, call this:
-//   createDepositRequest(amount, note)
-window.createDepositRequest = async function(amount, note){
-  if(!currentUser) return alert('Please wait, signing in…');
-  if(!amount || amount<=0) return alert('Enter valid amount');
-  const uid = currentUser.uid;
-  await depositRef.push({ uid, amount, note: note||'', status:'pending', time: Date.now() });
-  await txRef.push({ uid, type:'deposit_request', amount, time: Date.now() });
-  alert('Deposit request created.');
-};
 </script>
-<!-- ========= End Part 2 ========= -->
+
+<!-- Admin Access Button -->
+<button onclick="loadAdminPanel()" style="position:fixed;top:10px;right:10px;">Admin</button>
+
+</body>
+</html>
