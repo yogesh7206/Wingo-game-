@@ -1,320 +1,528 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Investment Website</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body {margin:0; font-family:Arial, sans-serif; background:#f5f5f5;}
-    header {background:#4CAF50; color:white; padding:10px; text-align:center; font-size:18px;}
-    section {display:none; padding:15px; margin-bottom:60px;}
-    nav {display:flex; justify-content:space-around; background:#333; position:fixed; bottom:0; width:100%; padding:5px 0;}
-    nav a {color:white; text-decoration:none; text-align:center; flex:1;}
-    nav div {font-size:20px;}
-    nav small {display:block; font-size:12px;}
-    nav a:hover {background:#575757;}
-    .btn {display:block; width:100%; padding:10px; margin:5px 0; background:#4CAF50; color:white; border:none; border-radius:5px;}
-    .card {background:white; padding:15px; border-radius:5px; margin:10px 0;}
-    input, textarea, select {width:100%; padding:8px; margin:5px 0; border:1px solid #ccc; border-radius:4px;}
-  </style>
+<meta charset="UTF-8" />
+<title>Investment Website</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<style>
+  :root{
+    --brand:#2196F3;
+    --bg:#f5f7fb;
+    --card:#ffffff;
+    --text:#222;
+    --muted:#666;
+    --border:#e6e8ef;
+    --success:#23c55e;
+    --danger:#ef4444;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+  header{position:sticky;top:0;background:var(--brand);color:#fff;padding:12px 16px;z-index:5}
+  header h1{margin:0;font-size:18px}
+  header .wallet{font-size:14px;opacity:.95}
+  main{padding:16px 16px 84px}
+
+  /* Sections */
+  .section{display:none}
+  .section.active{display:block}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin:12px 0;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+
+  /* Buttons / inputs */
+  .btn{display:inline-block;background:var(--brand);color:#fff;border:none;border-radius:10px;padding:10px 14px;font-weight:600;cursor:pointer}
+  .btn.secondary{background:#0ea5e9}
+  .btn.ghost{background:#fff;color:var(--text);border:1px solid var(--border)}
+  .btn.success{background:var(--success)}
+  .btn.danger{background:var(--danger)}
+  .btn.block{width:100%}
+  input,textarea{width:100%;padding:10px;border:1px solid var(--border);border-radius:10px;background:#fff}
+  label{font-size:13px;color:var(--muted)}
+
+  /* Bottom nav */
+  nav.bottom{position:fixed;left:0;right:0;bottom:0;background:#111;color:#fff;border-top:1px solid #222;display:flex;z-index:10}
+  nav.bottom a{flex:1;text-align:center;text-decoration:none;color:#fff;padding:8px 0}
+  nav.bottom a div{font-size:20px;line-height:20px}
+  nav.bottom a small{display:block;font-size:12px;opacity:.9}
+  nav.bottom a.active{background:#1e293b}
+
+  /* Account submenu (like your screenshot) */
+  .submenu{background:#fff;border-top:1px solid var(--border);border-bottom:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .submenu-item{display:flex;align-items:center;gap:10px;padding:14px 12px;border-bottom:1px solid var(--border);cursor:pointer}
+  .submenu-item:last-child{border-bottom:none}
+  .submenu-item:hover{background:#f9fafb}
+  .submenu-icon{font-size:20px}
+  .submenu-label{flex:1;font-weight:700}
+  .submenu-arrow{font-size:20px;color:#9aa3b2}
+
+  /* Admin badge/button */
+  .admin-btn{position:fixed;right:12px;top:12px;z-index:20}
+  .muted{color:var(--muted);font-size:12px}
+
+  /* Simple grid for quick actions */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+</style>
 </head>
 <body>
+  <header>
+    <h1>Investment Website</h1>
+    <div class="wallet">Wallet Balance: ₹<span id="wallet-balance">0.00</span></div>
+  </header>
 
-<header>Investment Website</header>
+  <!-- Admin open button -->
+  <button class="btn admin-btn" onclick="openAdmin()">Admin</button>
 
-<section id="home">
-  <h2>Home</h2>
-  <p>Welcome to our investment platform.</p>
-</section>
+  <main>
+    <!-- HOME -->
+    <section id="home" class="section active">
+      <div class="card">
+        <h3 style="margin:0 0 8px">Welcome 👋</h3>
+        <div class="muted">Quick actions</div>
+        <div class="grid2" style="margin-top:10px">
+          <button class="btn block" onclick="openDepositDialog()">Deposit</button>
+          <button class="btn secondary block" onclick="openWithdrawDialog()">Withdraw</button>
+        </div>
+      </div>
 
-<section id="invest">
-  <h2>Invest</h2>
-  <p>Choose a plan to invest in.</p>
-</section>
+      <div class="card">
+        <h3 style="margin:0 0 8px">Recent Transactions</h3>
+        <div id="home-transactions" class="muted">Loading…</div>
+      </div>
+    </section>
 
-<section id="blog">
-  <h2>Blog</h2>
-  <p>Latest news and updates.</p>
-</section>
+    <!-- INVEST -->
+    <section id="invest" class="section">
+      <div class="card">
+        <h3 style="margin:0 0 8px">Invest</h3>
+        <div class="muted">Plans coming soon.</div>
+      </div>
+    </section>
 
-<section id="notice">
-  <h2>Notice</h2>
-  <p>Important announcements.</p>
-</section>
+    <!-- BLOG -->
+    <section id="blog" class="section">
+      <div class="card"><h3 style="margin:0 0 8px">Blog</h3><div class="muted">Latest tips & updates.</div></div>
+    </section>
 
-<section id="account">
-  <h2>Account</h2>
-  <div class="card">
-    <h3>Wallet Balance: ₹<span id="wallet-balance">0</span></h3>
-    <button class="btn" onclick="showSubPage('deposit')">Deposit</button>
-    <button class="btn" onclick="showSubPage('withdraw')">Withdraw</button>
-    <button class="btn" onclick="showSubPage('bank-card')">Bank Card</button>
-    <button class="btn" onclick="showSubPage('transactions')">Transaction History</button>
-    <button class="btn" onclick="showSubPage('my-product')">My Product</button>
-    <button class="btn" onclick="showSubPage('customer-service')">Customer Service</button>
-    <button class="btn" onclick="resetPassword()">Reset Password</button>
-    <button class="btn" onclick="logout()">Logout</button>
-  </div>
-</section>
+    <!-- NOTICE -->
+    <section id="notice" class="section">
+      <div class="card"><h3 style="margin:0 0 8px">Notice</h3><div class="muted">Announcements will appear here.</div></div>
+    </section>
 
-<!-- Deposit Page -->
-<section id="deposit" class="subpage">
-  <h2>Deposit</h2>
-  <input type="number" id="deposit-amount" placeholder="Enter amount">
-  <button class="btn" onclick="deposit()">Request Deposit</button>
-  <button class="btn" onclick="backToAccount()">Back</button>
-</section>
+    <!-- ACCOUNT -->
+    <section id="account" class="section">
+      <div class="card">
+        <h3 style="margin:0 0 8px">My Account</h3>
+        <div class="muted">Manage your details</div>
+      </div>
 
-<!-- Withdraw Page -->
-<section id="withdraw" class="subpage">
-  <h2>Withdraw</h2>
-  <input type="number" id="withdraw-amount" placeholder="Enter amount">
-  <button class="btn" onclick="withdraw()">Request Withdrawal</button>
-  <button class="btn" onclick="backToAccount()">Back</button>
-</section>
+      <!-- Submenu styled like your screenshot -->
+      <div class="submenu">
+        <div class="submenu-item" onclick="showAccountPane('bank')">
+          <span class="submenu-icon">💳</span>
+          <span class="submenu-label">Bank Card</span>
+          <span class="submenu-arrow">›</span>
+        </div>
+        <div class="submenu-item" onclick="showAccountPane('transactions')">
+          <span class="submenu-icon">📜</span>
+          <span class="submenu-label">Transaction</span>
+          <span class="submenu-arrow">›</span>
+        </div>
+        <div class="submenu-item" onclick="showAccountPane('product')">
+          <span class="submenu-icon">📦</span>
+          <span class="submenu-label">My Product</span>
+          <span class="submenu-arrow">›</span>
+        </div>
+        <div class="submenu-item" onclick="showAccountPane('service')">
+          <span class="submenu-icon">💬</span>
+          <span class="submenu-label">Customer Service</span>
+          <span class="submenu-arrow">›</span>
+        </div>
+        <div class="submenu-item" onclick="showAccountPane('reset')">
+          <span class="submenu-icon">🔒</span>
+          <span class="submenu-label">Reset Password</span>
+          <span class="submenu-arrow">›</span>
+        </div>
+      </div>
 
-<!-- Bank Card Page -->
-<section id="bank-card" class="subpage">
-  <h2>Bank Card</h2>
-  <input type="text" id="bank-name" placeholder="Bank Name">
-  <input type="text" id="account-number" placeholder="Account Number">
-  <input type="text" id="ifsc-code" placeholder="IFSC Code">
-  <button class="btn" onclick="saveBankCard()">Save Bank Details</button>
-  <button class="btn" onclick="backToAccount()">Back</button>
-</section>
+      <!-- Account sub-pages (inline panes) -->
+      <div id="pane-bank" class="card" style="display:none">
+        <h3 style="margin:0 0 10px">Bind Bank Card</h3>
+        <label>Bank Name</label>
+        <input id="bank-name" type="text" placeholder="Enter bank name" />
+        <label>Account Holder Name</label>
+        <input id="account-holder" type="text" placeholder="Enter account holder name" />
+        <label>Account Number</label>
+        <input id="account-number" type="text" placeholder="Enter account number" />
+        <label>IFSC Code</label>
+        <input id="ifsc-code" type="text" placeholder="Enter IFSC code" />
+        <div class="grid2" style="margin-top:8px">
+          <button class="btn block" onclick="saveBankCard()">Save</button>
+          <button class="btn ghost block" onclick="closeAccountPanes()">Close</button>
+        </div>
+        <div id="bank-saved" class="muted" style="margin-top:8px"></div>
+      </div>
 
-<!-- Transactions Page -->
-<section id="transactions" class="subpage">
-  <h2>Transaction History</h2>
-  <div id="transactions-list"></div>
-  <button class="btn" onclick="backToAccount()">Back</button>
-</section>
+      <div id="pane-transactions" class="card" style="display:none">
+        <h3 style="margin:0 0 10px">Transactions</h3>
+        <div id="transactions-list" class="muted">Loading…</div>
+        <div style="margin-top:8px"><button class="btn ghost" onclick="closeAccountPanes()">Close</button></div>
+      </div>
 
-<!-- My Product Page -->
-<section id="my-product" class="subpage">
-  <h2>My Product</h2>
-  <div id="my-product-list"></div>
-  <button class="btn" onclick="backToAccount()">Back</button>
-</section>
+      <div id="pane-product" class="card" style="display:none">
+        <h3 style="margin:0 0 10px">My Product</h3>
+        <div class="muted">Your purchased products will appear here.</div>
+        <div style="margin-top:8px"><button class="btn ghost" onclick="closeAccountPanes()">Close</button></div>
+      </div>
 
-<!-- Customer Service Page -->
-<section id="customer-service" class="subpage">
-  <h2>Customer Service</h2>
-  <textarea id="cs-message" placeholder="Type your message"></textarea>
-  <button class="btn" onclick="sendMessage()">Send</button>
-  <button class="btn" onclick="backToAccount()">Back</button>
-</section>
+      <div id="pane-service" class="card" style="display:none">
+        <h3 style="margin:0 0 10px">Customer Service</h3>
+        <textarea id="cs-message" placeholder="Write your message"></textarea>
+        <div class="grid2">
+          <button class="btn block" onclick="sendMessage()">Send</button>
+          <button class="btn ghost block" onclick="closeAccountPanes()">Close</button>
+        </div>
+      </div>
 
-<!-- Bottom Navigation -->
-<nav>
-  <a href="#" onclick="showSection('home')">
-    <div>🏠</div>
-    <small>Home</small>
-  </a>
-  <a href="#" onclick="showSection('invest')">
-    <div>💹</div>
-    <small>Invest</small>
-  </a>
-  <a href="#" onclick="showSection('blog')">
-    <div>📰</div>
-    <small>Blog</small>
-  </a>
-  <a href="#" onclick="showSection('notice')">
-    <div>📢</div>
-    <small>Notice</small>
-  </a>
-  <a href="#" onclick="showSection('account')">
-    <div>👤</div>
-    <small>Account</small>
-  </a>
-</nav>
+      <div id="pane-reset" class="card" style="display:none">
+        <h3 style="margin:0 0 10px">Reset Password</h3>
+        <div class="muted" style="margin-bottom:8px">We’ll email a reset link.</div>
+        <input id="reset-email" type="email" placeholder="Enter your email" />
+        <div class="grid2">
+          <button class="btn block" onclick="resetPassword()">Send Reset Link</button>
+          <button class="btn ghost block" onclick="closeAccountPanes()">Close</button>
+        </div>
+      </div>
+    </section>
 
-<script>
-function showSection(id){
-  document.querySelectorAll('section').forEach(sec => sec.style.display='none');
-  document.getElementById(id).style.display='block';
-}
-function showSubPage(id){
-  document.querySelectorAll('#account, .subpage').forEach(sec => sec.style.display='none');
-  document.getElementById(id).style.display='block';
-}
-function backToAccount(){
-  document.querySelectorAll('.subpage').forEach(sec => sec.style.display='none');
-  document.getElementById('account').style.display='block';
-}
-showSection('home');
-</script>
-<!-- Firebase & App Logic -->
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <!-- ADMIN PANEL (hidden until opened) -->
+    <section id="admin" class="section">
+      <div class="card">
+        <div class="grid2">
+          <button class="btn ghost" onclick="showSection('home')">← Back</button>
+          <div></div>
+        </div>
+        <h3 style="margin:10px 0">Admin Panel</h3>
+        <div class="muted">Pending deposit & withdrawal requests</div>
+      </div>
 
-<script>
-// Firebase config
-const firebaseConfig = {
-  apiKey: "AIzaSyDvF1KrDDRZJucp-78dbvmQ34Oi3j17Rrk",
-  authDomain: "investment-website-deml.firebaseapp.com",
-  projectId: "investment-website-deml",
-  storageBucket: "investment-website-deml.firebasestorage.app",
-  messagingSenderId: "814451995593",
-  appId: "1:814451995593:web:55e3280d9cb43200f1ee18",
-  measurementId: "G-8FKZE5NNSX"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+      <div class="card">
+        <h4 style="margin:0 0 8px">Deposit Requests</h4>
+        <div id="admin-deposits" class="muted">Loading…</div>
+      </div>
 
-let currentUserId = null;
+      <div class="card">
+        <h4 style="margin:0 0 8px">Withdrawal Requests</h4>
+        <div id="admin-withdrawals" class="muted">Loading…</div>
+      </div>
+    </section>
+  </main>
 
-// Auto login for testing (replace with real login UI)
-auth.signInAnonymously().then(user => {
-  currentUserId = user.user.uid;
-  loadWallet();
-}).catch(console.error);
+  <!-- Bottom Navigation -->
+  <nav class="bottom">
+    <a href="#" id="tab-home" class="active" onclick="return showSection(event,'home')">
+      <div>🏠</div><small>Home</small>
+    </a>
+    <a href="#" onclick="return showSection(event,'invest')">
+      <div>💹</div><small>Invest</small>
+    </a>
+    <a href="#" onclick="return showSection(event,'blog')">
+      <div>📰</div><small>Blog</small>
+    </a>
+    <a href="#" onclick="return showSection(event,'notice')">
+      <div>📢</div><small>Notice</small>
+    </a>
+    <a href="#" onclick="return showSection(event,'account')">
+      <div>👤</div><small>Account</small>
+    </a>
+  </nav>
 
-function loadWallet(){
-  db.collection("wallets").doc(currentUserId).get().then(doc=>{
-    if(doc.exists){
-      document.getElementById("wallet-balance").textContent = doc.data().balance || 0;
-    } else {
-      db.collection("wallets").doc(currentUserId).set({balance:0});
-      document.getElementById("wallet-balance").textContent = 0;
-    }
-  });
-}
+  <!-- Firebase v8 SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
-function deposit(){
-  let amount = parseFloat(document.getElementById("deposit-amount").value);
-  if(isNaN(amount) || amount <= 0) return alert("Enter valid amount");
-  db.collection("depositRequests").add({
-    userId: currentUserId,
-    amount: amount,
-    status: "pending",
-    time: firebase.firestore.FieldValue.serverTimestamp()
-  }).then(()=>{
-    alert("Deposit request submitted");
-    document.getElementById("deposit-amount").value = "";
-  });
-}
+  <script>
+  /* =========================
+     Firebase Initialization
+     ========================= */
+  const firebaseConfig = {
+    apiKey: "AIzaSyDvF1KrDDRZJucp-78dbvmQ34Oi3j17Rrk",
+    authDomain: "investment-website-deml.firebaseapp.com",
+    projectId: "investment-website-deml",
+    storageBucket: "investment-website-deml.firebasestorage.app",
+    messagingSenderId: "814451995593",
+    appId: "1:814451995593:web:55e3280d9cb43200f1ee18",
+    measurementId: "G-8FKZE5NNSX"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
-function withdraw(){
-  let amount = parseFloat(document.getElementById("withdraw-amount").value);
-  if(isNaN(amount) || amount <= 0) return alert("Enter valid amount");
-  db.collection("withdrawRequests").add({
-    userId: currentUserId,
-    amount: amount,
-    status: "pending",
-    time: firebase.firestore.FieldValue.serverTimestamp()
-  }).then(()=>{
-    alert("Withdrawal request submitted");
-    document.getElementById("withdraw-amount").value = "";
-  });
-}
+  let UID = null;
 
-function saveBankCard(){
-  let bankName = document.getElementById("bank-name").value;
-  let accNumber = document.getElementById("account-number").value;
-  let ifsc = document.getElementById("ifsc-code").value;
-  if(!bankName || !accNumber || !ifsc) return alert("Fill all fields");
-  db.collection("bankCards").doc(currentUserId).set({
-    bankName, accNumber, ifsc
-  }).then(()=> alert("Bank details saved"));
-}
+  // Anonymous sign-in for demo
+  auth.signInAnonymously().then(() => {
+    UID = auth.currentUser.uid;
+    ensureWallet();
+    loadWallet();
+    loadHomeTransactions();
+    preloadBankCard();
+  }).catch(err => alert(err.message));
 
-function logout(){
-  auth.signOut().then(()=> location.reload());
-}
+  /* =========================
+     UI Helpers
+     ========================= */
+  function $(id){ return document.getElementById(id); }
 
-function resetPassword(){
-  let email = prompt("Enter your email to reset password:");
-  if(email){
-    auth.sendPasswordResetEmail(email).then(()=> alert("Password reset email sent"))
-    .catch(err=> alert(err.message));
+  function showSection(ev, id){
+    if(ev) ev.preventDefault();
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('nav.bottom a').forEach(a => a.classList.remove('active'));
+    $(id).classList.add('active');
+    if(ev && ev.currentTarget) ev.currentTarget.classList.add('active');
+    // special loads
+    if(id==='account'){ /* could lazy-load something here */ }
   }
-}
 
-function sendMessage(){
-  let msg = document.getElementById("cs-message").value;
-  if(!msg) return alert("Enter message");
-  db.collection("customerService").add({
-    userId: currentUserId,
-    message: msg,
-    time: firebase.firestore.FieldValue.serverTimestamp()
-  }).then(()=>{
-    alert("Message sent");
-    document.getElementById("cs-message").value = "";
-  });
-}
+  function showAccountPane(key){
+    closeAccountPanes();
+    const paneId = 'pane-' + key;
+    const el = $(paneId);
+    if(el) el.style.display = 'block';
+    if(key==='transactions') loadTransactions();
+  }
 
-// Load transactions
-function loadTransactions(){
-  let list = document.getElementById("transactions-list");
-  list.innerHTML = "Loading...";
-  db.collection("transactions").where("userId","==",currentUserId)
-    .orderBy("time","desc").get().then(snapshot=>{
-      list.innerHTML = "";
-      snapshot.forEach(doc=>{
-        let t = doc.data();
-        list.innerHTML += `<div class='card'>${t.type}: ₹${t.amount} (${t.status})</div>`;
+  function closeAccountPanes(){
+    ['bank','transactions','product','service','reset'].forEach(k=>{
+      const el = $('pane-'+k); if(el) el.style.display='none';
+    });
+  }
+
+  /* =========================
+     Wallet
+     ========================= */
+  async function ensureWallet(){
+    const doc = await db.collection('wallets').doc(UID).get();
+    if(!doc.exists){ await db.collection('wallets').doc(UID).set({ balance: 0 }); }
+  }
+  async function loadWallet(){
+    db.collection('wallets').doc(UID).onSnapshot(snap=>{
+      const bal = (snap.data() && snap.data().balance) || 0;
+      $('wallet-balance').textContent = Number(bal).toFixed(2);
+    });
+  }
+
+  /* =========================
+     Deposit / Withdraw (User)
+     ========================= */
+  function openDepositDialog(){
+    const v = prompt('Enter deposit amount (₹):');
+    const amt = parseFloat(v);
+    if(isNaN(amt) || amt<=0) return;
+    db.collection('depositRequests').add({
+      userId: UID, amount: amt, status: 'pending',
+      time: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(()=>{
+      db.collection('transactions').add({
+        userId: UID, amount: amt, type:'deposit_request',
+        status:'pending', time: firebase.firestore.FieldValue.serverTimestamp()
       });
-    });
-}
-document.querySelector("[onclick=\"showSubPage('transactions')\"]").addEventListener("click", loadTransactions);
+      alert('Deposit request submitted.');
+    }).catch(e=>alert(e.message));
+  }
 
-// Admin: View deposit/withdraw requests
-function loadAdminPanel(){
-  let adminPass = prompt("Enter admin password:");
-  if(adminPass !== "admin123") return alert("Wrong password");
-  document.body.innerHTML = "<h2>Admin Panel</h2><div id='admin-deposits'></div><div id='admin-withdrawals'></div>";
-  
-  db.collection("depositRequests").orderBy("time","desc").onSnapshot(snapshot=>{
-    let html = "<h3>Deposit Requests</h3>";
-    snapshot.forEach(doc=>{
-      let d = doc.data();
-      html += `<div class='card'>User: ${d.userId} | ₹${d.amount} | ${d.status} 
-      <button onclick="approveDeposit('${doc.id}', ${d.amount}, '${d.userId}')">Approve</button>
-      </div>`;
-    });
-    document.getElementById("admin-deposits").innerHTML = html;
-  });
+  function openWithdrawDialog(){
+    const v = prompt('Enter withdraw amount (₹):');
+    const amt = parseFloat(v);
+    if(isNaN(amt) || amt<=0) return;
+    db.collection('withdrawRequests').add({
+      userId: UID, amount: amt, status: 'pending',
+      time: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(()=>{
+      db.collection('transactions').add({
+        userId: UID, amount: -amt, type:'withdraw_request',
+        status:'pending', time: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      alert('Withdrawal request submitted.');
+    }).catch(e=>alert(e.message));
+  }
 
-  db.collection("withdrawRequests").orderBy("time","desc").onSnapshot(snapshot=>{
-    let html = "<h3>Withdrawal Requests</h3>";
-    snapshot.forEach(doc=>{
-      let d = doc.data();
-      html += `<div class='card'>User: ${d.userId} | ₹${d.amount} | ${d.status} 
-      <button onclick="approveWithdraw('${doc.id}', ${d.amount}, '${d.userId}')">Approve</button>
-      </div>`;
-    });
-    document.getElementById("admin-withdrawals").innerHTML = html;
-  });
-}
-
-function approveDeposit(docId, amount, userId){
-  db.collection("wallets").doc(userId).get().then(doc=>{
-    let bal = doc.exists ? doc.data().balance || 0 : 0;
-    db.collection("wallets").doc(userId).set({balance: bal + amount});
-    db.collection("transactions").add({userId, amount, type:"Deposit", status:"completed", time:firebase.firestore.FieldValue.serverTimestamp()});
-    db.collection("depositRequests").doc(docId).update({status:"approved"});
-  });
-}
-
-function approveWithdraw(docId, amount, userId){
-  db.collection("wallets").doc(userId).get().then(doc=>{
-    let bal = doc.exists ? doc.data().balance || 0 : 0;
-    if(bal >= amount){
-      db.collection("wallets").doc(userId).set({balance: bal - amount});
-      db.collection("transactions").add({userId, amount, type:"Withdrawal", status:"completed", time:firebase.firestore.FieldValue.serverTimestamp()});
-      db.collection("withdrawRequests").doc(docId).update({status:"approved"});
-    } else {
-      alert("Insufficient funds");
+  /* =========================
+     Bank Card
+     ========================= */
+  async function preloadBankCard(){
+    const doc = await db.collection('bankCards').doc(UID).get();
+    if(doc.exists){
+      const d = doc.data();
+      if($('bank-name')) $('bank-name').value = d.bankName || '';
+      if($('account-holder')) $('account-holder').value = d.holder || '';
+      if($('account-number')) $('account-number').value = d.accNumber || '';
+      if($('ifsc-code')) $('ifsc-code').value = d.ifsc || '';
+      if($('bank-saved')) $('bank-saved').textContent = 'Saved • tap Save to update';
     }
-  });
-}
-</script>
+  }
+  function saveBankCard(){
+    const bankName = $('bank-name').value.trim();
+    const holder = $('account-holder').value.trim();
+    const accNumber = $('account-number').value.trim();
+    const ifsc = $('ifsc-code').value.trim();
+    if(!bankName || !holder || !accNumber || !ifsc){ alert('Please fill all fields.'); return; }
+    db.collection('bankCards').doc(UID).set({
+      bankName, holder, accNumber, ifsc, updatedAt: Date.now()
+    }).then(()=>{
+      $('bank-saved').textContent = 'Bank details saved ✔';
+    }).catch(e=>alert(e.message));
+  }
 
-<!-- Admin Access Button -->
-<button onclick="loadAdminPanel()" style="position:fixed;top:10px;right:10px;">Admin</button>
+  /* =========================
+     Customer Service
+     ========================= */
+  function sendMessage(){
+    const msg = $('cs-message').value.trim();
+    if(!msg) return alert('Write a message first.');
+    db.collection('customerService').add({
+      userId: UID, message: msg,
+      status:'open', time: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(()=>{
+      $('cs-message').value = '';
+      alert('Message sent.');
+    }).catch(e=>alert(e.message));
+  }
 
+  /* =========================
+     Password Reset
+     ========================= */
+  function resetPassword(){
+    const email = $('reset-email').value.trim();
+    if(!email) return alert('Enter your email.');
+    auth.sendPasswordResetEmail(email)
+      .then(()=>alert('Password reset email sent.'))
+      .catch(err=>alert(err.message));
+  }
+
+  /* =========================
+     Transactions (list)
+     ========================= */
+  function renderTxItem(t){
+    const amt = Number(t.amount||0);
+    const sign = amt>=0 ? '+' : '–';
+    const color = amt>=0 ? 'style="color:#16a34a;font-weight:700"' : 'style="color:#ef4444;font-weight:700"';
+    const when = t.time && t.time.toDate ? t.time.toDate() : new Date();
+    return `<div class="card" style="margin:8px 0">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><strong>${t.type||'transaction'}</strong><div class="muted">${when.toLocaleString()}</div></div>
+        <div ${color}>${sign}₹${Math.abs(amt).toFixed(2)}</div>
+      </div>
+    </div>`;
+  }
+
+  function loadTransactions(){
+    const list = $('transactions-list');
+    list.innerHTML = 'Loading…';
+    db.collection('transactions')
+      .where('userId','==',UID).orderBy('time','desc').limit(50)
+      .get().then(snap=>{
+        if(snap.empty){ list.innerHTML = '<div class="muted">No transactions yet.</div>'; return; }
+        let html = '';
+        snap.forEach(doc=> html += renderTxItem(doc.data()));
+        list.innerHTML = html;
+      });
+  }
+  function loadHomeTransactions(){
+    const list = $('home-transactions');
+    db.collection('transactions')
+      .where('userId','==',UID).orderBy('time','desc').limit(5)
+      .onSnapshot(snap=>{
+        if(snap.empty){ list.innerHTML = 'No recent activity.'; return; }
+        let html = '';
+        snap.forEach(doc=> html += renderTxItem(doc.data()));
+        list.innerHTML = html;
+      });
+  }
+
+  /* =========================
+     Admin (simple)
+     ========================= */
+  function openAdmin(){
+    const pwd = prompt('Enter admin password:');
+    if(pwd!=='admin123') { alert('Wrong password'); return; }
+    showSection(null,'admin'); // go to admin page
+
+    // deposits
+    db.collection('depositRequests').orderBy('time','desc')
+      .onSnapshot(snap=>{
+        const el = $('admin-deposits');
+        if(snap.empty){ el.textContent = 'No deposit requests.'; return; }
+        let html='';
+        snap.forEach(doc=>{
+          const d = doc.data();
+          const when = d.time && d.time.toDate ? d.time.toDate().toLocaleString() : '';
+          html += `<div class="card">
+            <div><strong>UID:</strong> ${d.userId} • <strong>₹${Number(d.amount||0).toFixed(2)}</strong> • <span class="muted">${d.status||'pending'} • ${when}</span></div>
+            <div style="margin-top:8px;display:flex;gap:8px">
+              <button class="btn success" onclick="approveDeposit('${doc.id}','${d.userId}',${Number(d.amount||0)})">Approve</button>
+              <button class="btn danger" onclick="declineDeposit('${doc.id}')">Decline</button>
+            </div>
+          </div>`;
+        });
+        el.innerHTML = html;
+      });
+
+    // withdrawals
+    db.collection('withdrawRequests').orderBy('time','desc')
+      .onSnapshot(snap=>{
+        const el = $('admin-withdrawals');
+        if(snap.empty){ el.textContent = 'No withdrawal requests.'; return; }
+        let html='';
+        snap.forEach(doc=>{
+          const d = doc.data();
+          const when = d.time && d.time.toDate ? d.time.toDate().toLocaleString() : '';
+          html += `<div class="card">
+            <div><strong>UID:</strong> ${d.userId} • <strong>₹${Number(d.amount||0).toFixed(2)}</strong> • <span class="muted">${d.status||'pending'} • ${when}</span></div>
+            <div style="margin-top:8px;display:flex;gap:8px">
+              <button class="btn success" onclick="approveWithdraw('${doc.id}','${d.userId}',${Number(d.amount||0)})">Approve</button>
+              <button class="btn danger" onclick="declineWithdraw('${doc.id}')">Decline</button>
+            </div>
+          </div>`;
+        });
+        el.innerHTML = html;
+      });
+  }
+
+  // Admin actions
+  async function approveDeposit(docId, userId, amount){
+    // credit wallet
+    const wref = db.collection('wallets').doc(userId);
+    const wdoc = await wref.get();
+    const bal = wdoc.exists ? (wdoc.data().balance||0) : 0;
+    await wref.set({ balance: bal + amount });
+    // mark approved
+    await db.collection('depositRequests').doc(docId).update({ status:'approved' });
+    await db.collection('transactions').add({
+      userId, amount, type:'deposit_approved', status:'completed',
+      time: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    alert('Deposit approved.');
+  }
+  async function declineDeposit(docId){
+    await db.collection('depositRequests').doc(docId).update({ status:'declined' });
+    alert('Deposit declined.');
+  }
+  async function approveWithdraw(docId, userId, amount){
+    const wref = db.collection('wallets').doc(userId);
+    const wdoc = await wref.get();
+    const bal = wdoc.exists ? (wdoc.data().balance||0) : 0;
+    if(bal < amount){ alert('Insufficient wallet balance'); return; }
+    await wref.set({ balance: bal - amount });
+    await db.collection('withdrawRequests').doc(docId).update({ status:'approved' });
+    await db.collection('transactions').add({
+      userId, amount:-amount, type:'withdraw_paid', status:'completed',
+      time: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    alert('Withdrawal marked as paid.');
+  }
+  async function declineWithdraw(docId){
+    await db.collection('withdrawRequests').doc(docId).update({ status:'declined' });
+    alert('Withdrawal declined.');
+  }
+  </script>
 </body>
 </html>
