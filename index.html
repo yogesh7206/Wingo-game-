@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Investment Website</title>
+<!-- Font Awesome for Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 body {
   margin: 0;
@@ -13,16 +15,14 @@ body {
 header {
   background: #2196F3;
   color: #fff;
-  padding: 10px;
+  padding: 15px;
   text-align: center;
+  font-size: 18px;
   position: relative;
 }
 header .wallet {
-  position: absolute;
-  right: 15px;
-  top: 10px;
   font-size: 14px;
-  font-weight: bold;
+  margin-top: 5px;
 }
 .page {
   display: none;
@@ -46,183 +46,195 @@ nav button {
   border: none;
   font-size: 14px;
 }
-nav button:focus {
-  outline: none;
-  background: #eee;
+nav button i {
+  display: block;
+  font-size: 18px;
+  margin-bottom: 3px;
 }
 .menu-list {
   background: #fff;
   border-radius: 10px;
   overflow: hidden;
+  margin-top: 15px;
 }
 .menu-item {
-  padding: 15px;
-  border-bottom: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border-bottom: 1px solid #eee;
   cursor: pointer;
 }
-.menu-item:hover {
-  background: #f0f0f0;
+.menu-item i {
+  margin-right: 10px;
+  color: #2196F3;
+  font-size: 18px;
+}
+.menu-item span {
+  font-size: 16px;
 }
 .back-btn {
-  display: inline-block;
-  margin-bottom: 10px;
-  padding: 8px 15px;
   background: #2196F3;
   color: #fff;
+  padding: 10px;
+  border: none;
   border-radius: 5px;
-  cursor: pointer;
+  margin-bottom: 10px;
 }
 </style>
-<!-- Firebase App (v8) -->
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyDvF1KrDDRZJucp-78dbvmQ34Oi3j17Rrk",
-  authDomain: "investment-website-deml.firebaseapp.com",
-  projectId: "investment-website-deml",
-  storageBucket: "investment-website-deml.firebasestorage.app",
-  messagingSenderId: "814451995593",
-  appId: "1:814451995593:web:55e3280d9cb43200f1ee18",
-  measurementId: "G-8FKZE5NNSX"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-let currentUser = null;
-</script>
 </head>
 <body>
 
 <header>
-  <h2>Investment Website</h2>
-  <div class="wallet">Balance: ₹<span id="walletBalance">0</span></div>
+  Investment Website
+  <div class="wallet">Wallet Balance: ₹<span id="wallet-balance">0</span></div>
 </header>
 
 <!-- Pages -->
-<div id="homePage" class="page active">
-  <h3>Home</h3>
-  <p>Welcome to our investment platform.</p>
+<div id="home" class="page active">
+  <h2>Home</h2>
+  <p>Welcome to the Investment Platform.</p>
 </div>
 
-<div id="investPage" class="page">
-  <h3>Invest</h3>
-  <p>Investment plans will be shown here.</p>
+<div id="invest" class="page">
+  <h2>Invest</h2>
+  <p>Investment options will be listed here.</p>
 </div>
 
-<div id="blogPage" class="page">
-  <h3>Blog</h3>
-  <p>Latest news and updates.</p>
+<div id="blog" class="page">
+  <h2>Blog</h2>
+  <p>Latest investment articles and news.</p>
 </div>
 
-<div id="noticePage" class="page">
-  <h3>Notice</h3>
-  <p>Important announcements.</p>
+<div id="notice" class="page">
+  <h2>Notice</h2>
+  <p>Important updates and announcements.</p>
 </div>
 
-<div id="accountPage" class="page">
-  <h3>My Account</h3>
+<div id="account" class="page">
+  <h2>Account</h2>
   <div class="menu-list">
-    <div class="menu-item" onclick="openSubmenu('bankCardPage')">Bank Card</div>
-    <div class="menu-item" onclick="openSubmenu('transactionPage')">Transaction</div>
-    <div class="menu-item" onclick="openSubmenu('productPage')">My Product</div>
-    <div class="menu-item" onclick="openSubmenu('supportPage')">Customer Service</div>
-    <div class="menu-item" onclick="openSubmenu('resetPasswordPage')">Reset Password</div>
+    <div class="menu-item" onclick="openSubPage('bank-card')">
+      <i class="fas fa-credit-card"></i><span>Bank Card</span>
+    </div>
+    <div class="menu-item" onclick="openSubPage('transaction')">
+      <i class="fas fa-receipt"></i><span>Transaction</span>
+    </div>
+    <div class="menu-item" onclick="openSubPage('my-product')">
+      <i class="fas fa-box"></i><span>My Product</span>
+    </div>
+    <div class="menu-item" onclick="openSubPage('customer-service')">
+      <i class="fas fa-headset"></i><span>Customer Service</span>
+    </div>
+    <div class="menu-item" onclick="openSubPage('reset-password')">
+      <i class="fas fa-key"></i><span>Reset Password</span>
+    </div>
   </div>
 </div>
 
-<!-- Submenu Pages -->
-<div id="bankCardPage" class="page">
-  <div class="back-btn" onclick="goBack()">← Back</div>
+<!-- Sub Pages -->
+<div id="bank-card" class="page">
+  <button class="back-btn" onclick="goBack()">← Back</button>
   <h3>Bind Bank Card</h3>
-  <input type="text" placeholder="IFSC Code"><br><br>
-  <input type="text" placeholder="Account Number"><br><br>
   <input type="text" placeholder="Account Holder Name"><br><br>
   <input type="text" placeholder="Bank Name"><br><br>
-  <button>Save</button>
+  <input type="text" placeholder="IFSC Code"><br><br>
+  <input type="text" placeholder="Account Number"><br><br>
+  <button>Save Bank Details</button>
 </div>
 
-<div id="transactionPage" class="page">
-  <div class="back-btn" onclick="goBack()">← Back</div>
+<div id="transaction" class="page">
+  <button class="back-btn" onclick="goBack()">← Back</button>
   <h3>Transaction History</h3>
   <p>No transactions yet.</p>
 </div>
 
-<div id="productPage" class="page">
-  <div class="back-btn" onclick="goBack()">← Back</div>
+<div id="my-product" class="page">
+  <button class="back-btn" onclick="goBack()">← Back</button>
   <h3>My Products</h3>
-  <p>No products purchased yet.</p>
+  <p>No products yet.</p>
 </div>
 
-<div id="supportPage" class="page">
-  <div class="back-btn" onclick="goBack()">← Back</div>
+<div id="customer-service" class="page">
+  <button class="back-btn" onclick="goBack()">← Back</button>
   <h3>Customer Service</h3>
-  <p>Contact us at support@example.com</p>
+  <p>Email: support@example.com</p>
 </div>
 
-<div id="resetPasswordPage" class="page">
-  <div class="back-btn" onclick="goBack()">← Back</div>
+<div id="reset-password" class="page">
+  <button class="back-btn" onclick="goBack()">← Back</button>
   <h3>Reset Password</h3>
   <input type="password" placeholder="New Password"><br><br>
-  <button>Reset</button>
+  <button>Update Password</button>
 </div>
 
+<!-- Navigation -->
 <nav>
-  <button onclick="showPage('homePage')">Home</button>
-  <button onclick="showPage('investPage')">Invest</button>
-  <button onclick="showPage('blogPage')">Blog</button>
-  <button onclick="showPage('noticePage')">Notice</button>
-  <button onclick="showPage('accountPage')">Account</button>
-    </nav>
-    <script>
-let lastPage = 'homePage';
+  <button onclick="showPage('home')"><i class="fas fa-home"></i>Home</button>
+  <button onclick="showPage('invest')"><i class="fas fa-chart-line"></i>Invest</button>
+  <button onclick="showPage('blog')"><i class="fas fa-blog"></i>Blog</button>
+  <button onclick="showPage('notice')"><i class="fas fa-bullhorn"></i>Notice</button>
+  <button onclick="showPage('account')"><i class="fas fa-user"></i>Account</button>
+</nav>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+<script>
+// ======== Firebase Config ========
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// ======== Navigation Functions ========
+let currentPage = "home";
 
 function showPage(pageId) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById(pageId).classList.add('active');
-  lastPage = pageId;
+  document.getElementById(currentPage).classList.remove("active");
+  document.getElementById(pageId).classList.add("active");
+  currentPage = pageId;
 }
 
-function openSubmenu(subPageId) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById(subPageId).classList.add('active');
+function openSubPage(pageId) {
+  document.getElementById(currentPage).classList.remove("active");
+  document.getElementById(pageId).classList.add("active");
+  currentPage = pageId;
 }
 
 function goBack() {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('accountPage').classList.add('active');
+  document.getElementById(currentPage).classList.remove("active");
+  document.getElementById("account").classList.add("active");
+  currentPage = "account";
 }
 
-// Simulate login user and wallet load
-firebase.auth().onAuthStateChanged(user => {
-  if (user) {
-    currentUser = user;
-    loadWallet();
-  } else {
-    // Auto sign in anonymously for demo
-    firebase.auth().signInAnonymously();
-  }
-});
-
-// Load wallet balance
-function loadWallet() {
-  db.collection('wallets').doc(currentUser.uid).get().then(doc => {
+// ======== Wallet Functions ========
+function loadWallet(uid) {
+  db.collection("users").doc(uid).get().then(doc => {
     if (doc.exists) {
-      document.getElementById('walletBalance').innerText = doc.data().balance;
+      let balance = doc.data().wallet || 0;
+      document.getElementById("wallet-balance").textContent = balance;
     } else {
-      db.collection('wallets').doc(currentUser.uid).set({ balance: 0 });
-      document.getElementById('walletBalance').innerText = 0;
+      db.collection("users").doc(uid).set({ wallet: 0 });
     }
   });
 }
 
-// Example function to update wallet
-function updateWallet(amount) {
-  db.collection('wallets').doc(currentUser.uid).update({
-    balance: firebase.firestore.FieldValue.increment(amount)
-  }).then(() => loadWallet());
-}
+// ======== Auth State Listener ========
+auth.onAuthStateChanged(user => {
+  if (user) {
+    loadWallet(user.uid);
+  } else {
+    // Auto-login for testing (remove in production)
+    auth.signInAnonymously().catch(err => console.log(err.message));
+  }
+});
 </script>
-
 </body>
 </html>
