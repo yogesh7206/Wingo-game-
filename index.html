@@ -44,6 +44,7 @@ nav button span { font-size:18px; }
 
 <header>Win89</header>
 
+<!-- Sections -->
 <div id="loginSection" class="section active-section">
     <h2>Login</h2>
     <input type="email" id="loginEmail" placeholder="Email"><br><br>
@@ -63,6 +64,21 @@ nav button span { font-size:18px; }
 <div id="homeSection" class="section">
     <h2>Home</h2>
     <p>Welcome to Win89!</p>
+</div>
+
+<div id="investmentSection" class="section">
+    <h2>Investment</h2>
+    <p>Your investments appear here.</p>
+</div>
+
+<div id="blogSection" class="section">
+    <h2>Blog</h2>
+    <p>Latest blog posts.</p>
+</div>
+
+<div id="noticeSection" class="section">
+    <h2>Notice</h2>
+    <p>Important updates.</p>
 </div>
 
 <div id="accountSection" class="section">
@@ -97,116 +113,119 @@ nav button span { font-size:18px; }
     <button onclick="logoutUser()">Logout</button>
 </div>
 
-<div id="investmentSection" class="section">
-    <h2>Investment</h2>
-    <p>Your investments appear here.</p>
-</div>
-
-<div id="blogSection" class="section">
-    <h2>Blog</h2>
-    <p>Latest blog posts.</p>
-</div>
-
-<div id="noticeSection" class="section">
-    <h2>Notice</h2>
-    <p>Important updates.</p>
-</div>
-
+<!-- Bottom navigation -->
 <nav id="bottomNav">
     <button onclick="showSection('homeSection')"><span>🏠</span>Home</button>
     <button onclick="showSection('investmentSection')"><span>💰</span>Investment</button>
     <button onclick="showSection('blogSection')"><span>📝</span>Blog</button>
     <button onclick="showSection('noticeSection')"><span>📢</span>Notice</button>
-    <button onclick="showSection('accountSection')" style="margin-left:auto;"><span>👤</span>Account</button>
+    <button onclick="showSection('accountSection')"><span>👤</span>Account</button>
 </nav>
-<!-- Account Submenus & Panels -->
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-(function buildAccountMenus(){
+const firebaseConfig = {
+  apiKey: "AIzaSyDvF1KrDDRZJucp-78dbvmQ34Oi3j17Rrk",
+  authDomain: "investment-website-deml.firebaseapp.com",
+  projectId: "investment-website-deml",
+  storageBucket: "investment-website-deml.firebasestorage.app",
+  messagingSenderId: "814451995593",
+  appId: "1:814451995593:web:55e3280d9cb43200f1ee18",
+  measurementId: "G-8FKZE5NNSX"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+</script>
+
+<script>
+// Section switch
+function showSection(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active-section'));
+  const el = document.getElementById(id);
+  if(el) el.classList.add('active-section');
+}
+
+// Auth
+auth.onAuthStateChanged(user => {
+  const nav = document.getElementById('bottomNav');
+  if(user){
+    nav.style.display = 'flex';
+    showSection('homeSection');
+    initUserData(user);
+  } else {
+    nav.style.display = 'none';
+    showSection('loginSection');
+  }
+});
+
+async function initUserData(user){
+  const UID = user.uid;
+  const userRef = db.collection('users').doc(UID);
+  const snap = await userRef.get();
+  if(!snap.exists){
+    await userRef.set({
+      userId: Math.floor(100000 + Math.random()*900000),
+      balance:0, rechargeTotal:0, withdrawalTotal:0, productRevenue:0, orders:0,
+      email: user.email
+    });
+  }
+  userRef.onSnapshot(doc=>{
+    const d = doc.data() || {};
+    document.getElementById('balance').textContent = '₹'+(d.balance||0);
+    document.getElementById('recharge').textContent = '₹'+(d.rechargeTotal||0);
+    document.getElementById('withdrawal').textContent = '₹'+(d.withdrawalTotal||0);
+    document.getElementById('productRevenue').textContent = '₹'+(d.productRevenue||0);
+    document.getElementById('myOrders').textContent = d.orders||0;
+  });
+}
+
+// Login/Register
+async function loginUser(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPassword').value.trim();
+  if(!email || !pass){ alert('Enter email & password'); return; }
+  try{ await auth.signInWithEmailAndPassword(email, pass); }
+  catch(e){ alert(e.message); if(e.code==='auth/user-not-found') showSection('registerSection'); }
+}
+
+async function registerUser(){
+  const email = document.getElementById('registerEmail').value.trim();
+  const pass = document.getElementById('registerPassword').value.trim();
+  if(!email || !pass){ alert('Enter email & password'); return; }
+  try{
+    const cred = await auth.createUserWithEmailAndPassword(email, pass);
+    await db.collection('users').doc(cred.user.uid).set({
+      userId: Math.floor(100000 + Math.random()*900000),
+      balance:0, rechargeTotal:0, withdrawalTotal:0, productRevenue:0, orders:0,
+      email
+    });
+    alert('Registered! Please login.');
+    showSection('loginSection');
+  }catch(e){ alert(e.message); }
+}
+
+function logoutUser(){ auth.signOut(); }
+
+// Account submenus
+(function(){
   const wrap = document.createElement('div');
   wrap.className = 'menu-list';
   wrap.innerHTML = `
-    <div class="menu-item" onclick="openPanel('rechargePanel')">
-      <span class="menu-icon">💳</span><span class="menu-text">Recharge</span><span class="menu-arrow">›</span>
-    </div>
-    <div class="menu-item" onclick="openPanel('withdrawPanel')">
-      <span class="menu-icon">🏧</span><span class="menu-text">Withdraw</span><span class="menu-arrow">›</span>
-    </div>
-    <div class="menu-item" onclick="openPanel('bankCardPanel')">
-      <span class="menu-icon">🏦</span><span class="menu-text">Bank Card</span><span class="menu-arrow">›</span>
-    </div>
-    <div class="menu-item" onclick="openPanel('transactionsPanel')">
-      <span class="menu-icon">🧾</span><span class="menu-text">Transactions</span><span class="menu-arrow">›</span>
-    </div>
-    <div class="menu-item" onclick="openPanel('myProductPanel')">
-      <span class="menu-icon">📦</span><span class="menu-text">My Product</span><span class="menu-arrow">›</span>
-    </div>
-    <div class="menu-item" onclick="openPanel('supportPanel')">
-      <span class="menu-icon">💬</span><span class="menu-text">Customer Service</span><span class="menu-arrow">›</span>
-    </div>
-    <div class="menu-item" onclick="openPanel('resetPassPanel')">
-      <span class="menu-icon">🔒</span><span class="menu-text">Reset Password</span><span class="menu-arrow">›</span>
-    </div>
+    <div class="menu-item" onclick="alert('Recharge panel')"><span class="menu-icon">💳</span><span class="menu-text">Recharge</span><span class="menu-arrow">›</span></div>
+    <div class="menu-item" onclick="alert('Withdraw panel')"><span class="menu-icon">🏧</span><span class="menu-text">Withdraw</span><span class="menu-arrow">›</span></div>
+    <div class="menu-item" onclick="alert('Bank Card panel')"><span class="menu-icon">🏦</span><span class="menu-text">Bank Card</span><span class="menu-arrow">›</span></div>
+    <div class="menu-item" onclick="alert('Transactions panel')"><span class="menu-icon">🧾</span><span class="menu-text">Transactions</span><span class="menu-arrow">›</span></div>
+    <div class="menu-item" onclick="alert('My Product panel')"><span class="menu-icon">📦</span><span class="menu-text">My Product</span><span class="menu-arrow">›</span></div>
+    <div class="menu-item" onclick="alert('Support panel')"><span class="menu-icon">💬</span><span class="menu-text">Customer Service</span><span class="menu-arrow">›</span></div>
+    <div class="menu-item" onclick="alert('Reset Password panel')"><span class="menu-icon">🔒</span><span class="menu-text">Reset Password</span><span class="menu-arrow">›</span></div>
   `;
   document.getElementById('accountSection').appendChild(wrap);
 })();
-
-const panelsHTML = `
-  <div id="rechargePanel" class="panel">
-    <h3>Recharge</h3>
-    <input id="rechargeAmount" type="number" class="input" placeholder="Amount (₹)">
-    <button class="btn block" onclick="doRecharge()">Add Money</button>
-    <p class="small">Recharge increases your wallet balance. A record is added to transactions.</p>
-  </div>
-
-  <div id="withdrawPanel" class="panel">
-    <h3>Withdraw</h3>
-    <input id="withdrawAmount" type="number" class="input" placeholder="Amount (₹)">
-    <button class="btn block" onclick="doWithdraw()">Request Withdraw</button>
-    <p class="small">Requires a bound bank card.</p>
-  </div>
-
-  <div id="bankCardPanel" class="panel">
-    <h3>Bind Bank Card</h3>
-    <input id="bankName" class="input" placeholder="Bank Name">
-    <input id="ifsc" class="input" placeholder="IFSC Code">
-    <input id="accNo" class="input" placeholder="Account Number">
-    <input id="accName" class="input" placeholder="Account Holder Name">
-    <button class="btn block" onclick="saveBankCard()">Save</button>
-  </div>
-
-  <div id="transactionsPanel" class="panel">
-    <h3>Transactions</h3>
-    <div id="txList" class="small">No transactions yet.</div>
-  </div>
-
-  <div id="myProductPanel" class="panel">
-    <h3>My Product</h3>
-    <p class="small">You can store product purchases here later.</p>
-  </div>
-
-  <div id="supportPanel" class="panel">
-    <h3>Customer Service</h3>
-    <p class="small">Telegram: @EarnersCircleVip</p>
-  </div>
-
-  <div id="resetPassPanel" class="panel">
-    <h3>Reset Password</h3>
-    <input id="newPass" type="password" class="input" placeholder="New password">
-    <button class="btn" onclick="resetPassword()">Update Password</button>
-    <button class="btn secondary" style="margin-left:8px" onclick="sendResetEmail()">Send Reset Email</button>
-  </div>
-`;
-const panelsHolder = document.createElement('div');
-panelsHolder.id = 'accountPanels';
-panelsHolder.innerHTML = panelsHTML;
-document.body.appendChild(panelsHolder);
-
-// Hook big buttons
-document.querySelector('.recharge-btn')?.addEventListener('click', ()=>openPanel('rechargePanel'));
-document.querySelector('.withdraw-btn')?.addEventListener('click', ()=>openPanel('withdrawPanel'));
 </script>
-
-<!-- Firebase Scripts already included in Part 1 -->
 
 </body>
 </html>
