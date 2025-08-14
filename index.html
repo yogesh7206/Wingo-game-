@@ -1,211 +1,190 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Win89</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    body { font-family: Arial, sans-serif; margin: 0; background: #fff; }
-    header { background: orange; padding: 10px; color: white; display: flex; justify-content: space-between; align-items: center; }
-    nav ul { display: flex; list-style: none; margin: 0; padding: 0; }
-    nav ul li { position: relative; }
-    nav ul li a { color: white; padding: 10px 15px; display: block; text-decoration: none; }
-    nav ul li:hover { background: #e69500; }
-    nav ul li ul { display: none; position: absolute; background: white; color: black; min-width: 150px; top: 100%; left: 0; padding: 0; margin: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.15);}
-    nav ul li:hover ul { display: block; }
-    nav ul li ul li a { color: black; }
-    nav ul li ul li a:hover { background: #f2f2f2; }
-    .account-info { padding: 15px; background: #f9f9f9; border-bottom: 1px solid #ddd; }
-    .hidden { display: none; }
-    section { display: none; padding: 20px; }
-    section.active { display: block; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Investment Website</title>
+<style>
+body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f4f4f4; }
+header { background:#ff6600; color:#fff; padding:10px; display:flex; justify-content:space-between; align-items:center; }
+header h1 { font-size:20px; margin:0; }
+nav { display:flex; gap:15px; }
+nav a { color:#fff; text-decoration:none; font-weight:bold; }
+.section { display:none; padding:15px; }
+.section.active { display:block; }
+.account-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:10px; }
+.stat { background:#fff; padding:10px; border-radius:8px; text-align:center; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+.action-buttons { margin:15px 0; display:flex; gap:10px; }
+.recharge-btn, .withdraw-btn { flex:1; padding:10px; border:none; border-radius:5px; font-weight:bold; cursor:pointer; }
+.recharge-btn { background:#28a745; color:#fff; }
+.withdraw-btn { background:#dc3545; color:#fff; }
+.menu-list { margin-top:15px; background:#fff; border-radius:8px; overflow:hidden; }
+.menu-item { display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #ddd; cursor:pointer; }
+.menu-item:hover { background:#f1f1f1; }
+.menu-icon { margin-right:10px; }
+.menu-text { flex:1; }
+.menu-arrow { color:#999; }
+</style>
 </head>
 <body>
 
 <header>
-  <div class="logo"><i class="fas fa-trophy"></i> Win89</div>
-  <nav>
-    <ul id="navMenu" class="hidden">
-      <li><a href="#" onclick="showSection('home')"><i class="fas fa-home"></i> Home</a></li>
-      <li><a href="#" onclick="showSection('investment')"><i class="fas fa-chart-line"></i> Investment</a></li>
-      <li><a href="#" onclick="showSection('blog')"><i class="fas fa-blog"></i> Blog</a></li>
-      <li><a href="#" onclick="showSection('notice')"><i class="fas fa-bullhorn"></i> Notice</a></li>
-      <li style="margin-left:auto;">
-        <a href="#"><i class="fas fa-user"></i> Account</a>
-        <ul>
-          <li><a href="#" onclick="showSection('account')">Profile</a></li>
-          <li><a href="#" onclick="showSection('wallet')">Wallet</a></li>
-          <li><a href="#" onclick="showSection('transactions')">Transactions</a></li>
-          <li><a href="#" onclick="logout()">Logout</a></li>
-        </ul>
-      </li>
-    </ul>
-  </nav>
+    <h1>Investment Site</h1>
+    <nav id="navMenu" style="display:none;">
+        <a href="#" onclick="showSection('home')">🏠 Home</a>
+        <a href="#" onclick="showSection('investment')">💼 Investment</a>
+        <a href="#" onclick="showSection('blog')">📰 Blog</a>
+        <a href="#" onclick="showSection('notice')">📢 Notice</a>
+        <a href="#" onclick="showSection('accountSection')">👤 Account</a>
+    </nav>
 </header>
 
-<section id="loginSection" class="active">
-  <h2>Login</h2>
-  <input type="email" id="loginEmail" placeholder="Email"><br><br>
-  <input type="password" id="loginPassword" placeholder="Password"><br><br>
-  <button onclick="login()">Login</button>
-</section>
+<!-- Sections -->
+<div id="home" class="section active">
+    <h2>Welcome to the Home Page</h2>
+</div>
 
-<section id="registerSection">
-  <h2>Register</h2>
-  <input type="email" id="registerEmail" placeholder="Email"><br><br>
-  <input type="text" id="registerMobile" placeholder="Mobile"><br><br>
-  <input type="password" id="registerPassword" placeholder="Password"><br><br>
-  <button onclick="register()">Register</button>
-</section>
+<div id="investment" class="section">
+    <h2>Investment Plans</h2>
+</div>
 
-<section id="home">
-  <h2>Welcome to Win89</h2>
-</section>
+<div id="blog" class="section">
+    <h2>Blog</h2>
+</div>
 
-<section id="investment">
-  <h2>Investment Plans</h2>
-</section>
+<div id="notice" class="section">
+    <h2>Notices</h2>
+</div>
 
-<section id="blog">
-  <h2>Our Blog</h2>
-</section>
-
-<section id="notice">
-  <h2>Notices</h2>
-</section>
-
-<section id="account">
-  <div class="account-info">
-    <p><strong>Email:</strong> <span id="accountEmail"></span></p>
-    <p><strong>Mobile:</strong> <span id="accountMobile"></span></p>
-    <p><strong>User ID:</strong> <span id="accountUserId"></span></p>
-  </div>
-</section>
-
-<section id="wallet">
-  <h2>Your Wallet</h2>
-</section>
-
-<section id="transactions">
-  <h2>Transaction History</h2>
-</section>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+<!-- Account Section -->
+<div id="accountSection" class="section">
+    <h2>My Account</h2>
+    <div id="userInfo" style="background:#e9ecef; padding:12px; border-radius:12px; margin-bottom:15px; text-align:center;">
+        <p><strong>Email:</strong> <span id="userEmail">-</span></p>
+        <p><strong>Mobile:</strong> <span id="userMobile">-</span></p>
+        <p><strong>User ID:</strong> <span id="user6Id">-</span></p>
+    </div>
+    <div class="account-stats">
+        <div class="stat"><h3 id="balance">₹0</h3><p>Balance</p></div>
+        <div class="stat"><h3 id="recharge">₹0</h3><p>Recharge</p></div>
+        <div class="stat"><h3 id="withdrawal">₹0</h3><p>Withdrawal</p></div>
+        <div class="stat"><h3 id="productRevenue">₹0</h3><p>Product revenue</p></div>
+        <div class="stat"><h3 id="myOrders">0</h3><p>My Orders</p></div>
+    </div>
+    <div class="action-buttons">
+        <button class="recharge-btn">Recharge</button>
+        <button class="withdraw-btn">Withdrawal</button>
+    </div>
+    <!-- Submenus -->
+    <div class="menu-list">
+        <div class="menu-item" onclick="alert('Profile page coming soon!')">
+            <span class="menu-icon">👤</span>
+            <span class="menu-text">Profile</span>
+            <span class="menu-arrow">›</span>
+        </div>
+        <div class="menu-item" onclick="alert('Referral system coming soon!')">
+            <span class="menu-icon">👥</span>
+            <span class="menu-text">Referrals</span>
+            <span class="menu-arrow">›</span>
+        </div>
+        <div class="menu-item" onclick="window.open('https://t.me/YourTelegramGroupLink', '_blank')">
+            <span class="menu-icon">💬</span>
+            <span class="menu-text">Join Telegram Group</span>
+            <span class="menu-arrow">›</span>
+        </div>
+    </div>
+    <br>
+    <button onclick="logoutUser()">Logout</button>
+</div>
+<!-- Firebase & JavaScript -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
 <script>
-  // Firebase config
-  const firebaseConfig = {
-    apiKey: "AIzaSyDvF1KrDDRZJucp-78dbvmQ34Oi3j17Rrk",
-    authDomain: "investment-website-deml.firebaseapp.com",
-    projectId: "investment-website-deml",
-    storageBucket: "investment-website-deml.firebasestorage.app",
-    messagingSenderId: "814451995593",
-    appId: "1:814451995593:web:55e3280d9cb43200f1ee18",
-    measurementId: "G-8FKZE5NNSX"
-  };
+/* ================= Firebase Config ================= */
+const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "SENDER_ID",
+    appId: "APP_ID"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
+/* ================ Navigation ================= */
+function showSection(id) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
 
-  // Navigation handler
-  function showSection(id) {
-    document.querySelectorAll("section").forEach(sec => sec.classList.remove("active"));
-    document.getElementById(id).classList.add("active");
-  }
+/* ================ 6-digit ID Generator ================ */
+function generateUserId() {
+    return Math.floor(100000 + Math.random() * 900000);
+}
 
-  // Register
-  function register() {
-    const email = document.getElementById("registerEmail").value;
-    const mobile = document.getElementById("registerMobile").value;
-    const password = document.getElementById("registerPassword").value;
-
-    if (!email || !mobile || !password) {
-      alert("Please fill all fields");
-      return;
-    }
-
-    auth.createUserWithEmailAndPassword(email, password)
-      .then(cred => {
-        const userId = Math.floor(100000 + Math.random() * 900000).toString();
-        return db.collection("users").doc(cred.user.uid).set({
-          email: email,
-          mobile: mobile,
-          userId: userId
-        });
-      })
-      .then(() => {
-        alert("Registered successfully");
-        showSection("loginSection");
-      })
-      .catch(err => alert(err.message));
-  }
-
-  // Login
-  function login() {
-    const email = document.getElementById("loginEmail").value;
-    const password = document.getElementById("loginPassword").value;
-
-    auth.signInWithEmailAndPassword(email, password)
-      .then(() => {
-        document.getElementById("navMenu").classList.remove("hidden");
-        showSection("home");
-      })
-      .catch(err => alert(err.message));
-  }
-
-  // Logout
-  function logout() {
-    auth.signOut().then(() => {
-      document.getElementById("navMenu").classList.add("hidden");
-      showSection("loginSection");
-    });
-  }
-
-  // Listen for auth changes
-  auth.onAuthStateChanged(user => {
-    if (user) {
-      document.getElementById("navMenu").classList.remove("hidden");
-      showSection("home");
-
-      const userRef = db.collection("users").doc(user.uid);
-      userRef.get().then(doc => {
-        if (doc.exists) {
-          let data = doc.data();
-
-          // If old user missing ID, generate it
-          if (!data.userId) {
-            const newId = Math.floor(100000 + Math.random() * 900000).toString();
-            data.userId = newId;
-            userRef.update({ userId: newId });
-          }
-
-          document.getElementById("accountEmail").innerText = data.email || user.email;
-          document.getElementById("accountMobile").innerText = data.mobile || "Not set";
-          document.getElementById("accountUserId").innerText = data.userId;
-        } else {
-          // If no record, create with generated ID
-          const newId = Math.floor(100000 + Math.random() * 900000).toString();
-          userRef.set({
-            email: user.email,
-            mobile: "Not set",
-            userId: newId
-          }).then(() => {
-            document.getElementById("accountEmail").innerText = user.email;
-            document.getElementById("accountMobile").innerText = "Not set";
-            document.getElementById("accountUserId").innerText = newId;
-          });
+/* ================ Save User Data ================ */
+function saveUserData(user, mobile) {
+    const userRef = db.collection('users').doc(user.uid);
+    return userRef.get().then(doc => {
+        if (!doc.exists) {
+            const newId = generateUserId();
+            return userRef.set({
+                email: user.email || '',
+                mobile: mobile || '',
+                user6Id: newId,
+                balance: 0
+            });
         }
-      });
-    } else {
-      document.getElementById("navMenu").classList.add("hidden");
-      showSection("loginSection");
-    }
-  });
-</script>
+    });
+}
 
+/* ================ Load User Data ================ */
+function loadUserData(uid) {
+    db.collection('users').doc(uid).get().then(doc => {
+        if (doc.exists) {
+            const data = doc.data();
+            document.getElementById('userEmail').innerText = data.email || '-';
+            document.getElementById('userMobile').innerText = data.mobile || '-';
+            document.getElementById('user6Id').innerText = data.user6Id || '-';
+            document.getElementById('balance').innerText = `₹${data.balance || 0}`;
+        }
+    });
+}
+
+/* ================ Auth State ================ */
+auth.onAuthStateChanged(user => {
+    if (user) {
+        document.getElementById('navMenu').style.display = 'flex';
+        showSection('home');
+        loadUserData(user.uid);
+    } else {
+        document.getElementById('navMenu').style.display = 'none';
+        showSection('home');
+    }
+});
+
+/* ================ Logout ================ */
+function logoutUser() {
+    auth.signOut();
+}
+
+/* ================ Example Register/Login ================ */
+// Example: Register with email, password, and mobile number
+function registerUser(email, password, mobile) {
+    auth.createUserWithEmailAndPassword(email, password)
+    .then(cred => saveUserData(cred.user, mobile))
+    .catch(err => alert(err.message));
+}
+
+// Example: Login with email and password
+function loginUser(email, password) {
+    auth.signInWithEmailAndPassword(email, password)
+    .catch(err => alert(err.message));
+}
+</script>
 </body>
 </html>
