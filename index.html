@@ -3,328 +3,502 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Investment Platform</title>
+<title>Win89</title>
 <style>
-  body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f5f5f5; }
-  header { background: #1976d2; color: white; padding: 10px; text-align: center; font-size: 20px; }
-  .content { padding: 15px; }
-  .hidden { display: none; }
-  .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; border-top: 1px solid #ccc; display: flex; }
-  .bottom-nav button { flex: 1; padding: 10px; border: none; background: none; font-size: 14px; }
-  .bottom-nav button.active { background: #1976d2; color: white; }
-  .submenu { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 15px; }
-  .submenu div { background: white; border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-  .submenu div img { width: 40px; height: 40px; margin-bottom: 5px; }
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: #f8f9fa;
+}
+header {
+    background: #007bff;
+    padding: 10px;
+    color: #fff;
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+}
+nav {
+    background: #fff;
+    border-top: 1px solid #ccc;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    padding: 5px 0;
+    z-index: 1000;
+}
+nav button {
+    background: none;
+    border: none;
+    font-size: 14px;
+    color: #333;
+}
+.submenu {
+    display: none;
+    background: #f4f4f4;
+    padding: 10px;
+}
+.submenu button {
+    display: block;
+    width: 100%;
+    background: #fff;
+    border: none;
+    text-align: left;
+    padding: 8px;
+    margin-bottom: 5px;
+    border-radius: 6px;
+}
+.active-section {
+    display: block !important;
+}
+.section {
+    display: none;
+    padding: 15px;
+}
+.account-stats {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    background: #fff;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+}
+.stat {
+    text-align: center;
+    flex: 1 1 45%;
+    margin: 5px 0;
+}
+.stat h3 {
+    color: #004085;
+    margin: 0;
+    font-size: 18px;
+}
+.stat p {
+    color: #6c757d;
+    font-size: 14px;
+    margin: 0;
+}
+.action-buttons {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 10px;
+}
+.action-buttons button {
+    flex: 1;
+    margin: 5px;
+    padding: 12px;
+    border: none;
+    border-radius: 25px;
+    font-size: 16px;
+    color: #fff;
+}
+.recharge-btn {
+    background: linear-gradient(45deg, #ffc107, #ffb300);
+}
+.withdraw-btn {
+    background: linear-gradient(45deg, #28a745, #218838);
+}
 </style>
 </head>
 <body>
 
-<header id="header-title">Login</header>
+<header>Win89</header>
 
-<!-- Login/Register Page -->
-<div id="login-page" class="content">
-  <h2>Login</h2>
-  <input type="email" id="login-email" placeholder="Email"><br><br>
-  <input type="password" id="login-password" placeholder="Password"><br><br>
-  <button onclick="loginUser()">Login</button>
-  <p>Don't have an account? <a href="#" onclick="showRegister()">Register</a></p>
+<div id="loginSection" class="section active-section">
+    <h2>Login</h2>
+    <input type="email" id="loginEmail" placeholder="Email"><br><br>
+    <input type="password" id="loginPassword" placeholder="Password"><br><br>
+    <button onclick="loginUser()">Login</button>
+    <p>Don't have an account? <a href="#" onclick="showSection('registerSection')">Register</a></p>
 </div>
 
-<div id="register-page" class="content hidden">
-  <h2>Register</h2>
-  <input type="email" id="register-email" placeholder="Email"><br><br>
-  <input type="password" id="register-password" placeholder="Password"><br><br>
-  <button onclick="registerUser()">Register</button>
-  <p>Already have an account? <a href="#" onclick="showLogin()">Login</a></p>
+<div id="registerSection" class="section">
+    <h2>Register</h2>
+    <input type="email" id="registerEmail" placeholder="Email"><br><br>
+    <input type="password" id="registerPassword" placeholder="Password"><br><br>
+    <button onclick="registerUser()">Register</button>
+    <p>Already have an account? <a href="#" onclick="showSection('loginSection')">Login</a></p>
 </div>
 
-<!-- Home Page -->
-<div id="home-page" class="content hidden">
-  <h2>Welcome to Investment Platform</h2>
-  <p>Latest updates will show here.</p>
+<div id="accountSection" class="section">
+    <h2>My Account</h2>
+    <div class="account-stats">
+        <div class="stat">
+            <h3 id="balance">₹0</h3>
+            <p>Balance</p>
+        </div>
+        <div class="stat">
+            <h3 id="recharge">₹0</h3>
+            <p>Recharge</p>
+        </div>
+        <div class="stat">
+            <h3 id="withdrawal">₹0</h3>
+            <p>Withdrawal</p>
+        </div>
+        <div class="stat">
+            <h3 id="productRevenue">₹0</h3>
+            <p>Product revenue</p>
+        </div>
+        <div class="stat">
+            <h3 id="myOrders">0</h3>
+            <p>My Orders</p>
+        </div>
+    </div>
+    <div class="action-buttons">
+        <button class="recharge-btn">Recharge</button>
+        <button class="withdraw-btn">Withdrawal</button>
+    </div>
+    <br>
+    <button onclick="logoutUser()">Logout</button>
 </div>
 
-<!-- Account Page -->
-<div id="account-page" class="content hidden">
-  <h2>My Account</h2>
-  <p><strong>User ID:</strong> <span id="user-id-display"></span></p>
-  <p><strong>Wallet Balance:</strong> ₹<span id="wallet-balance">0</span></p>
-  <div class="submenu">
-    <div onclick="openPage('team')"><img src="team.png"><p>Team</p></div>
-    <div onclick="openPage('myProduct')"><img src="product.png"><p>My Product</p></div>
-    <div onclick="openPage('bankCard')"><img src="bank.png"><p>Bank Card</p></div>
-    <div onclick="openPage('transaction')"><img src="transaction.png"><p>Transaction</p></div>
-    <div onclick="openPage('customerService')"><img src="support.png"><p>Customer Service</p></div>
-    <div onclick="openPage('resetPassword')"><img src="reset.png"><p>Reset Password</p></div>
-  </div>
-  <br>
-  <button onclick="logoutUser()">Logout</button>
+<nav>
+    <button onclick="showSection('accountSection')">Account</button>
+    <button onclick="toggleSubmenu('gameSubmenu')">Games</button>
+    <button onclick="showSection('comingSoon')">More</button>
+</nav>
+
+<div id="gameSubmenu" class="submenu">
+    <button onclick="showSection('wingoSection')">Wingo</button>
+    <button onclick="showSection('paritySection')">Parity</button>
 </div>
 
-<!-- Submenu Pages -->
-<div id="team-page" class="content hidden"><h2>Team</h2><p>Your team details here.</p></div>
-<div id="myProduct-page" class="content hidden"><h2>My Product</h2><p>Your products here.</p></div>
-<div id="bankCard-page" class="content hidden">
-  <h2>Bind Bank Card</h2>
-  <input type="text" id="bank-name" placeholder="Bank Name"><br><br>
-  <input type="text" id="ifsc-code" placeholder="IFSC Code"><br><br>
-  <input type="text" id="account-number" placeholder="Account Number"><br><br>
-  <input type="text" id="account-holder" placeholder="Account Holder Name"><br><br>
-  <button onclick="saveBankDetails()">Save</button>
+<div id="comingSoon" class="section">
+    <h2>Coming Soon</h2>
 </div>
-<div id="transaction-page" class="content hidden"><h2>Transactions</h2><p>Your transaction history.</p></div>
-<div id="customerService-page" class="content hidden"><h2>Customer Service</h2><p>Contact us at support@example.com</p></div>
-<div id="resetPassword-page" class="content hidden">
-  <h2>Reset Password</h2>
-  <input type="password" id="new-password" placeholder="New Password"><br><br>
-  <button onclick="resetPassword()">Update Password</button>
-</div>
+<!-- Firebase (compat so code stays simple) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-<!-- Bottom Navigation -->
-<div class="bottom-nav">
-  <button id="nav-home" onclick="showSection('home-page')">Home</button>
-  <button id="nav-invest" onclick="alert('Invest Page Coming Soon')">Invest</button>
-  <button id="nav-blog" onclick="alert('Blog Page Coming Soon')">Blog</button>
-  <button id="nav-notice" onclick="alert('Notice Page Coming Soon')">Notice</button>
-  <button id="nav-account" onclick="showSection('account-page')">Account</button>
-</div>
-
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-<script>
-  // Firebase config
-  const firebaseConfig = {
-    apiKey: "AIzaSyDvF1KrDDRZJucp-78dbvmQ34Oi3j17Rrk",
-    authDomain: "investment-website-deml.firebaseapp.com",
-    projectId: "investment-website-deml",
-    storageBucket: "investment-website-deml.firebasestorage.app",
-    messagingSenderId: "814451995593",
-    appId: "1:814451995593:web:55e3280d9cb43200f1ee18",
-    measurementId: "G-8FKZE5NNSX"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-</script>
 <style>
-  /* --- Slide-in panel effect for submenu pages --- */
-  .content { position: relative; overflow-x: hidden; }
-  .panel { display:none; position:fixed; top:60px; left:0; right:0; bottom:60px; background:#f5f5f5; padding:15px; z-index:10; }
-  .panel.show { display:block; animation: slideIn .25s ease-out; }
-  @keyframes slideIn { from { transform: translateX(100%);} to { transform: translateX(0);} }
-
-  /* Hide bottom nav on auth pages */
-  .bottom-nav.hidden { display:none; }
+/* ===== extra styles for account menu lines & panels (mobile) ===== */
+.menu-list{margin:15px 0;background:#fff;border-radius:12px;overflow:hidden}
+.menu-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #eceff1}
+.menu-item:last-child{border-bottom:none}
+.menu-icon{font-size:20px;width:24px;text-align:center}
+.menu-text{flex:1;font-size:15px;color:#212529}
+.menu-arrow{color:#9aa0a6}
+.panel{display:none;padding:15px}
+.panel.active{display:block}
+.panel h3{margin:8px 0 12px}
+.input{width:100%;padding:12px;border:1px solid #dfe3e8;border-radius:8px;margin-bottom:10px}
+.btn{display:inline-block;padding:12px 14px;border:none;border-radius:10px;background:#007bff;color:#fff}
+.btn.secondary{background:#6c757d}
+.btn.block{width:100%}
+.small{color:#6c757d;font-size:12px}
+.tag{display:inline-block;background:#e8f0fe;color:#1967d2;border-radius:8px;padding:2px 8px;font-size:12px;margin-left:6px}
+.hidden{display:none}
 </style>
 
 <script>
-/* =========================
-   Simple router helpers
-========================= */
-const headerTitle = document.getElementById('header-title');
-const bottomNav = document.querySelector('.bottom-nav');
+/* ==============================
+   Firebase | init
+============================== */
+const firebaseConfig = {
+  apiKey: "AIzaSyDvF1KrDDRZJucp-78dbvmQ34Oi3j17Rrk",
+  authDomain: "investment-website-deml.firebaseapp.com",
+  projectId: "investment-website-deml",
+  storageBucket: "investment-website-deml.firebasestorage.app",
+  messagingSenderId: "814451995593",
+  appId: "1:814451995593:web:55e3280d9cb43200f1ee18",
+  measurementId: "G-8FKZE5NNSX"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db   = firebase.firestore();
 
-// Top-level sections from Part 1
-const PAGES = ['login-page','register-page','home-page','account-page'];
-// Submenu pages (panels)
-const SUBPAGES = ['team-page','myProduct-page','bankCard-page','transaction-page','customerService-page','resetPassword-page'];
-
-function setHeader(text){ headerTitle.textContent = text; }
-
+/* ==============================
+   Simple section router
+============================== */
 function showSection(id){
-  // hide all main content sections
-  PAGES.forEach(pid => document.getElementById(pid).classList.add('hidden'));
-  // hide all subpages (if any open)
-  SUBPAGES.forEach(pid => closePanel(pid));
-  document.getElementById(id).classList.remove('hidden');
-
-  // header + nav title mapping
-  const map = {
-    'login-page':'Login',
-    'register-page':'Register',
-    'home-page':'Home',
-    'account-page':'Account'
-  };
-  setHeader(map[id] || 'App');
-
-  // bottom nav visible only when logged-in screens
-  if (id === 'login-page' || id === 'register-page') {
-    bottomNav.classList.add('hidden');
-  } else {
-    bottomNav.classList.remove('hidden');
-  }
-
-  // highlight nav
-  document.querySelectorAll('.bottom-nav button').forEach(b=>b.classList.remove('active'));
-  if (id==='home-page') document.getElementById('nav-home').classList.add('active');
-  if (id==='account-page') document.getElementById('nav-account').classList.add('active');
-}
-
-function openPage(key){
-  // key matches prefix of element id used in Part 1
-  const id = key + '-page';
-  // close any open panels, then open requested
-  SUBPAGES.forEach(pid => closePanel(pid));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active-section'));
   const el = document.getElementById(id);
-  if (el){ el.classList.add('panel','show'); setHeader(el.querySelector('h2')?.textContent || ''); }
-}
-function closePanel(id){
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.classList.remove('show');
-  el.classList.add('hidden'); // keep hidden when not shown
+  if(el){ el.classList.add('active-section'); window.scrollTo({top:0,behavior:'instant'}); }
 }
 
-/* =========================
-   Auth + Firestore profile
-========================= */
-let currentUser = null;
+/* ==============================
+   Build Account submenus (lines)
+============================== */
+(function buildAccountMenus(){
+  const wrap = document.createElement('div');
+  wrap.className = 'menu-list';
+  wrap.innerHTML = `
+    <div class="menu-item" onclick="openPanel('rechargePanel')">
+      <span class="menu-icon">💳</span><span class="menu-text">Recharge</span><span class="menu-arrow">›</span>
+    </div>
+    <div class="menu-item" onclick="openPanel('withdrawPanel')">
+      <span class="menu-icon">🏧</span><span class="menu-text">Withdraw</span><span class="menu-arrow">›</span>
+    </div>
+    <div class="menu-item" onclick="openPanel('bankCardPanel')">
+      <span class="menu-icon">🏦</span><span class="menu-text">Bank Card</span><span class="menu-arrow">›</span>
+    </div>
+    <div class="menu-item" onclick="openPanel('transactionsPanel')">
+      <span class="menu-icon">🧾</span><span class="menu-text">Transactions</span><span class="menu-arrow">›</span>
+    </div>
+    <div class="menu-item" onclick="openPanel('myProductPanel')">
+      <span class="menu-icon">📦</span><span class="menu-text">My Product</span><span class="menu-arrow">›</span>
+    </div>
+    <div class="menu-item" onclick="openPanel('supportPanel')">
+      <span class="menu-icon">💬</span><span class="menu-text">Customer Service</span><span class="menu-arrow">›</span>
+    </div>
+    <div class="menu-item" onclick="openPanel('resetPassPanel')">
+      <span class="menu-icon">🔒</span><span class="menu-text">Reset Password</span><span class="menu-arrow">›</span>
+    </div>
+  `;
+  document.getElementById('accountSection').appendChild(wrap);
+})();
+
+/* ==============================
+   Panels (pages inside Account)
+============================== */
+const panelsHTML = `
+  <div id="rechargePanel" class="panel">
+    <h3>Recharge</h3>
+    <input id="rechargeAmount" type="number" class="input" placeholder="Amount (₹)">
+    <button class="btn block" onclick="doRecharge()">Add Money</button>
+    <p class="small">Recharge increases your wallet balance. A record is added to transactions.</p>
+  </div>
+
+  <div id="withdrawPanel" class="panel">
+    <h3>Withdraw</h3>
+    <input id="withdrawAmount" type="number" class="input" placeholder="Amount (₹)">
+    <button class="btn block" onclick="doWithdraw()">Request Withdraw</button>
+    <p class="small">Requires a bound bank card.</p>
+  </div>
+
+  <div id="bankCardPanel" class="panel">
+    <h3>Bind Bank Card</h3>
+    <input id="bankName" class="input" placeholder="Bank Name">
+    <input id="ifsc" class="input" placeholder="IFSC Code">
+    <input id="accNo" class="input" placeholder="Account Number">
+    <input id="accName" class="input" placeholder="Account Holder Name">
+    <button class="btn block" onclick="saveBankCard()">Save</button>
+  </div>
+
+  <div id="transactionsPanel" class="panel">
+    <h3>Transactions</h3>
+    <div id="txList" class="small">No transactions yet.</div>
+  </div>
+
+  <div id="myProductPanel" class="panel">
+    <h3>My Product</h3>
+    <p class="small">You can store product purchases here later.</p>
+  </div>
+
+  <div id="supportPanel" class="panel">
+    <h3>Customer Service</h3>
+    <p class="small">Telegram: @EarnersCircleVip</p>
+  </div>
+
+  <div id="resetPassPanel" class="panel">
+    <h3>Reset Password</h3>
+    <input id="newPass" type="password" class="input" placeholder="New password">
+    <button class="btn" onclick="resetPassword()">Update Password</button>
+    <button class="btn secondary" style="margin-left:8px" onclick="sendResetEmail()">Send Reset Email</button>
+  </div>
+`;
+const panelsHolder = document.createElement('div');
+panelsHolder.id = 'accountPanels';
+panelsHolder.innerHTML = panelsHTML;
+document.body.appendChild(panelsHolder);
+
+function openPanel(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el){ el.classList.add('active'); showSection('accountSection'); window.scrollTo({top:0}); }
+}
+
+/* ==============================
+   Auth flow (fixed)
+============================== */
+let UID = null;          // Firebase auth uid
+let userDocRef = null;   // Firestore doc ref
 
 auth.onAuthStateChanged(async (user)=>{
-  if (!user) {
-    // Not logged in ⇒ go to Login
-    showSection('login-page');
+  if(!user){
+    UID = null; userDocRef = null;
+    showSection('loginSection');
     return;
   }
+  UID = user.uid;
+  userDocRef = db.collection('users').doc(UID);
 
-  currentUser = user;
-  // Ensure user document with 6-digit userId for new/old users
-  const docRef = db.collection('users').doc(user.uid);
-  const snap = await docRef.get();
-  if (!snap.exists) {
-    await docRef.set({ 
-      email: user.email || null,
-      userId: gen6(),
-      balance: 0,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-  } else if (!snap.data().userId) {
-    await docRef.update({ userId: gen6() });
+  // Ensure profile doc + 6-digit id for old users
+  const snap = await userDocRef.get();
+  if(!snap.exists){
+    await userDocRef.set({ userId: gen6(), balance: 0, rechargeTotal: 0, withdrawalTotal: 0, productRevenue: 0, orders: 0 });
+  }else if(!snap.data().userId){
+    await userDocRef.update({ userId: gen6() });
   }
 
-  // Start UI
-  loadProfile();
-  showSection('home-page');
+  // Listen for live wallet stats
+  userDocRef.onSnapshot(doc=>{
+    const d = doc.data() || {};
+    setText('balance', '₹'+num(d.balance));
+    setText('recharge', '₹'+num(d.rechargeTotal));
+    setText('withdrawal','₹'+num(d.withdrawalTotal));
+    setText('productRevenue','₹'+num(d.productRevenue));
+    setText('myOrders', num(d.orders));
+  });
+
+  // Auto-load transactions list
+  loadTransactions();
+
+  // Enter account page by default
+  showSection('accountSection');
 });
 
-function gen6(){ return Math.floor(100000 + Math.random()*900000).toString(); }
+function gen6(){ return String(Math.floor(100000 + Math.random()*900000)); }
+function num(v){ return (Number(v||0)).toFixed(0); }
+function setText(id, t){ const el = document.getElementById(id); if(el) el.textContent = t; }
 
 async function loginUser(){
-  const email = (document.getElementById('login-email').value || '').trim();
-  const pass  = (document.getElementById('login-password').value || '').trim();
-  if (!email || !pass) return alert('Enter email and password');
-  try {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPassword').value.trim();
+  if(!email || !pass){ alert('Enter email & password'); return; }
+  try{
     await auth.signInWithEmailAndPassword(email, pass);
-  } catch(err){
-    if (err.code === 'auth/user-not-found') {
+  }catch(e){
+    if(e.code === 'auth/user-not-found'){
       alert('No user found. Please register.');
-      showRegister();
-    } else {
-      alert(err.message);
+      showSection('registerSection');
+    }else{
+      alert(e.message);
     }
   }
 }
 async function registerUser(){
-  const email = (document.getElementById('register-email').value || '').trim();
-  const pass  = (document.getElementById('register-password').value || '').trim();
-  if (!email || !pass) return alert('Enter email and password');
-  try {
+  const email = document.getElementById('registerEmail').value.trim();
+  const pass  = document.getElementById('registerPassword').value.trim();
+  if(!email || !pass){ alert('Enter email & password'); return; }
+  try{
     const cred = await auth.createUserWithEmailAndPassword(email, pass);
-    // Create profile with 6-digit id
     await db.collection('users').doc(cred.user.uid).set({
-      email, userId: gen6(), balance: 0, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      userId: gen6(), balance: 0, rechargeTotal: 0, withdrawalTotal: 0, productRevenue: 0, orders: 0,
+      email
     });
-    alert('Registered! You can now log in.');
-    showLogin();
-  } catch(err){ alert(err.message); }
+    alert('Registered! Please log in.'); showSection('loginSection');
+  }catch(e){ alert(e.message); }
 }
-function logoutUser(){
-  auth.signOut().then(()=>{
-    currentUser = null;
-    // Clear UI & go to login
-    showSection('login-page');
-  });
-}
-function showRegister(){ showSection('register-page'); }
-function showLogin(){ showSection('login-page'); }
+function logoutUser(){ auth.signOut(); }
 
-/* =========================
-   Wallet + Profile binding
-========================= */
-function loadProfile(){
-  if (!currentUser) return;
-  db.collection('users').doc(currentUser.uid).onSnapshot(doc=>{
-    const d = doc.data() || {};
-    document.getElementById('user-id-display').textContent = d.userId || '------';
-    document.getElementById('wallet-balance').textContent = Number(d.balance||0).toFixed(2);
+/* ==============================
+   Wallet actions
+============================== */
+async function doRecharge(){
+  const amt = parseFloat(document.getElementById('rechargeAmount').value);
+  if(!UID) return alert('Login required');
+  if(isNaN(amt) || amt<=0) return alert('Enter valid amount');
+  await db.runTransaction(async (tx)=>{
+    const snap = await tx.get(userDocRef);
+    const d = snap.data();
+    tx.update(userDocRef,{
+      balance: (d.balance||0) + amt,
+      rechargeTotal: (d.rechargeTotal||0) + amt
+    });
   });
+  await addTxn('recharge', amt);
+  document.getElementById('rechargeAmount').value='';
+  openPanel('transactionsPanel');
 }
 
-/* =========================
-   Bank Card save
-========================= */
-async function saveBankDetails(){
-  if (!currentUser) return alert('Please login first');
+async function doWithdraw(){
+  const amt = parseFloat(document.getElementById('withdrawAmount').value);
+  if(!UID) return alert('Login required');
+  if(isNaN(amt) || amt<=0) return alert('Enter valid amount');
+  const profile = (await userDocRef.get()).data();
+  if(!profile.bankCard) return alert('Please bind a bank card first.');
+  if((profile.balance||0) < amt) return alert('Insufficient balance');
+  await db.runTransaction(async (tx)=>{
+    const snap = await tx.get(userDocRef);
+    const d = snap.data();
+    tx.update(userDocRef,{
+      balance: (d.balance||0) - amt,
+      withdrawalTotal: (d.withdrawalTotal||0) + amt
+    });
+  });
+  await addTxn('withdraw', amt);
+  document.getElementById('withdrawAmount').value='';
+  openPanel('transactionsPanel');
+}
+
+async function saveBankCard(){
+  if(!UID) return alert('Login required');
   const payload = {
-    bankName: (document.getElementById('bank-name').value||'').trim(),
-    ifsc: (document.getElementById('ifsc-code').value||'').trim(),
-    accountNumber: (document.getElementById('account-number').value||'').trim(),
-    accountHolder: (document.getElementById('account-holder').value||'').trim(),
+    bankName: document.getElementById('bankName').value.trim(),
+    ifsc:     document.getElementById('ifsc').value.trim(),
+    accNo:    document.getElementById('accNo').value.trim(),
+    accName:  document.getElementById('accName').value.trim(),
     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
   };
-  if (!payload.bankName || !payload.ifsc || !payload.accountNumber || !payload.accountHolder) {
-    return alert('Please fill all bank fields');
+  if(!payload.bankName || !payload.ifsc || !payload.accNo || !payload.accName){
+    return alert('Please fill all fields');
   }
-  await db.collection('users').doc(currentUser.uid).update({ bankCard: payload });
-  alert('Bank details saved');
-  // Return to Account main
-  closePanel('bankCard-page'); showSection('account-page'); setHeader('Account');
+  await userDocRef.update({ bankCard: payload });
+  alert('Bank card saved.');
 }
 
-/* =========================
-   Reset password
-========================= */
+async function addTxn(type, amount){
+  const ref = userDocRef.collection('transactions').doc();
+  await ref.set({
+    type, amount, ts: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  loadTransactions();
+}
+
+function loadTransactions(){
+  if(!UID) return;
+  userDocRef.collection('transactions').orderBy('ts','desc').limit(50).onSnapshot(snap=>{
+    const list = document.getElementById('txList');
+    if(!list) return;
+    if(snap.empty){ list.textContent = 'No transactions yet.'; return; }
+    list.innerHTML = '';
+    snap.forEach(doc=>{
+      const d = doc.data();
+      const row = document.createElement('div');
+      row.className = 'menu-item';
+      row.innerHTML = `
+        <span class="menu-icon">${d.type==='recharge'?'💳':'🏧'}</span>
+        <span class="menu-text" style="font-weight:600;text-transform:capitalize">${d.type}</span>
+        <span class="tag">₹${num(d.amount)}</span>
+      `;
+      list.appendChild(row);
+    });
+  });
+}
+
+/* ==============================
+   Password helpers
+============================== */
 async function resetPassword(){
-  if (!currentUser) return alert('Please login first');
-  const newPass = (document.getElementById('new-password').value||'').trim();
-  if (!newPass) return alert('Enter a new password');
-  try {
-    await currentUser.updatePassword(newPass);
+  if(!auth.currentUser) return alert('Login required');
+  const np = document.getElementById('newPass').value.trim();
+  if(!np) return alert('Enter a new password');
+  try{
+    await auth.currentUser.updatePassword(np);
     alert('Password updated');
-    document.getElementById('new-password').value='';
-    closePanel('resetPassword-page'); showSection('account-page'); setHeader('Account');
-  } catch(err){
-    // If requires recent login, fallback to email reset
-    try {
-      const email = currentUser.email;
-      if (!email) throw new Error('No email on account');
-      await auth.sendPasswordResetEmail(email);
-      alert('Session too old. Password reset email sent to ' + email);
-    } catch(e2){
-      alert(err.message);
-    }
+    document.getElementById('newPass').value='';
+  }catch(e){
+    alert(e.message + '\nTry "Send Reset Email" instead.');
   }
 }
-
-/* =========================
-   Transactions (placeholder)
-========================= */
-function openTransaction(){
-  // If you later store txns in Firestore, load & render here
-  openPage('transaction');
+function sendResetEmail(){
+  const u = auth.currentUser;
+  if(!u || !u.email) return alert('No email on account');
+  auth.sendPasswordResetEmail(u.email).then(()=>alert('Reset email sent to '+u.email));
 }
 
-/* =========================
-   Hook up Account submenu taps
-========================= */
-function openTeam(){ openPage('team'); }
-function openMyProduct(){ openPage('myProduct'); }
-function openBankCard(){ openPage('bankCard'); }
-function openCustomerService(){ openPage('customerService'); }
-
-/* Default route if someone clicks bottom nav before auth resolves */
-if (!auth.currentUser) showSection('login-page');
+/* ==============================
+   Hook big yellow/green buttons
+============================== */
+document.querySelector('.recharge-btn')?.addEventListener('click', ()=>openPanel('rechargePanel'));
+document.querySelector('.withdraw-btn')?.addEventListener('click', ()=>openPanel('withdrawPanel'));
 </script>
+
 </body>
 </html>
