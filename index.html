@@ -3,238 +3,413 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Investment Website</title>
-<!-- Font Awesome for Icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<title>Win89</title>
 <style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f5f5f5;
-}
-header {
-  background: #2196F3;
-  color: #fff;
-  padding: 15px;
-  text-align: center;
-  font-size: 18px;
-  position: relative;
-}
-header .wallet {
-  font-size: 14px;
-  margin-top: 5px;
-}
-.page {
-  display: none;
-  padding: 15px;
-}
-.page.active {
-  display: block;
-}
-nav {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  display: flex;
-  background: #fff;
-  border-top: 1px solid #ccc;
-}
-nav button {
-  flex: 1;
-  padding: 10px;
-  background: #fff;
-  border: none;
-  font-size: 14px;
-}
-nav button i {
-  display: block;
-  font-size: 18px;
-  margin-bottom: 3px;
-}
-.menu-list {
-  background: #fff;
-  border-radius: 10px;
-  overflow: hidden;
-  margin-top: 15px;
-}
-.menu-item {
-  display: flex;
-  align-items: center;
-  padding: 12px;
-  border-bottom: 1px solid #eee;
-  cursor: pointer;
-}
-.menu-item i {
-  margin-right: 10px;
-  color: #2196F3;
-  font-size: 18px;
-}
-.menu-item span {
-  font-size: 16px;
-}
-.back-btn {
-  background: #2196F3;
-  color: #fff;
-  padding: 10px;
-  border: none;
-  border-radius: 5px;
-  margin-bottom: 10px;
-}
+    body { font-family: Arial, sans-serif; margin:0; background:#f8f8f8; }
+    header { background:#333; color:#fff; padding:10px; text-align:center; }
+    nav { background:#444; color:#fff; display:flex; justify-content:space-around; padding:8px 0; }
+    nav a { color:#fff; text-decoration:none; padding:6px 10px; }
+    nav a:hover { background:#666; border-radius:4px; }
+    .section { display:none; padding:20px; }
+    .active { display:block; }
+
+    /* Wallet Styles */
+    .wallet-container {
+        background:#fff;
+        border-radius:10px;
+        padding:15px;
+        margin:15px 0;
+        box-shadow:0 2px 5px rgba(0,0,0,0.1);
+    }
+    .wallet-row {
+        display:flex;
+        justify-content:space-between;
+        margin-bottom:10px;
+        text-align:center;
+    }
+    .wallet-item {
+        flex:1;
+    }
+    .wallet-item p {
+        margin:5px 0;
+    }
+    .wallet-value {
+        font-size:18px;
+        font-weight:bold;
+        color:#007a4d;
+    }
+    .wallet-label {
+        color:#777;
+    }
+    .wallet-buttons {
+        display:flex;
+        justify-content:space-around;
+        margin-top:10px;
+    }
+    .wallet-buttons button {
+        flex:1;
+        margin:0 5px;
+        padding:10px;
+        border:none;
+        color:#fff;
+        font-size:16px;
+        border-radius:25px;
+        cursor:pointer;
+    }
+    .btn-recharge { background:#ffcc00; color:#fff; }
+    .btn-withdraw { background:#28a745; color:#fff; }
 </style>
 </head>
 <body>
 
 <header>
-  Investment Website
-  <div class="wallet">Wallet Balance: ₹<span id="wallet-balance">0</span></div>
+    <h1>Win89</h1>
 </header>
 
-<!-- Pages -->
-<div id="home" class="page active">
-  <h2>Home</h2>
-  <p>Welcome to the Investment Platform.</p>
+<nav>
+    <a href="#" onclick="showSection('home')">Home</a>
+    <a href="#" onclick="showSection('wallet')">Wallet</a>
+    <a href="#" onclick="showSection('games')">Games</a>
+    <a href="#" onclick="showSection('profile')">Profile</a>
+</nav>
+
+<!-- Home Section -->
+<div id="home" class="section active">
+    <h2>Welcome to Win89</h2>
 </div>
 
-<div id="invest" class="page">
-  <h2>Invest</h2>
-  <p>Investment options will be listed here.</p>
+<!-- Wallet Section -->
+<div id="wallet" class="section">
+    <h2>My Wallet</h2>
+    <div class="wallet-container">
+        <div class="wallet-row">
+            <div class="wallet-item">
+                <p class="wallet-value" id="walletBalance">₹0</p>
+                <p class="wallet-label">Balance</p>
+            </div>
+            <div class="wallet-item">
+                <p class="wallet-value" id="walletRecharge">₹0</p>
+                <p class="wallet-label">Recharge</p>
+            </div>
+            <div class="wallet-item">
+                <p class="wallet-value" id="walletWithdrawal">₹0</p>
+                <p class="wallet-label">Withdrawal</p>
+            </div>
+        </div>
+        <div class="wallet-row">
+            <div class="wallet-item">
+                <p class="wallet-value" id="walletRevenue">₹0</p>
+                <p class="wallet-label">Product revenue</p>
+            </div>
+            <div class="wallet-item">
+                <p class="wallet-value" id="walletOrders">0</p>
+                <p class="wallet-label">My Orders</p>
+            </div>
+        </div>
+        <div style="text-align:center;margin-top:5px;">
+            <small>User ID: <span id="userId">-</span></small>
+        </div>
+        <div class="wallet-buttons">
+            <button class="btn-recharge" onclick="openRecharge()">Recharge</button>
+            <button class="btn-withdraw" onclick="openWithdraw()">Withdrawal</button>
+        </div>
+    </div>
 </div>
 
-<div id="blog" class="page">
-  <h2>Blog</h2>
-  <p>Latest investment articles and news.</p>
+<!-- Firebase Setup -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script>
+    var firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+        databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_PROJECT_ID.appspot.com",
+        messagingSenderId: "YOUR_SENDER_ID",
+        appId: "YOUR_APP_ID"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    function showSection(id) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function generateUserId() {
+        return Math.floor(100000 + Math.random() * 900000).toString();
+    }
+
+    firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+            var uid = user.uid;
+            firebase.database().ref('users/' + uid).once('value').then(snapshot => {
+                if (!snapshot.val().userId) {
+                    var newId = generateUserId();
+                    firebase.database().ref('users/' + uid).update({ userId: newId });
+                    document.getElementById('userId').innerText = newId;
+                } else {
+                    document.getElementById('userId').innerText = snapshot.val().userId;
+                }
+                document.getElementById('walletBalance').innerText = "₹" + (snapshot.val().balance || 0);
+                document.getElementById('walletRecharge').innerText = "₹" + (snapshot.val().totalRecharge || 0);
+                document.getElementById('walletWithdrawal').innerText = "₹" + (snapshot.val().totalWithdrawal || 0);
+                document.getElementById('walletRevenue').innerText = "₹" + (snapshot.val().productRevenue || 0);
+                document.getElementById('walletOrders').innerText = snapshot.val().ordersCount || 0;
+            });
+        }
+    });
+
+    function openRecharge() {
+        alert("Recharge page coming soon");
+    }
+    function openWithdraw() {
+        alert("Withdraw page coming soon");
+    }
+</script>
+<!-- Games Section -->
+<div id="games" class="section">
+  <h2>Games</h2>
+  <p>Coming soon…</p>
 </div>
 
-<div id="notice" class="page">
-  <h2>Notice</h2>
-  <p>Important updates and announcements.</p>
-</div>
-
-<div id="account" class="page">
-  <h2>Account</h2>
-  <div class="menu-list">
-    <div class="menu-item" onclick="openSubPage('bank-card')">
-      <i class="fas fa-credit-card"></i><span>Bank Card</span>
-    </div>
-    <div class="menu-item" onclick="openSubPage('transaction')">
-      <i class="fas fa-receipt"></i><span>Transaction</span>
-    </div>
-    <div class="menu-item" onclick="openSubPage('my-product')">
-      <i class="fas fa-box"></i><span>My Product</span>
-    </div>
-    <div class="menu-item" onclick="openSubPage('customer-service')">
-      <i class="fas fa-headset"></i><span>Customer Service</span>
-    </div>
-    <div class="menu-item" onclick="openSubPage('reset-password')">
-      <i class="fas fa-key"></i><span>Reset Password</span>
+<!-- Profile Section -->
+<div id="profile" class="section">
+  <h2>Profile</h2>
+  <div class="wallet-container">
+    <p><b>User ID:</b> <span id="profileUserId">-</span></p>
+    <p><b>Auth:</b> <span id="profileAuth">Anonymous</span></p>
+    <div class="wallet-buttons" style="margin-top:10px;">
+      <button class="btn-recharge" onclick="signOut()">Sign Out</button>
+      <button class="btn-withdraw" onclick="showSection('admin')" id="adminBtn" style="display:none;">Admin Panel</button>
     </div>
   </div>
 </div>
 
-<!-- Sub Pages -->
-<div id="bank-card" class="page">
-  <button class="back-btn" onclick="goBack()">← Back</button>
-  <h3>Bind Bank Card</h3>
-  <input type="text" placeholder="Account Holder Name"><br><br>
-  <input type="text" placeholder="Bank Name"><br><br>
-  <input type="text" placeholder="IFSC Code"><br><br>
-  <input type="text" placeholder="Account Number"><br><br>
-  <button>Save Bank Details</button>
+<!-- Admin Section (visible only for admins) -->
+<div id="admin" class="section">
+  <h2>Admin Panel</h2>
+  <p>Approve or reject pending requests.</p>
+
+  <div class="wallet-container">
+    <h3>Pending Recharges</h3>
+    <div id="rechargeList">No pending items.</div>
+  </div>
+
+  <div class="wallet-container">
+    <h3>Pending Withdrawals</h3>
+    <div id="withdrawList">No pending items.</div>
+  </div>
 </div>
 
-<div id="transaction" class="page">
-  <button class="back-btn" onclick="goBack()">← Back</button>
-  <h3>Transaction History</h3>
-  <p>No transactions yet.</p>
+<!-- ========== Modals for Recharge / Withdraw ========== -->
+<style>
+  .modal-backdrop{
+    position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:9999;
+  }
+  .modal{background:#fff;border-radius:10px;padding:16px;width:92%;max-width:380px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+  .modal h3{margin-top:0}
+  .modal .row{margin:8px 0}
+  .modal input{width:100%;padding:10px;border:1px solid #ccc;border-radius:6px}
+  .modal .actions{display:flex;gap:8px;margin-top:12px}
+  .modal .actions button{flex:1;padding:10px;border:none;border-radius:8px;color:#fff;cursor:pointer}
+  .btn-cancel{background:#9e9e9e}
+</style>
+
+<div class="modal-backdrop" id="rechargeModal">
+  <div class="modal">
+    <h3>Recharge</h3>
+    <div class="row">
+      <input id="rechargeAmount" type="number" min="1" placeholder="Enter amount (₹)">
+    </div>
+    <div class="actions">
+      <button class="btn-cancel" onclick="closeRecharge()">Cancel</button>
+      <button class="btn-recharge" onclick="submitRecharge()">Submit</button>
+    </div>
+  </div>
 </div>
 
-<div id="my-product" class="page">
-  <button class="back-btn" onclick="goBack()">← Back</button>
-  <h3>My Products</h3>
-  <p>No products yet.</p>
+<div class="modal-backdrop" id="withdrawModal">
+  <div class="modal">
+    <h3>Withdraw</h3>
+    <div class="row">
+      <input id="withdrawAmount" type="number" min="1" placeholder="Enter amount (₹)">
+    </div>
+    <div class="actions">
+      <button class="btn-cancel" onclick="closeWithdraw()">Cancel</button>
+      <button class="btn-withdraw" onclick="submitWithdraw()">Submit</button>
+    </div>
+  </div>
 </div>
-
-<div id="customer-service" class="page">
-  <button class="back-btn" onclick="goBack()">← Back</button>
-  <h3>Customer Service</h3>
-  <p>Email: support@example.com</p>
-</div>
-
-<div id="reset-password" class="page">
-  <button class="back-btn" onclick="goBack()">← Back</button>
-  <h3>Reset Password</h3>
-  <input type="password" placeholder="New Password"><br><br>
-  <button>Update Password</button>
-</div>
-
-<!-- Navigation -->
-<nav>
-  <button onclick="showPage('home')"><i class="fas fa-home"></i>Home</button>
-  <button onclick="showPage('invest')"><i class="fas fa-chart-line"></i>Invest</button>
-  <button onclick="showPage('blog')"><i class="fas fa-blog"></i>Blog</button>
-  <button onclick="showPage('notice')"><i class="fas fa-bullhorn"></i>Notice</button>
-  <button onclick="showPage('account')"><i class="fas fa-user"></i>Account</button>
-</nav>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 <script>
-// ======== Firebase Config ========
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+  // ---------- BASIC STATE ----------
+  const rtdb = firebase.database();
+  let RT_USER_REF = null;     // /users/{uid}
+  let currentUID = null;
+  const usersRef = rtdb.ref('users');
+  const rechargesRef = rtdb.ref('rechargeRequests');
+  const withdrawsRef = rtdb.ref('withdrawRequests');
 
-// ======== Navigation Functions ========
-let currentPage = "home";
+  // Keep UI in sync with DB
+  function bindWalletUI(snap) {
+    const v = snap.val() || {};
+    document.getElementById('walletBalance').innerText = '₹' + (v.balance || 0);
+    document.getElementById('walletRecharge').innerText = '₹' + (v.totalRecharge || 0);
+    document.getElementById('walletWithdrawal').innerText = '₹' + (v.totalWithdrawal || 0);
+    document.getElementById('walletRevenue').innerText = '₹' + (v.productRevenue || 0);
+    document.getElementById('walletOrders').innerText = (v.ordersCount || 0);
+    document.getElementById('userId').innerText = v.userId || '-';
+    document.getElementById('profileUserId').innerText = v.userId || '-';
+  }
 
-function showPage(pageId) {
-  document.getElementById(currentPage).classList.remove("active");
-  document.getElementById(pageId).classList.add("active");
-  currentPage = pageId;
-}
+  // Open / close modals
+  function openRecharge(){ document.getElementById('rechargeModal').style.display='flex'; }
+  function closeRecharge(){ document.getElementById('rechargeModal').style.display='none'; document.getElementById('rechargeAmount').value=''; }
+  function openWithdraw(){ document.getElementById('withdrawModal').style.display='flex'; }
+  function closeWithdraw(){ document.getElementById('withdrawModal').style.display='none'; document.getElementById('withdrawAmount').value=''; }
 
-function openSubPage(pageId) {
-  document.getElementById(currentPage).classList.remove("active");
-  document.getElementById(pageId).classList.add("active");
-  currentPage = pageId;
-}
+  // Create a 6-digit ID
+  function gen6() { return Math.floor(100000 + Math.random()*900000).toString(); }
 
-function goBack() {
-  document.getElementById(currentPage).classList.remove("active");
-  document.getElementById("account").classList.add("active");
-  currentPage = "account";
-}
+  // Ensure user doc exists with defaults + 6-digit id
+  async function ensureUser(uid) {
+    const snap = await usersRef.child(uid).get();
+    if (!snap.exists()) {
+      await usersRef.child(uid).set({
+        userId: gen6(),
+        balance: 0,
+        totalRecharge: 0,
+        totalWithdrawal: 0,
+        productRevenue: 0,
+        ordersCount: 0,
+        isAdmin: false
+      });
+    } else if (!snap.val().userId) {
+      await usersRef.child(uid).update({ userId: gen6() });
+    }
+  }
 
-// ======== Wallet Functions ========
-function loadWallet(uid) {
-  db.collection("users").doc(uid).get().then(doc => {
-    if (doc.exists) {
-      let balance = doc.data().wallet || 0;
-      document.getElementById("wallet-balance").textContent = balance;
+  // Submit recharge request
+  async function submitRecharge(){
+    const amt = parseInt(document.getElementById('rechargeAmount').value || '0',10);
+    if (!currentUID) return alert('Not signed in');
+    if (!amt || amt <= 0) return alert('Enter a valid amount');
+    const req = {
+      uid: currentUID,
+      amount: amt,
+      status: 'pending',
+      createdAt: Date.now()
+    };
+    const key = rechargesRef.push().key;
+    await rechargesRef.child(key).set(req);
+    closeRecharge();
+    alert('Recharge request created. Wait for admin approval.');
+  }
+
+  // Submit withdraw request
+  async function submitWithdraw(){
+    const amt = parseInt(document.getElementById('withdrawAmount').value || '0',10);
+    if (!currentUID) return alert('Not signed in');
+    if (!amt || amt <= 0) return alert('Enter a valid amount');
+    // (no client balance check; admin will validate)
+    const req = {
+      uid: currentUID,
+      amount: amt,
+      status: 'pending',
+      createdAt: Date.now()
+    };
+    const key = withdrawsRef.push().key;
+    await withdrawsRef.child(key).set(req);
+    closeWithdraw();
+    alert('Withdrawal request created. Wait for admin approval.');
+  }
+
+  // --------- ADMIN UI (simple) ----------
+  function renderList(containerId, data, type){
+    const el = document.getElementById(containerId);
+    if (!data) { el.innerHTML = 'No pending items.'; return; }
+    const entries = Object.entries(data).filter(([_,v]) => v.status==='pending');
+    if (!entries.length){ el.innerHTML = 'No pending items.'; return; }
+    el.innerHTML = '';
+    entries.forEach(([id, v]) => {
+      const row = document.createElement('div');
+      row.style.borderBottom = '1px solid #eee';
+      row.style.padding = '8px 0';
+      row.innerHTML = `
+        <div><b>${type === 'recharge' ? 'Recharge' : 'Withdraw'}</b> • ₹${v.amount} • <small>${new Date(v.createdAt).toLocaleString()}</small></div>
+        <div><small>UID:</small> ${v.uid}</div>
+        <div style="margin-top:6px;display:flex;gap:8px;">
+          <button class="btn-recharge" style="padding:6px 10px;border:none;border-radius:6px;color:#fff" onclick="approveReq('${type}','${id}')">Approve</button>
+          <button class="btn-cancel"  style="padding:6px 10px;border:none;border-radius:6px;color:#fff;background:#f44336" onclick="rejectReq('${type}','${id}')">Reject</button>
+        </div>`;
+      el.appendChild(row);
+    });
+  }
+
+  async function approveReq(type, id){
+    const ref = type==='recharge' ? rechargesRef.child(id) : withdrawsRef.child(id);
+    const snap = await ref.get();
+    if (!snap.exists()) return;
+    const { uid, amount, status } = snap.val();
+    if (status!=='pending') return alert('Already processed.');
+    const userRef = usersRef.child(uid);
+    const userSnap = await userRef.get();
+    const u = userSnap.val() || {};
+    let updates = {};
+    if (type==='recharge'){
+      updates.balance = (u.balance||0) + amount;
+      updates.totalRecharge = (u.totalRecharge||0) + amount;
     } else {
-      db.collection("users").doc(uid).set({ wallet: 0 });
+      if ((u.balance||0) < amount) return alert('User has insufficient balance');
+      updates.balance = (u.balance||0) - amount;
+      updates.totalWithdrawal = (u.totalWithdrawal||0) + amount;
+    }
+    await userRef.update(updates);
+    await ref.update({ status:'approved', processedAt: Date.now() });
+    alert('Approved.');
+  }
+
+  async function rejectReq(type, id){
+    const ref = type==='recharge' ? rechargesRef.child(id) : withdrawsRef.child(id);
+    const snap = await ref.get();
+    if (!snap.exists()) return;
+    if (snap.val().status!=='pending') return alert('Already processed.');
+    await ref.update({ status:'rejected', processedAt: Date.now() });
+    alert('Rejected.');
+  }
+
+  // ---------- AUTH & LIVE BINDINGS ----------
+  firebase.auth().onAuthStateChanged(async (user)=>{
+    if (user){
+      currentUID = user.uid;
+      document.getElementById('profileAuth').innerText = user.isAnonymous ? 'Anonymous' : (user.email || 'Signed in');
+      RT_USER_REF = usersRef.child(user.uid);
+      await ensureUser(user.uid);
+      RT_USER_REF.on('value', bindWalletUI);
+
+      // show admin panel button if isAdmin
+      const snap = await RT_USER_REF.get();
+      const isAdmin = !!(snap.val() && snap.val().isAdmin);
+      document.getElementById('adminBtn').style.display = isAdmin ? 'inline-block' : 'none';
+
+      // If admin, watch pending lists
+      if (isAdmin){
+        rechargesRef.on('value', s => renderList('rechargeList', s.val(), 'recharge'));
+        withdrawsRef.on('value', s => renderList('withdrawList', s.val(), 'withdraw'));
+      }
+    } else {
+      // auto anonymous sign-in for demo
+      firebase.auth().signInAnonymously();
     }
   });
-}
 
-// ======== Auth State Listener ========
-auth.onAuthStateChanged(user => {
-  if (user) {
-    loadWallet(user.uid);
-  } else {
-    // Auto-login for testing (remove in production)
-    auth.signInAnonymously().catch(err => console.log(err.message));
+  // ---------- UTIL ----------
+  function signOut(){
+    firebase.auth().signOut().then(()=> location.reload());
   }
-});
 </script>
+
 </body>
 </html>
