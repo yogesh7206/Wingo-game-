@@ -83,6 +83,13 @@ nav button span { font-size:18px; }
 
 <div id="accountSection" class="section">
     <h2>My Account</h2>
+
+    <!-- New user info panel -->
+    <div id="userInfo" style="background:#e9ecef; padding:12px; border-radius:12px; margin-bottom:15px; text-align:center;">
+        <p><strong>Email/Mobile:</strong> <span id="userEmail">-</span></p>
+        <p><strong>User ID:</strong> <span id="user6Id">-</span></p>
+    </div>
+
     <div class="account-stats">
         <div class="stat">
             <h3 id="balance">₹0</h3>
@@ -180,6 +187,10 @@ async function initUserData(user){
     document.getElementById('withdrawal').textContent = '₹'+(d.withdrawalTotal||0);
     document.getElementById('productRevenue').textContent = '₹'+(d.productRevenue||0);
     document.getElementById('myOrders').textContent = d.orders||0;
+
+    // NEW: show email and user ID
+    document.getElementById('userEmail').textContent = d.email || '-';
+    document.getElementById('user6Id').textContent = d.userId || '-';
   });
 }
 
