@@ -1,190 +1,176 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Investment Website</title>
-<style>
-body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f4f4f4; }
-header { background:#ff6600; color:#fff; padding:10px; display:flex; justify-content:space-between; align-items:center; }
-header h1 { font-size:20px; margin:0; }
-nav { display:flex; gap:15px; }
-nav a { color:#fff; text-decoration:none; font-weight:bold; }
-.section { display:none; padding:15px; }
-.section.active { display:block; }
-.account-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:10px; }
-.stat { background:#fff; padding:10px; border-radius:8px; text-align:center; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
-.action-buttons { margin:15px 0; display:flex; gap:10px; }
-.recharge-btn, .withdraw-btn { flex:1; padding:10px; border:none; border-radius:5px; font-weight:bold; cursor:pointer; }
-.recharge-btn { background:#28a745; color:#fff; }
-.withdraw-btn { background:#dc3545; color:#fff; }
-.menu-list { margin-top:15px; background:#fff; border-radius:8px; overflow:hidden; }
-.menu-item { display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #ddd; cursor:pointer; }
-.menu-item:hover { background:#f1f1f1; }
-.menu-icon { margin-right:10px; }
-.menu-text { flex:1; }
-.menu-arrow { color:#999; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Win89</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+    }
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: orange;
+      padding: 10px 20px;
+    }
+    nav ul {
+      display: flex;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    nav ul li {
+      position: relative;
+    }
+    nav ul li a {
+      color: white;
+      padding: 10px 15px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+    }
+    nav ul li a:hover {
+      background-color: #e69500;
+    }
+    nav ul li ul {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background-color: orange;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      min-width: 180px;
+      z-index: 1000;
+    }
+    nav ul li:hover ul {
+      display: block;
+    }
+    nav ul li ul li a {
+      padding: 10px;
+    }
+    .account-info {
+      padding: 15px;
+      background: white;
+      border-bottom: 1px solid #ddd;
+    }
+    .account-info p {
+      margin: 5px 0;
+    }
+    main {
+      padding: 20px;
+    }
+  </style>
 </head>
 <body>
 
-<header>
-    <h1>Investment Site</h1>
-    <nav id="navMenu" style="display:none;">
-        <a href="#" onclick="showSection('home')">🏠 Home</a>
-        <a href="#" onclick="showSection('investment')">💼 Investment</a>
-        <a href="#" onclick="showSection('blog')">📰 Blog</a>
-        <a href="#" onclick="showSection('notice')">📢 Notice</a>
-        <a href="#" onclick="showSection('accountSection')">👤 Account</a>
-    </nav>
-</header>
+<nav>
+  <ul>
+    <li><a href="#"><span>🏠</span> Home</a></li>
+    <li><a href="#"><span>💰</span> Investment</a></li>
+    <li><a href="#"><span>📰</span> Blog</a></li>
+    <li><a href="#"><span>📢</span> Notice</a></li>
+  </ul>
+  <ul>
+    <li>
+      <a href="#"><span>👤</span> Account</a>
+      <ul>
+        <li><a href="#">Profile</a></li>
+        <li><a href="#">Wallet</a></li>
+        <li><a href="#">Referral</a></li>
+        <li><a href="#">Bet History</a></li>
+        <li><a href="#">Customer Service</a></li>
+        <li><a href="https://t.me/YourTelegramGroupLink" target="_blank">Telegram Group</a></li>
+        <li><a href="#" id="logoutBtn">Logout</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
 
-<!-- Sections -->
-<div id="home" class="section active">
-    <h2>Welcome to the Home Page</h2>
+<div class="account-info">
+  <p>Email: <span id="userEmail">Loading...</span></p>
+  <p>Mobile: <span id="userMobile">Loading...</span></p>
+  <p>User ID: <span id="userId">Loading...</span></p>
 </div>
 
-<div id="investment" class="section">
-    <h2>Investment Plans</h2>
-</div>
+<main>
+    <h1>Welcome to Win89</h1>
+  <p>This is your dashboard.</p>
+</main>
 
-<div id="blog" class="section">
-    <h2>Blog</h2>
-</div>
-
-<div id="notice" class="section">
-    <h2>Notices</h2>
-</div>
-
-<!-- Account Section -->
-<div id="accountSection" class="section">
-    <h2>My Account</h2>
-    <div id="userInfo" style="background:#e9ecef; padding:12px; border-radius:12px; margin-bottom:15px; text-align:center;">
-        <p><strong>Email:</strong> <span id="userEmail">-</span></p>
-        <p><strong>Mobile:</strong> <span id="userMobile">-</span></p>
-        <p><strong>User ID:</strong> <span id="user6Id">-</span></p>
-    </div>
-    <div class="account-stats">
-        <div class="stat"><h3 id="balance">₹0</h3><p>Balance</p></div>
-        <div class="stat"><h3 id="recharge">₹0</h3><p>Recharge</p></div>
-        <div class="stat"><h3 id="withdrawal">₹0</h3><p>Withdrawal</p></div>
-        <div class="stat"><h3 id="productRevenue">₹0</h3><p>Product revenue</p></div>
-        <div class="stat"><h3 id="myOrders">0</h3><p>My Orders</p></div>
-    </div>
-    <div class="action-buttons">
-        <button class="recharge-btn">Recharge</button>
-        <button class="withdraw-btn">Withdrawal</button>
-    </div>
-    <!-- Submenus -->
-    <div class="menu-list">
-        <div class="menu-item" onclick="alert('Profile page coming soon!')">
-            <span class="menu-icon">👤</span>
-            <span class="menu-text">Profile</span>
-            <span class="menu-arrow">›</span>
-        </div>
-        <div class="menu-item" onclick="alert('Referral system coming soon!')">
-            <span class="menu-icon">👥</span>
-            <span class="menu-text">Referrals</span>
-            <span class="menu-arrow">›</span>
-        </div>
-        <div class="menu-item" onclick="window.open('https://t.me/YourTelegramGroupLink', '_blank')">
-            <span class="menu-icon">💬</span>
-            <span class="menu-text">Join Telegram Group</span>
-            <span class="menu-arrow">›</span>
-        </div>
-    </div>
-    <br>
-    <button onclick="logoutUser()">Logout</button>
-</div>
-<!-- Firebase & JavaScript -->
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
 <script>
-/* ================= Firebase Config ================= */
-const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "SENDER_ID",
-    appId: "APP_ID"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+  // Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyDvF1KrDDRZJucp-78dbvmQ34Oi3j17Rrk",
+    authDomain: "investment-website-deml.firebaseapp.com",
+    projectId: "investment-website-deml",
+    storageBucket: "investment-website-deml.firebasestorage.app",
+    messagingSenderId: "814451995593",
+    appId: "1:814451995593:web:55e3280d9cb43200f1ee18",
+    measurementId: "G-8FKZE5NNSX"
+  };
 
-/* ================ Navigation ================= */
-function showSection(id) {
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-}
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
-/* ================ 6-digit ID Generator ================ */
-function generateUserId() {
-    return Math.floor(100000 + Math.random() * 900000);
-}
+  // Generate 6-digit ID
+  function generateUserId() {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  }
 
-/* ================ Save User Data ================ */
-function saveUserData(user, mobile) {
-    const userRef = db.collection('users').doc(user.uid);
-    return userRef.get().then(doc => {
-        if (!doc.exists) {
-            const newId = generateUserId();
-            return userRef.set({
-                email: user.email || '',
-                mobile: mobile || '',
-                user6Id: newId,
-                balance: 0
-            });
-        }
+  // Save user data on registration
+  function saveUserData(user) {
+    const userRef = db.collection("users").doc(user.uid);
+    userRef.get().then(doc => {
+      if (!doc.exists) {
+        const userId = generateUserId();
+        userRef.set({
+          email: user.email || "",
+          mobile: user.phoneNumber || "",
+          userId: userId
+        }).then(() => {
+          displayUserInfo(user.email, user.phoneNumber, userId);
+        });
+      } else {
+        const data = doc.data();
+        displayUserInfo(data.email, data.mobile, data.userId);
+      }
     });
-}
+  }
 
-/* ================ Load User Data ================ */
-function loadUserData(uid) {
-    db.collection('users').doc(uid).get().then(doc => {
-        if (doc.exists) {
-            const data = doc.data();
-            document.getElementById('userEmail').innerText = data.email || '-';
-            document.getElementById('userMobile').innerText = data.mobile || '-';
-            document.getElementById('user6Id').innerText = data.user6Id || '-';
-            document.getElementById('balance').innerText = `₹${data.balance || 0}`;
-        }
-    });
-}
+  // Display user info in account section
+  function displayUserInfo(email, mobile, userId) {
+    document.getElementById("userEmail").textContent = email || "Not set";
+    document.getElementById("userMobile").textContent = mobile || "Not set";
+    document.getElementById("userId").textContent = userId || "Not set";
+  }
 
-/* ================ Auth State ================ */
-auth.onAuthStateChanged(user => {
+  // Auth state change listener
+  auth.onAuthStateChanged(user => {
     if (user) {
-        document.getElementById('navMenu').style.display = 'flex';
-        showSection('home');
-        loadUserData(user.uid);
+      saveUserData(user);
     } else {
-        document.getElementById('navMenu').style.display = 'none';
-        showSection('home');
+      displayUserInfo("Not logged in", "", "");
     }
-});
+  });
 
-/* ================ Logout ================ */
-function logoutUser() {
-    auth.signOut();
-}
-
-/* ================ Example Register/Login ================ */
-// Example: Register with email, password, and mobile number
-function registerUser(email, password, mobile) {
-    auth.createUserWithEmailAndPassword(email, password)
-    .then(cred => saveUserData(cred.user, mobile))
-    .catch(err => alert(err.message));
-}
-
-// Example: Login with email and password
-function loginUser(email, password) {
-    auth.signInWithEmailAndPassword(email, password)
-    .catch(err => alert(err.message));
-}
+  // Logout
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    auth.signOut().then(() => {
+      location.reload();
+    });
+  });
 </script>
+
 </body>
 </html>
