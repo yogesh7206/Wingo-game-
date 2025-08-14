@@ -156,31 +156,37 @@ function showSection(id){
   if(el) el.classList.add('active-section');
 }
 
-// Auth
-auth.onAuthStateChanged(user => {
+// Auth + old user handling
+auth.onAuthStateChanged(async (user) => {
   const nav = document.getElementById('bottomNav');
-  if(user){
-    nav.style.display = 'flex';
-    showSection('homeSection');
-    initUserData(user);
-  } else {
+  if (!user) {
     nav.style.display = 'none';
     showSection('loginSection');
+    return;
   }
-});
+  nav.style.display = 'flex';
+  showSection('homeSection');
 
-async function initUserData(user){
   const UID = user.uid;
   const userRef = db.collection('users').doc(UID);
   const snap = await userRef.get();
-  if(!snap.exists){
+
+  if (!snap.exists) {
     await userRef.set({
       userId: Math.floor(100000 + Math.random()*900000),
       balance:0, rechargeTotal:0, withdrawalTotal:0, productRevenue:0, orders:0,
       email: user.email
     });
+  } else {
+    const data = snap.data();
+    const updates = {};
+    if (!data.userId) updates.userId = Math.floor(100000 + Math.random()*900000);
+    if (!data.email) updates.email = user.email;
+    if (Object.keys(updates).length > 0) await userRef.update(updates);
   }
-  userRef.onSnapshot(doc=>{
+
+  // Live updates
+  userRef.onSnapshot(doc => {
     const d = doc.data() || {};
     document.getElementById('balance').textContent = '₹'+(d.balance||0);
     document.getElementById('recharge').textContent = '₹'+(d.rechargeTotal||0);
@@ -188,11 +194,10 @@ async function initUserData(user){
     document.getElementById('productRevenue').textContent = '₹'+(d.productRevenue||0);
     document.getElementById('myOrders').textContent = d.orders||0;
 
-    // NEW: show email and user ID
-    document.getElementById('userEmail').textContent = d.email || '-';
+    document.getElementById('userEmail').textContent = d.email || user.email || '-';
     document.getElementById('user6Id').textContent = d.userId || '-';
   });
-}
+});
 
 // Login/Register
 async function loginUser(){
