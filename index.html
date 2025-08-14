@@ -5,104 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Win89</title>
 <style>
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    background: #f8f9fa;
-}
-header {
-    background: #007bff;
-    padding: 10px;
-    color: #fff;
-    text-align: center;
-    font-size: 20px;
-    font-weight: bold;
-}
-nav {
-    background: #fff;
-    border-top: 1px solid #ccc;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    display: flex;
-    justify-content: space-around;
-    padding: 5px 0;
-    z-index: 1000;
-}
-nav button {
-    background: none;
-    border: none;
-    font-size: 14px;
-    color: #333;
-}
-.section {
-    display: none;
-    padding: 15px;
-}
-.active-section {
-    display: block !important;
-}
-.account-stats {
-    display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
-    background: #fff;
-    padding: 15px;
-    border-radius: 12px;
-    margin-bottom: 15px;
-}
-.stat {
-    text-align: center;
-    flex: 1 1 45%;
-    margin: 5px 0;
-}
-.stat h3 {
-    color: #004085;
-    margin: 0;
-    font-size: 18px;
-}
-.stat p {
-    color: #6c757d;
-    font-size: 14px;
-    margin: 0;
-}
-.action-buttons {
-    display: flex;
-    justify-content: space-around;
-    margin-top: 10px;
-}
-.action-buttons button {
-    flex: 1;
-    margin: 5px;
-    padding: 12px;
-    border: none;
-    border-radius: 25px;
-    font-size: 16px;
-    color: #fff;
-}
-.recharge-btn {
-    background: linear-gradient(45deg, #ffc107, #ffb300);
-}
-.withdraw-btn {
-    background: linear-gradient(45deg, #28a745, #218838);
-}
-.menu-list{margin:15px 0;background:#fff;border-radius:12px;overflow:hidden}
-.menu-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #eceff1}
-.menu-item:last-child{border-bottom:none}
-.menu-icon{font-size:20px;width:24px;text-align:center}
-.menu-text{flex:1;font-size:15px;color:#212529}
-.menu-arrow{color:#9aa0a6}
-.panel{display:none;padding:15px}
-.panel.active{display:block}
-.panel h3{margin:8px 0 12px}
-.input{width:100%;padding:12px;border:1px solid #dfe3e8;border-radius:8px;margin-bottom:10px}
-.btn{display:inline-block;padding:12px 14px;border:none;border-radius:10px;background:#007bff;color:#fff}
-.btn.secondary{background:#6c757d}
-.btn.block{width:100%}
-.small{color:#6c757d;font-size:12px}
-.tag{display:inline-block;background:#e8f0fe;color:#1967d2;border-radius:8px;padding:2px 8px;font-size:12px;margin-left:6px}
-.hidden{display:none}
+body { font-family: Arial, sans-serif; margin: 0; background: #f8f9fa; }
+header { background: #007bff; padding: 10px; color: #fff; text-align: center; font-size: 20px; font-weight: bold; }
+.section { display: none; padding: 15px; }
+.active-section { display: block !important; }
+.account-stats { display: flex; justify-content: space-around; flex-wrap: wrap; background: #fff; padding: 15px; border-radius: 12px; margin-bottom: 15px; }
+.stat { text-align: center; flex: 1 1 45%; margin: 5px 0; }
+.stat h3 { color: #004085; margin: 0; font-size: 18px; }
+.stat p { color: #6c757d; font-size: 14px; margin: 0; }
+.account-menu { background:#fff; border-radius:12px; overflow:hidden; }
+.menu-item { display:flex; align-items:center; gap:12px; padding:14px 16px; border-bottom:1px solid #eceff1; cursor:pointer; }
+.menu-item:last-child { border-bottom:none; }
+.menu-icon { font-size:20px; width:24px; text-align:center; }
+.menu-text { flex:1; font-size:15px; color:#212529; }
+.menu-arrow { color:#9aa0a6; }
+.panel { display:none; padding:15px; margin-top:10px; background:#fff; border-radius:12px; }
+.panel.active { display:block; }
+.input { width:100%; padding:12px; border:1px solid #dfe3e8; border-radius:8px; margin-bottom:10px; }
+.btn { display:inline-block; padding:12px 14px; border:none; border-radius:10px; background:#007bff; color:#fff; cursor:pointer; }
+.btn.secondary { background:#6c757d; }
+.btn.block { width:100%; }
+.small { color:#6c757d; font-size:12px; }
+.tag { display:inline-block; background:#e8f0fe; color:#1967d2; border-radius:8px; padding:2px 8px; font-size:12px; margin-left:6px; }
+.hidden { display:none; }
 </style>
 </head>
 <body>
@@ -148,261 +73,143 @@ nav button {
 <div id="accountSection" class="section">
     <h2>My Account</h2>
     <div class="account-stats">
-        <div class="stat">
-            <h3 id="balance">₹0</h3>
-            <p>Balance</p>
-        </div>
-        <div class="stat">
-            <h3 id="recharge">₹0</h3>
-            <p>Recharge</p>
-        </div>
-        <div class="stat">
-            <h3 id="withdrawal">₹0</h3>
-            <p>Withdrawal</p>
-        </div>
-        <div class="stat">
-            <h3 id="productRevenue">₹0</h3>
-            <p>Product revenue</p>
-        </div>
-        <div class="stat">
-            <h3 id="myOrders">0</h3>
-            <p>My Orders</p>
-        </div>
+        <div class="stat"><h3 id="balance">₹0</h3><p>Balance</p></div>
+        <div class="stat"><h3 id="recharge">₹0</h3><p>Recharge</p></div>
+        <div class="stat"><h3 id="withdrawal">₹0</h3><p>Withdrawal</p></div>
+        <div class="stat"><h3 id="productRevenue">₹0</h3><p>Product revenue</p></div>
+        <div class="stat"><h3 id="myOrders">0</h3><p>My Orders</p></div>
     </div>
-    <div class="action-buttons">
-        <button class="recharge-btn">Recharge</button>
-        <button class="withdraw-btn">Withdrawal</button>
+
+    <div class="account-menu">
+        <div class="menu-item" onclick="openPanel('rechargePanel')"><span class="menu-icon">💳</span><span class="menu-text">Recharge</span><span class="menu-arrow">›</span></div>
+        <div class="menu-item" onclick="openPanel('withdrawPanel')"><span class="menu-icon">🏧</span><span class="menu-text">Withdraw</span><span class="menu-arrow">›</span></div>
+        <div class="menu-item" onclick="openPanel('bankCardPanel')"><span class="menu-icon">🏦</span><span class="menu-text">Bind Bank Card</span><span class="menu-arrow">›</span></div>
+        <div class="menu-item" onclick="openPanel('transactionsPanel')"><span class="menu-icon">📜</span><span class="menu-text">Transactions</span><span class="menu-arrow">›</span></div>
+        <div class="menu-item" onclick="openPanel('myProductPanel')"><span class="menu-icon">🛒</span><span class="menu-text">My Product</span><span class="menu-arrow">›</span></div>
+        <div class="menu-item" onclick="openPanel('supportPanel')"><span class="menu-icon">💬</span><span class="menu-text">Customer Service</span><span class="menu-arrow">›</span></div>
+        <div class="menu-item" onclick="openPanel('resetPassPanel')"><span class="menu-icon">🔒</span><span class="menu-text">Reset Password</span><span class="menu-arrow">›</span></div>
     </div>
-    <br>
-    <button onclick="logoutUser()">Logout</button>
 </div>
 
-<!-- Account Panels -->
-<div id="accountPanels">
-  <div id="rechargePanel" class="panel">
+<!-- Panels -->
+<div id="rechargePanel" class="panel">
     <h3>Recharge</h3>
     <input id="rechargeAmount" type="number" class="input" placeholder="Amount (₹)">
     <button class="btn block" onclick="doRecharge()">Add Money</button>
-    <p class="small">Recharge increases your wallet balance. A record is added to transactions.</p>
-  </div>
-  <div id="withdrawPanel" class="panel">
+</div>
+<div id="withdrawPanel" class="panel">
     <h3>Withdraw</h3>
     <input id="withdrawAmount" type="number" class="input" placeholder="Amount (₹)">
     <button class="btn block" onclick="doWithdraw()">Request Withdraw</button>
-    <p class="small">Requires a bound bank card.</p>
-  </div>
-  <div id="bankCardPanel" class="panel">
+</div>
+<div id="bankCardPanel" class="panel">
     <h3>Bind Bank Card</h3>
     <input id="bankName" class="input" placeholder="Bank Name">
     <input id="ifsc" class="input" placeholder="IFSC Code">
     <input id="accNo" class="input" placeholder="Account Number">
     <input id="accName" class="input" placeholder="Account Holder Name">
     <button class="btn block" onclick="saveBankCard()">Save</button>
-  </div>
-  <div id="transactionsPanel" class="panel">
+</div>
+<div id="transactionsPanel" class="panel">
     <h3>Transactions</h3>
     <div id="txList" class="small">No transactions yet.</div>
-  </div>
-  <div id="myProductPanel" class="panel">
+</div>
+<div id="myProductPanel" class="panel">
     <h3>My Product</h3>
     <p class="small">You can store product purchases here later.</p>
-  </div>
-  <div id="supportPanel" class="panel">
+</div>
+<div id="supportPanel" class="panel">
     <h3>Customer Service</h3>
     <p class="small">Telegram: @EarnersCircleVip</p>
-  </div>
-  <div id="resetPassPanel" class="panel">
+</div>
+<div id="resetPassPanel" class="panel">
     <h3>Reset Password</h3>
     <input id="newPass" type="password" class="input" placeholder="New password">
     <button class="btn" onclick="resetPassword()">Update Password</button>
     <button class="btn secondary" style="margin-left:8px" onclick="sendResetEmail()">Send Reset Email</button>
-  </div>
 </div>
 
 <!-- Bottom Navigation -->
 <nav id="bottomNav" style="display:none;">
-    <button onclick="showSection('homeSection')">Home</button>
-    <button onclick="showSection('investmentSection')">Investment</button>
-    <button onclick="showSection('blogSection')">Blog</button>
-    <button onclick="showSection('noticeSection')">Notice</button>
-    <button style="margin-left:auto;" onclick="showSection('accountSection')">Account</button>
+    <button onclick="showSection('homeSection')"><span class="icon">🏠</span>Home</button>
+    <button onclick="showSection('investmentSection')"><span class="icon">💹</span>Investment</button>
+    <button onclick="showSection('blogSection')"><span class="icon">📰</span>Blog</button>
+    <button onclick="showSection('noticeSection')"><span class="icon">📢</span>Notice</button>
+    <button style="margin-left:auto;" onclick="showSection('accountSection')"><span class="icon">👤</span>Account</button>
 </nav>
 
-<!-- Firebase -->
+<!-- Firebase & Scripts -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
 <script>
 // Firebase config
-const firebaseConfig = {
-  apiKey: "AIzaSyDvF1KrDDRZJucp-78dbvmQ34Oi3j17Rrk",
-  authDomain: "investment-website-deml.firebaseapp.com",
-  projectId: "investment-website-deml",
-  storageBucket: "investment-website-deml.firebasestorage.app",
-  messagingSenderId: "814451995593",
-  appId: "1:814451995593:web:55e3280d9cb43200f1ee18",
-  measurementId: "G-8FKZE5NNSX"
-};
+const firebaseConfig = { apiKey:"AIza...", authDomain:"...", projectId:"...", storageBucket:"...", messagingSenderId:"...", appId:"...", measurementId:"..." };
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
-const db   = firebase.firestore();
+const db = firebase.firestore();
 
 // Section router
 function showSection(id){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active-section'));
-  const el = document.getElementById(id);
-  if(el){ el.classList.add('active-section'); window.scrollTo({top:0,behavior:'instant'}); }
-}
-
-// Auth flow
-let UID = null;
-let userDocRef = null;
-auth.onAuthStateChanged(async (user)=>{
-  if(!user){
-    UID = null; userDocRef = null;
-    showSection('loginSection');
-    document.getElementById('bottomNav').style.display = 'none';
-    return;
-  }
-  UID = user.uid;
-  userDocRef = db.collection('users').doc(UID);
-  document.getElementById('bottomNav').style.display = 'flex';
-
-  const snap = await userDocRef.get();
-  if(!snap.exists){
-    await userDocRef.set({ userId: gen6(), balance: 0, rechargeTotal: 0, withdrawalTotal: 0, productRevenue: 0, orders: 0 });
-  }else if(!snap.data().userId){
-    await userDocRef.update({ userId: gen6() });
-  }
-
-  userDocRef.onSnapshot(doc=>{
-    const d = doc.data() || {};
-    setText('balance', '₹'+num(d.balance));
-    setText('recharge', '₹'+num(d.rechargeTotal));
-    setText('withdrawal','₹'+num(d.withdrawalTotal));
-    setText('productRevenue','₹'+num(d.productRevenue));
-    setText('myOrders', num(d.orders));
-  });
-
-  loadTransactions();
-  showSection('homeSection');
-});
-
-// Helpers
-function gen6(){ return String(Math.floor(100000 + Math.random()*900000)); }
-function num(v){ return (Number(v||0)).toFixed(0); }
-function setText(id, t){ const el = document.getElementById(id); if(el) el.textContent = t; }
-
-// Login/Register
-async function loginUser(){
-  const email = document.getElementById('loginEmail').value.trim();
-  const pass  = document.getElementById('loginPassword').value.trim();
-  if(!email || !pass){ alert('Enter email & password'); return; }
-  try{ await auth.signInWithEmailAndPassword(email, pass); }
-  catch(e){ if(e.code==='auth/user-not-found'){ alert('No user found. Please register.'); showSection('registerSection'); }else{ alert(e.message); } }
-}
-async function registerUser(){
-  const email = document.getElementById('registerEmail').value.trim();
-  const pass  = document.getElementById('registerPassword').value.trim();
-  if(!email || !pass){ alert('Enter email & password'); return; }
-  try{
-    const cred = await auth.createUserWithEmailAndPassword(email, pass);
-    await db.collection('users').doc(cred.user.uid).set({ userId: gen6(), balance: 0, rechargeTotal:0, withdrawalTotal:0, productRevenue:0, orders:0, email });
-    alert('Registered! Please log in.'); showSection('loginSection');
-  }catch(e){ alert(e.message); }
-}
-function logoutUser(){ auth.signOut(); }
-
-// Wallet
-async function doRecharge(){
-  const amt = parseFloat(document.getElementById('rechargeAmount').value);
-  if(!UID) return alert('Login required');
-  if(isNaN(amt) || amt<=0) return alert('Enter valid amount');
-  await db.runTransaction(async tx=>{
-    const snap = await tx.get(userDocRef);
-    const d = snap.data();
-    tx.update(userDocRef,{ balance:(d.balance||0)+amt, rechargeTotal:(d.rechargeTotal||0)+amt });
-  });
-  await addTxn('recharge', amt);
-  document.getElementById('rechargeAmount').value='';
-  openPanel('transactionsPanel');
-}
-async function doWithdraw(){
-  const amt = parseFloat(document.getElementById('withdrawAmount').value);
-  if(!UID) return alert('Login required');
-  if(isNaN(amt) || amt<=0) return alert('Enter valid amount');
-  const profile = (await userDocRef.get()).data();
-  if(!profile.bankCard) return alert('Please bind a bank card first.');
-  if((profile.balance||0)<amt) return alert('Insufficient balance');
-  await db.runTransaction(async tx=>{
-    const snap = await tx.get(userDocRef);
-    const d = snap.data();
-    tx.update(userDocRef,{ balance:(d.balance||0)-amt, withdrawalTotal:(d.withdrawalTotal||0)+amt });
-  });
-  await addTxn('withdraw', amt);
-  document.getElementById('withdrawAmount').value='';
-  openPanel('transactionsPanel');
-}
-async function saveBankCard(){
-  if(!UID) return alert('Login required');
-  const payload = {
-    bankName: document.getElementById('bankName').value.trim(),
-    ifsc:     document.getElementById('ifsc').value.trim(),
-    accNo:    document.getElementById('accNo').value.trim(),
-    accName:  document.getElementById('accName').value.trim(),
-    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-  };
-  if(!payload.bankName||!payload.ifsc||!payload.accNo||!payload.accName) return alert('Please fill all fields');
-  await userDocRef.update({ bankCard: payload });
-  alert('Bank card saved.');
-}
-async function addTxn(type, amount){
-  const ref = userDocRef.collection('transactions').doc();
-  await ref.set({ type, amount, ts: firebase.firestore.FieldValue.serverTimestamp() });
-  loadTransactions();
-}
-function loadTransactions(){
-  if(!UID) return;
-  userDocRef.collection('transactions').orderBy('ts','desc').limit(50).onSnapshot(snap=>{
-    const list = document.getElementById('txList');
-    if(!list) return;
-    if(snap.empty){ list.textContent='No transactions yet.'; return; }
-    list.innerHTML='';
-    snap.forEach(doc=>{
-      const d=doc.data();
-      const row = document.createElement('div');
-      row.className='menu-item';
-      row.innerHTML=`<span class="menu-icon">${d.type==='recharge'?'💳':'🏧'}</span><span class="menu-text" style="font-weight:600;text-transform:capitalize">${d.type}</span><span class="tag">₹${num(d.amount)}</span>`;
-      list.appendChild(row);
-    });
-  });
+  const el=document.getElementById(id); if(el) el.classList.add('active-section'); window.scrollTo({top:0});
 }
 
 // Panels
 function openPanel(id){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  const el=document.getElementById(id);
-  if(el){ el.classList.add('active'); showSection('accountSection'); window.scrollTo({top:0}); }
+  const el=document.getElementById(id); if(el) el.classList.add('active');
 }
+
+// Auth
+let UID=null, userDocRef=null;
+auth.onAuthStateChanged(async user=>{
+  if(!user){ UID=null; userDocRef=null; showSection('loginSection'); document.getElementById('bottomNav').style.display='none'; return; }
+  UID=user.uid; userDocRef=db.collection('users').doc(UID);
+  document.getElementById('bottomNav').style.display='flex';
+  const snap=await userDocRef.get();
+  if(!snap.exists){ await userDocRef.set({userId:gen6(), balance:0, rechargeTotal:0, withdrawalTotal:0, productRevenue:0, orders:0}); }
+  userDocRef.onSnapshot(doc=>{
+    const d=doc.data()||{};
+    setText('balance','₹'+num(d.balance));
+    setText('recharge','₹'+num(d.rechargeTotal));
+    setText('withdrawal','₹'+num(d.withdrawalTotal));
+    setText('productRevenue','₹'+num(d.productRevenue));
+    setText('myOrders',num(d.orders));
+  });
+  loadTransactions(); showSection('homeSection');
+});
+function gen6(){ return String(Math.floor(100000 + Math.random()*900000)); }
+function num(v){ return (Number(v||0)).toFixed(0); }
+function setText(id,t){ const el=document.getElementById(id); if(el) el.textContent=t; }
+
+// Login/Register
+async function loginUser(){
+  const email=document.getElementById('loginEmail').value.trim();
+  const pass=document.getElementById('loginPassword').value.trim();
+  if(!email||!pass){ alert('Enter email & password'); return; }
+  try{ await auth.signInWithEmailAndPassword(email, pass); }
+  catch(e){ alert(e.message); }
+}
+async function registerUser(){
+  const email=document.getElementById('registerEmail').value.trim();
+  const pass=document.getElementById('registerPassword').value.trim();
+  if(!email||!pass){ alert('Enter email & password'); return; }
+  try{ const cred=await auth.createUserWithEmailAndPassword(email,pass); await db.collection('users').doc(cred.user.uid).set({userId:gen6(), balance:0, rechargeTotal:0, withdrawalTotal:0, productRevenue:0, orders:0, email}); alert('Registered! Please login'); showSection('loginSection'); }
+  catch(e){ alert(e.message); }
+}
+function logoutUser(){ auth.signOut(); }
+
+// Wallet Functions
+async function doRecharge(){ const amt=parseFloat(document.getElementById('rechargeAmount').value); if(!UID) return alert('Login required'); if(isNaN(amt)||amt<=0)return alert('Enter valid amount'); await db.runTransaction(async tx=>{ const snap=await tx.get(userDocRef); const d=snap.data(); tx.update(userDocRef,{balance:(d.balance||0)+amt,rechargeTotal:(d.rechargeTotal||0)+amt}); }); await addTxn('recharge',amt); document.getElementById('rechargeAmount').value=''; openPanel('transactionsPanel'); }
+async function doWithdraw(){ const amt=parseFloat(document.getElementById('withdrawAmount').value); if(!UID) return alert('Login required'); if(isNaN(amt)||amt<=0)return alert('Enter valid amount'); const profile=(await userDocRef.get()).data(); if(!profile.bankCard) return alert('Please bind a bank card first.'); if((profile.balance||0)<amt) return alert('Insufficient balance'); await db.runTransaction(async tx=>{ const snap=await tx.get(userDocRef); const d=snap.data(); tx.update(userDocRef,{balance:(d.balance||0)-amt,withdrawalTotal:(d.withdrawalTotal||0)+amt}); }); await addTxn('withdraw',amt); document.getElementById('withdrawAmount').value=''; openPanel('transactionsPanel'); }
+async function saveBankCard(){ if(!UID) return alert('Login required'); const payload={ bankName:document.getElementById('bankName').value.trim(), ifsc:document.getElementById('ifsc').value.trim(), accNo:document.getElementById('accNo').value.trim(), accName:document.getElementById('accName').value.trim(), updatedAt:firebase.firestore.FieldValue.serverTimestamp() }; if(!payload.bankName||!payload.ifsc||!payload.accNo||!payload.accName) return alert('Please fill all fields'); await userDocRef.update({bankCard:payload}); alert('Bank card saved.'); }
+async function addTxn(type,amount){ const ref=userDocRef.collection('transactions').doc(); await ref.set({type,amount,ts:firebase.firestore.FieldValue.serverTimestamp()}); loadTransactions(); }
+function loadTransactions(){ if(!UID) return; userDocRef.collection('transactions').orderBy('ts','desc').limit(50).onSnapshot(snap=>{ const list=document.getElementById('txList'); if(!list)return; if(snap.empty){ list.textContent='No transactions yet.'; return; } list.innerHTML=''; snap.forEach(doc=>{ const d=doc.data(); const row=document.createElement('div'); row.className='menu-item'; row.innerHTML=`<span class="menu-icon">${d.type==='recharge'?'💳':'🏧'}</span><span class="menu-text">${d.type}</span><span class="tag">₹${num(d.amount)}</span>`; list.appendChild(row); }); }); }
 
 // Password
-async function resetPassword(){
-  if(!auth.currentUser) return alert('Login required');
-  const np=document.getElementById('newPass').value.trim();
-  if(!np) return alert('Enter a new password');
-  try{ await auth.currentUser.updatePassword(np); alert('Password updated'); document.getElementById('newPass').value=''; }
-  catch(e){ alert(e.message+'\nTry "Send Reset Email" instead.'); }
-}
-function sendResetEmail(){
-  const u = auth.currentUser;
-  if(!u || !u.email) return alert('No email on account');
-  auth.sendPasswordResetEmail(u.email).then(()=>alert('Reset email sent to '+u.email));
-}
-
-// Hook big buttons
-document.querySelector('.recharge-btn')?.addEventListener('click', ()=>openPanel('rechargePanel'));
-document.querySelector('.withdraw-btn')?.addEventListener('click', ()=>openPanel('withdrawPanel'));
+async function resetPassword(){ if(!auth.currentUser) return alert('Login required'); const np=document.getElementById('newPass').value.trim(); if(!np) return alert('Enter a new password'); try{ await auth.currentUser.updatePassword(np); alert('Password updated'); document.getElementById('newPass').value=''; }catch(e){ alert(e.message+'\nTry "Send Reset Email" instead.'); } }
+function sendResetEmail(){ const u=auth.currentUser; if(!u||!u.email)return alert('No email'); auth.sendPasswordResetEmail(u.email).then(()=>alert('Reset email sent to '+u.email)); }
 </script>
 
 </body>
