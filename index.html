@@ -2,138 +2,66 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Win89</title>
+<title>Investment Website</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-body { font-family: Arial, sans-serif; margin: 0; background: #f8f9fa; }
-header { background: #007bff; padding: 10px; color: #fff; text-align: center; font-size: 20px; font-weight: bold; }
-nav { background: #fff; border-top: 1px solid #ccc; position: fixed; bottom: 0; left: 0; width: 100%; display: flex; justify-content: space-around; padding: 5px 0; z-index: 1000; display:none; }
-nav button { background: none; border: none; font-size: 14px; color: #333; display:flex; flex-direction:column; align-items:center; }
-nav button span { font-size:18px; }
-.section { display: none; padding: 15px; }
-.active-section { display: block !important; }
-.account-stats { display: flex; justify-content: space-around; flex-wrap: wrap; background: #fff; padding: 15px; border-radius: 12px; margin-bottom: 15px; }
-.stat { text-align: center; flex: 1 1 45%; margin: 5px 0; }
-.stat h3 { color: #004085; margin: 0; font-size: 18px; }
-.stat p { color: #6c757d; font-size: 14px; margin: 0; }
-.action-buttons { display: flex; justify-content: space-around; margin-top: 10px; }
-.action-buttons button { flex: 1; margin: 5px; padding: 12px; border: none; border-radius: 25px; font-size: 16px; color: #fff; }
-.recharge-btn { background: linear-gradient(45deg, #ffc107, #ffb300); }
-.withdraw-btn { background: linear-gradient(45deg, #28a745, #218838); }
-.submenu { display: none; background: #f4f4f4; padding: 10px; }
-.submenu button { display: block; width: 100%; background: #fff; border: none; text-align: left; padding: 8px; margin-bottom: 5px; border-radius: 6px; }
-.menu-list{margin:15px 0;background:#fff;border-radius:12px;overflow:hidden}
-.menu-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #eceff1; cursor:pointer;}
-.menu-item:last-child{border-bottom:none}
-.menu-icon{font-size:20px;width:24px;text-align:center}
-.menu-text{flex:1;font-size:15px;color:#212529}
-.menu-arrow{color:#9aa0a6}
-.panel{display:none;padding:15px}
-.panel.active{display:block}
-.panel h3{margin:8px 0 12px}
-.input{width:100%;padding:12px;border:1px solid #dfe3e8;border-radius:8px;margin-bottom:10px}
-.btn{display:inline-block;padding:12px 14px;border:none;border-radius:10px;background:#007bff;color:#fff}
-.btn.secondary{background:#6c757d}
-.btn.block{width:100%}
-.small{color:#6c757d;font-size:12px}
-.tag{display:inline-block;background:#e8f0fe;color:#1967d2;border-radius:8px;padding:2px 8px;font-size:12px;margin-left:6px}
-.hidden{display:none}
+body { font-family: Arial, sans-serif; margin:0; background:#f8f9fa; }
+header { background:#ff6600; color:white; padding:10px; text-align:center; }
+nav { display:flex; justify-content:space-around; background:#fff; border-top:1px solid #ccc; position:fixed; bottom:0; width:100%; }
+nav button { background:none; border:none; padding:10px; font-size:14px; }
+section { display:none; padding:15px; }
+.active { display:block; }
+#userInfo { background:#e9ecef; padding:12px; border-radius:12px; margin-bottom:15px; text-align:center; }
 </style>
 </head>
 <body>
 
-<header>Win89</header>
+<header>
+  <h1>Investment Website</h1>
+</header>
 
-<!-- Sections -->
-<div id="loginSection" class="section active-section">
-    <h2>Login</h2>
-    <input type="email" id="loginEmail" placeholder="Email"><br><br>
-    <input type="password" id="loginPassword" placeholder="Password"><br><br>
-    <button onclick="loginUser()">Login</button>
-    <p>Don't have an account? <a href="#" onclick="showSection('registerSection')">Register</a></p>
-</div>
+<!-- Account Section -->
+<section id="accountSection">
+  <div id="userInfo">
+    <p><strong>Email/Mobile:</strong> <span id="userEmail">-</span></p>
+    <p><strong>User ID:</strong> <span id="user6Id">-</span></p>
+  </div>
+  <div>
+    <p>Balance: <span id="balance">₹0</span></p>
+    <p>Recharge Total: <span id="recharge">₹0</span></p>
+    <p>Withdrawal Total: <span id="withdrawal">₹0</span></p>
+    <p>Product Revenue: <span id="productRevenue">₹0</span></p>
+    <p>My Orders: <span id="myOrders">0</span></p>
+  </div>
+</section>
 
-<div id="registerSection" class="section">
-    <h2>Register</h2>
-    <input type="email" id="registerEmail" placeholder="Email"><br><br>
-    <input type="password" id="registerPassword" placeholder="Password"><br><br>
-    <button onclick="registerUser()">Register</button>
-    <p>Already have an account? <a href="#" onclick="showSection('loginSection')">Login</a></p>
-</div>
+<!-- Login Section -->
+<section id="loginSection" class="active">
+  <h2>Login</h2>
+  <input type="email" id="loginEmail" placeholder="Email"><br><br>
+  <input type="password" id="loginPassword" placeholder="Password"><br><br>
+  <button onclick="login()">Login</button>
+  <p>Or Register:</p>
+  <input type="email" id="registerEmail" placeholder="Email"><br><br>
+  <input type="password" id="registerPassword" placeholder="Password"><br><br>
+  <button onclick="register()">Register</button>
+</section>
 
-<div id="homeSection" class="section">
-    <h2>Home</h2>
-    <p>Welcome to Win89!</p>
-</div>
-
-<div id="investmentSection" class="section">
-    <h2>Investment</h2>
-    <p>Your investments appear here.</p>
-</div>
-
-<div id="blogSection" class="section">
-    <h2>Blog</h2>
-    <p>Latest blog posts.</p>
-</div>
-
-<div id="noticeSection" class="section">
-    <h2>Notice</h2>
-    <p>Important updates.</p>
-</div>
-
-<div id="accountSection" class="section">
-    <h2>My Account</h2>
-
-    <!-- New user info panel -->
-    <div id="userInfo" style="background:#e9ecef; padding:12px; border-radius:12px; margin-bottom:15px; text-align:center;">
-        <p><strong>Email/Mobile:</strong> <span id="userEmail">-</span></p>
-        <p><strong>User ID:</strong> <span id="user6Id">-</span></p>
-    </div>
-
-    <div class="account-stats">
-        <div class="stat">
-            <h3 id="balance">₹0</h3>
-            <p>Balance</p>
-        </div>
-        <div class="stat">
-            <h3 id="recharge">₹0</h3>
-            <p>Recharge</p>
-        </div>
-        <div class="stat">
-            <h3 id="withdrawal">₹0</h3>
-            <p>Withdrawal</p>
-        </div>
-        <div class="stat">
-            <h3 id="productRevenue">₹0</h3>
-            <p>Product revenue</p>
-        </div>
-        <div class="stat">
-            <h3 id="myOrders">0</h3>
-            <p>My Orders</p>
-        </div>
-    </div>
-    <div class="action-buttons">
-        <button class="recharge-btn">Recharge</button>
-        <button class="withdraw-btn">Withdrawal</button>
-    </div>
-    <br>
-    <button onclick="logoutUser()">Logout</button>
-</div>
-
-<!-- Bottom navigation -->
-<nav id="bottomNav">
-    <button onclick="showSection('homeSection')"><span>🏠</span>Home</button>
-    <button onclick="showSection('investmentSection')"><span>💰</span>Investment</button>
-    <button onclick="showSection('blogSection')"><span>📝</span>Blog</button>
-    <button onclick="showSection('noticeSection')"><span>📢</span>Notice</button>
-    <button onclick="showSection('accountSection')"><span>👤</span>Account</button>
+<!-- Navigation -->
+<nav id="bottomNav" style="display:none;">
+  <button onclick="showSection('homeSection')">🏠 Home</button>
+  <button onclick="showSection('investmentSection')">💼 Investment</button>
+  <button onclick="showSection('blogSection')">📰 Blog</button>
+  <button onclick="showSection('noticeSection')">📢 Notice</button>
+  <button onclick="showSection('accountSection')">👤 Account</button>
 </nav>
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
 <script>
+// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyDvF1KrDDRZJucp-78dbvmQ34Oi3j17Rrk",
   authDomain: "investment-website-deml.firebaseapp.com",
@@ -146,17 +74,14 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
-</script>
 
-<script>
-// Section switch
-function showSection(id){
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active-section'));
-  const el = document.getElementById(id);
-  if(el) el.classList.add('active-section');
+// Navigation
+function showSection(id) {
+  document.querySelectorAll('section').forEach(sec=>sec.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
 }
 
-// Auth + old user handling
+// Auth State Change
 auth.onAuthStateChanged(async (user) => {
   const nav = document.getElementById('bottomNav');
   if (!user) {
@@ -174,74 +99,91 @@ auth.onAuthStateChanged(async (user) => {
   if (!snap.exists) {
     await userRef.set({
       userId: Math.floor(100000 + Math.random()*900000),
-      balance:0, rechargeTotal:0, withdrawalTotal:0, productRevenue:0, orders:0,
-      email: user.email
+      balance: 0,
+      rechargeTotal: 0,
+      withdrawalTotal: 0,
+      productRevenue: 0,
+      orders: 0,
+      email: user.email || user.phoneNumber || '-'
     });
   } else {
     const data = snap.data();
     const updates = {};
     if (!data.userId) updates.userId = Math.floor(100000 + Math.random()*900000);
-    if (!data.email) updates.email = user.email;
+    if (!data.email) updates.email = user.email || user.phoneNumber || '-';
     if (Object.keys(updates).length > 0) await userRef.update(updates);
   }
 
-  // Live updates
+  // Live user info
   userRef.onSnapshot(doc => {
     const d = doc.data() || {};
-    document.getElementById('balance').textContent = '₹'+(d.balance||0);
-    document.getElementById('recharge').textContent = '₹'+(d.rechargeTotal||0);
-    document.getElementById('withdrawal').textContent = '₹'+(d.withdrawalTotal||0);
-    document.getElementById('productRevenue').textContent = '₹'+(d.productRevenue||0);
-    document.getElementById('myOrders').textContent = d.orders||0;
-
-    document.getElementById('userEmail').textContent = d.email || user.email || '-';
+    document.getElementById('balance').textContent = '₹' + (d.balance || 0);
+    document.getElementById('recharge').textContent = '₹' + (d.rechargeTotal || 0);
+    document.getElementById('withdrawal').textContent = '₹' + (d.withdrawalTotal || 0);
+    document.getElementById('productRevenue').textContent = '₹' + (d.productRevenue || 0);
+    document.getElementById('myOrders').textContent = d.orders || 0;
+    document.getElementById('userEmail').textContent = d.email || user.email || user.phoneNumber || '-';
     document.getElementById('user6Id').textContent = d.userId || '-';
   });
 });
-
-// Login/Register
-async function loginUser(){
-  const email = document.getElementById('loginEmail').value.trim();
-  const pass = document.getElementById('loginPassword').value.trim();
-  if(!email || !pass){ alert('Enter email & password'); return; }
-  try{ await auth.signInWithEmailAndPassword(email, pass); }
-  catch(e){ alert(e.message); if(e.code==='auth/user-not-found') showSection('registerSection'); }
-}
-
-async function registerUser(){
+    // Register
+async function register() {
   const email = document.getElementById('registerEmail').value.trim();
-  const pass = document.getElementById('registerPassword').value.trim();
-  if(!email || !pass){ alert('Enter email & password'); return; }
-  try{
-    const cred = await auth.createUserWithEmailAndPassword(email, pass);
-    await db.collection('users').doc(cred.user.uid).set({
+  const password = document.getElementById('registerPassword').value.trim();
+  if (!email || !password) return alert('Enter email and password');
+  try {
+    const cred = await auth.createUserWithEmailAndPassword(email, password);
+    const user = cred.user;
+    await db.collection('users').doc(user.uid).set({
       userId: Math.floor(100000 + Math.random()*900000),
-      balance:0, rechargeTotal:0, withdrawalTotal:0, productRevenue:0, orders:0,
-      email
+      balance: 0,
+      rechargeTotal: 0,
+      withdrawalTotal: 0,
+      productRevenue: 0,
+      orders: 0,
+      email: user.email
     });
-    alert('Registered! Please login.');
-    showSection('loginSection');
-  }catch(e){ alert(e.message); }
+    alert('Registered successfully!');
+  } catch (err) {
+    alert(err.message);
+  }
 }
 
-function logoutUser(){ auth.signOut(); }
+// Login
+async function login() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value.trim();
+  if (!email || !password) return alert('Enter email and password');
+  try {
+    await auth.signInWithEmailAndPassword(email, password);
+  } catch (err) {
+    alert(err.message);
+  }
+}
 
-// Account submenus
-(function(){
-  const wrap = document.createElement('div');
-  wrap.className = 'menu-list';
-  wrap.innerHTML = `
-    <div class="menu-item" onclick="alert('Recharge panel')"><span class="menu-icon">💳</span><span class="menu-text">Recharge</span><span class="menu-arrow">›</span></div>
-    <div class="menu-item" onclick="alert('Withdraw panel')"><span class="menu-icon">🏧</span><span class="menu-text">Withdraw</span><span class="menu-arrow">›</span></div>
-    <div class="menu-item" onclick="alert('Bank Card panel')"><span class="menu-icon">🏦</span><span class="menu-text">Bank Card</span><span class="menu-arrow">›</span></div>
-    <div class="menu-item" onclick="alert('Transactions panel')"><span class="menu-icon">🧾</span><span class="menu-text">Transactions</span><span class="menu-arrow">›</span></div>
-    <div class="menu-item" onclick="alert('My Product panel')"><span class="menu-icon">📦</span><span class="menu-text">My Product</span><span class="menu-arrow">›</span></div>
-    <div class="menu-item" onclick="alert('Support panel')"><span class="menu-icon">💬</span><span class="menu-text">Customer Service</span><span class="menu-arrow">›</span></div>
-    <div class="menu-item" onclick="alert('Reset Password panel')"><span class="menu-icon">🔒</span><span class="menu-text">Reset Password</span><span class="menu-arrow">›</span></div>
-  `;
-  document.getElementById('accountSection').appendChild(wrap);
-})();
+// Sections for navigation
+document.body.insertAdjacentHTML('beforeend', `
+<section id="homeSection">
+  <h2>Home</h2>
+  <p>Welcome to your investment dashboard!</p>
+</section>
+
+<section id="investmentSection">
+  <h2>Investment</h2>
+  <p>Investment plans will be displayed here.</p>
+</section>
+
+<section id="blogSection">
+  <h2>Blog</h2>
+  <p>Latest investment news.</p>
+</section>
+
+<section id="noticeSection">
+  <h2>Notice</h2>
+  <p>Important announcements will appear here.</p>
+</section>
+`);
+
 </script>
-
 </body>
 </html>
