@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Win89</title>
+<title>Win89 Merged Dashboard</title>
 <style>
 body { font-family: Arial, sans-serif; margin: 0; background: #f8f9fa; }
 header { background: #007bff; padding: 10px; color: #fff; text-align: center; font-size: 20px; font-weight: bold; }
-nav { background: #fff; border-top: 1px solid #ccc; position: fixed; bottom: 0; left: 0; width: 100%; display: flex; justify-content: space-around; padding: 5px 0; z-index: 1000; display:none; }
+nav { background: #fff; border-top: 1px solid #ccc; position: fixed; bottom: 0; left: 0; width: 100%; display: flex; justify-content: space-around; padding: 5px 0; z-index: 1000;}
 nav button { background: none; border: none; font-size: 14px; color: #333; display:flex; flex-direction:column; align-items:center; }
 nav button span { font-size:18px; }
 .section { display: none; padding: 15px; }
@@ -23,25 +23,14 @@ nav button span { font-size:18px; }
 .menu-list{margin:15px 0;background:#fff;border-radius:12px;overflow:hidden}
 .menu-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #eceff1; cursor:pointer;}
 .menu-item:last-child{border-bottom:none}
+.menu-item.active,.menu-item:hover{background:#e9f1fc;}
 .menu-icon{font-size:20px;width:24px;text-align:center}
 .menu-text{flex:1;font-size:15px;color:#212529}
 .menu-arrow{color:#9aa0a6}
-.panel{display:none;padding:15px}
-.panel.active{display:block}
-.panel h3{margin:8px 0 12px}
-.input{width:100%;padding:12px;border:1px solid #dfe3e8;border-radius:8px;margin-bottom:10px}
-.btn{display:inline-block;padding:12px 14px;border:none;border-radius:10px;background:#007bff;color:#fff}
-.btn.secondary{background:#6c757d}
-.btn.block{width:100%}
-.small{color:#6c757d;font-size:12px}
-.tag{display:inline-block;background:#e8f0fe;color:#1967d2;border-radius:8px;padding:2px 8px;font-size:12px;margin-left:6px}
-.hidden{display:none}
-
-/* User top info style */
-.user-info-top {background:#f6f6f8; border-radius:16px; display:flex; align-items:center; gap:18px; padding:18px 14px 16px 14px; margin-bottom:15px;}
 .profile-avatar {width:68px; height:68px; border-radius:50%; object-fit:cover;}
+.user-info-top {background:#f6f6f8; border-radius:16px; display:flex; align-items:center; gap:18px; padding:18px 14px 16px 14px; margin-bottom:15px;}
 .user-contact {font-size:18px; font-weight:bold; color:#111; margin-bottom:6px;}
-.user-id-box { background:#fff;font-size:16px;padding:4px 14px; border-radius:12px;display:inline-block;letter-spacing:1.2px; color:#157efb; font-weight:500; border:1px solid #e0e6ed;}
+.invite-code-box { background:#fff;font-size:16px;padding:4px 14px; border-radius:12px;display:inline-block;letter-spacing:1.2px; color:#157efb; font-weight:500; border:1px solid #e0e6ed;}
 .copy-icon {cursor:pointer; font-size:19px; margin-left:5px;}
 .logout-btn-big {
     display: block;
@@ -61,13 +50,31 @@ nav button span { font-size:18px; }
 .logout-btn-big:hover {
     background: linear-gradient(90deg, #1561c3 0%, #2891ec 100%);
 }
+.page-content{max-width:440px;margin:35px auto;padding:23px 16px 24px 16px;background:#fff;border-radius:16px;box-shadow:0 1px 8px #ddeaff;}
+.page-content h2{margin-top:0;}
+.page-content label{font-weight:bold;margin-top:12px;display:block;}
+.page-content input, .page-content select {width:100%;margin:6px 0 18px 0; padding:8px; border-radius:6px; border:1px solid #ccc;}
+.page-content button, .page-content .btn {padding:10px 18px;background:#157efb;color:#fff;border:none;border-radius:7px;font-size:16px; font-weight:bold;}
+.page-content table{width:100%;border-collapse:collapse;}
+.page-content th, .page-content td{border:1px solid #eee;padding:8px;}
+.page-content th{background:#157efb;color:#fff;}
+.page-content td{background:#f8fafd;}
 </style>
 </head>
 <body>
 
 <header>Win89</header>
 
-<!-- Sections -->
+<!-- Navigation: always shows -->
+<nav id="bottomNav">
+    <button onclick="showSection('homeSection')"><span>🏠</span>Home</button>
+    <button onclick="showSection('investmentSection')"><span>💰</span>Investment</button>
+    <button onclick="showSection('blogSection')"><span>📝</span>Blog</button>
+    <button onclick="showSection('noticeSection')"><span>📢</span>Notice</button>
+    <button onclick="showSection('accountSection')"><span>👤</span>Account</button>
+</nav>
+
+<!-- Dashboard MAIN Sections -->
 <div id="loginSection" class="section active-section">
     <h2>Login</h2>
     <input type="email" id="loginEmail" placeholder="Email"><br><br>
@@ -104,19 +111,20 @@ nav button span { font-size:18px; }
     <p>Important updates.</p>
 </div>
 
+<!-- ACCOUNT DASHBOARD (default page) -->
 <div id="accountSection" class="section">
     <h2>My Account</h2>
-
+    
     <!-- User info panel -->
     <div class="user-info-top">
         <img id="userAvatar" class="profile-avatar" src="https://ui-avatars.com/api/?name=User&rounded=true&background=4bb2ff&color=fff&size=96" alt="avatar">
         <div style="flex:1;">
             <div id="userContact" class="user-contact">MOBILE: -</div>
             <div style="display:flex;align-items:center;gap:7px;">
-                <span class="user-id-box">
-                    User ID: <span id="userId6">------</span>
+                <span class="invite-code-box">
+                    Invite Code: <span id="inviteCode">------</span>
                 </span>
-                <span class="copy-icon" title="Copy" onclick="copyUserId()">📋</span>
+                <span class="copy-icon" title="Copy" onclick="copyInviteCode()">📋</span>
             </div>
         </div>
     </div>
@@ -149,19 +157,73 @@ nav button span { font-size:18px; }
         <button class="withdraw-btn">Withdrawal</button>
     </div>
     <br>
-    <!-- Logout button appears after menu list -->
+    <!-- Submenus -->
+    <div class="menu-list" id="submenuList"></div>
+    <button class="logout-btn-big" onclick="logoutUser();">Logout</button>
 </div>
 
-<!-- Bottom navigation -->
-<nav id="bottomNav">
-    <button onclick="showSection('homeSection')"><span>🏠</span>Home</button>
-    <button onclick="showSection('investmentSection')"><span>💰</span>Investment</button>
-    <button onclick="showSection('blogSection')"><span>📝</span>Blog</button>
-    <button onclick="showSection('noticeSection')"><span>📢</span>Notice</button>
-    <button onclick="showSection('accountSection')"><span>👤</span>Account</button>
-</nav>
+<!-- Merged submenu FULL PAGES - Only one shown at a time -->
+<div id="bankCardPage" class="section">
+  <div class="page-content">
+    <h2>Bank Card Details</h2>
+    <form>
+      <label>Card Number</label>
+      <input type="text" placeholder="Enter card number" required>
+      <label>Bank Name</label>
+      <input type="text" placeholder="Enter bank name" required>
+      <label>IFSC Code</label>
+      <input type="text" placeholder="Enter IFSC code">
+      <button type="submit">Save Card</button>
+    </form>
+  </div>
+</div>
+<div id="transactionsPage" class="section">
+  <div class="page-content">
+    <h2>Recent Transactions</h2>
+    <table>
+      <tr><th>Date</th><th>Type</th><th>Amount</th><th>Status</th></tr>
+      <tr><td>2025-08-10</td><td>Deposit</td><td>₹500</td><td>Success</td></tr>
+      <tr><td>2025-08-12</td><td>Withdrawal</td><td>₹300</td><td>Pending</td></tr>
+    </table>
+  </div>
+</div>
+<div id="myProductPage" class="section">
+  <div class="page-content">
+    <h2>My Products</h2>
+    <div class="product">Product A <button class="btn">View</button></div>
+    <div class="product">Product B <button class="btn">View</button></div>
+  </div>
+</div>
+<div id="myTeamPage" class="section">
+  <div class="page-content">
+    <h2>My Team</h2>
+    <button class="btn">Invite New Member</button>
+    <ul>
+      <li>Team Member 1</li>
+      <li>Team Member 2</li>
+    </ul>
+  </div>
+</div>
+<div id="customerServicePage" class="section">
+  <div class="page-content">
+    <h2>Customer Service</h2>
+    <p>Contact us at <b>support@win89.com</b></p>
+    <button class="btn" onclick="window.open('https://t.me/YourTelegramGroupLink','_blank')">Open Telegram</button>
+  </div>
+</div>
+<div id="resetPasswordPage" class="section">
+  <div class="page-content">
+    <h2>Reset Password</h2>
+    <form>
+      <label>Old Password</label>
+      <input type="password" placeholder="Enter old password" required>
+      <label>New Password</label>
+      <input type="password" placeholder="Enter new password" required>
+      <button type="submit">Reset Password</button>
+    </form>
+  </div>
+</div>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -181,21 +243,20 @@ const db = firebase.firestore();
 </script>
 
 <script>
-// Section switch
 function showSection(id){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active-section'));
-  const el = document.getElementById(id);
+  var el = document.getElementById(id);
   if(el) el.classList.add('active-section');
 }
 
-// Helper: copy User ID
-function copyUserId() {
-    var code = document.getElementById('userId6').innerText;
+// Invite code copy
+function copyInviteCode() {
+    var code = document.getElementById('inviteCode').innerText;
     navigator.clipboard.writeText(code);
-    alert('User ID copied!');
+    alert('Invite code copied!');
 }
 
-// Auth + old user handling
+// Account information
 auth.onAuthStateChanged(async (user) => {
   const nav = document.getElementById('bottomNav');
   if (!user) {
@@ -212,20 +273,19 @@ auth.onAuthStateChanged(async (user) => {
 
   if (!snap.exists) {
     await userRef.set({
-      userId: Math.floor(100000 + Math.random()*900000),
+      inviteCode: 'xKed0R',
       balance:0, rechargeTotal:0, withdrawalTotal:0, productRevenue:0, orders:0,
-      email: user.email
-      // mobile: '', // you can add default mobile if you wish
+      email: user.email,
+      mobile: '917206343481'
     });
   } else {
     const data = snap.data();
     const updates = {};
-    if (!data.userId) updates.userId = Math.floor(100000 + Math.random()*900000);
+    if (!data.inviteCode) updates.inviteCode = 'xKed0R';
     if (!data.email) updates.email = user.email;
     if (Object.keys(updates).length > 0) await userRef.update(updates);
   }
 
-  // Live updates
   userRef.onSnapshot(doc => {
     const d = doc.data() || {};
     document.getElementById('balance').textContent = '₹'+(d.balance||0);
@@ -233,21 +293,14 @@ auth.onAuthStateChanged(async (user) => {
     document.getElementById('withdrawal').textContent = '₹'+(d.withdrawalTotal||0);
     document.getElementById('productRevenue').textContent = '₹'+(d.productRevenue||0);
     document.getElementById('myOrders').textContent = d.orders||0;
-
-    // Show MOBILE (preferred), otherwise EMAIL
-    let contact = d.mobile 
+    document.getElementById('userContact').textContent = d.mobile 
         ? `MOBILE: ${d.mobile}` 
         : (d.email ? `EMAIL: ${d.email}` : '-');
-    document.getElementById('userContact').textContent = contact;
-
-    // User ID (6 digits, zero-padded)
-    document.getElementById('userId6').textContent = d.userId ? String(d.userId).padStart(6,'0') : '------';
-    // Optionally, set avatar if you have a field for it:
+    document.getElementById('inviteCode').textContent = d.inviteCode || '------';
     if(d.avatarUrl) document.getElementById('userAvatar').src = d.avatarUrl;
   });
 });
 
-// Login/Register
 async function loginUser(){
   const email = document.getElementById('loginEmail').value.trim();
   const pass = document.getElementById('loginPassword').value.trim();
@@ -263,9 +316,10 @@ async function registerUser(){
   try{
     const cred = await auth.createUserWithEmailAndPassword(email, pass);
     await db.collection('users').doc(cred.user.uid).set({
-      userId: Math.floor(100000 + Math.random()*900000),
+      inviteCode: 'xKed0R',
       balance:0, rechargeTotal:0, withdrawalTotal:0, productRevenue:0, orders:0,
-      email
+      email,
+      mobile: ''
     });
     alert('Registered! Please login.');
     showSection('loginSection');
@@ -274,33 +328,35 @@ async function registerUser(){
 
 function logoutUser(){ auth.signOut(); }
 
-// Account submenus + Logout button at bottom
+// Submenu logic: switch to full page content
 (function(){
-  const wrap = document.createElement('div');
-  wrap.className = 'menu-list';
-  wrap.innerHTML = `
-    <div class="menu-item" onclick="alert('Bank Card panel')"><span class="menu-icon">🏦</span><span class="menu-text">Bank Card</span><span class="menu-arrow">›</span></div>
-    <div class="menu-item" onclick="alert('Transactions panel')"><span class="menu-icon">🧾</span><span class="menu-text">Transactions</span><span class="menu-arrow">›</span></div>
-    <div class="menu-item" onclick="alert('My Product panel')"><span class="menu-icon">📦</span><span class="menu-text">My Product</span><span class="menu-arrow">›</span></div>
-    <div class="menu-item" onclick="alert('My Team panel')">
-      <span class="menu-icon">👥</span>
-      <span class="menu-text">My Team</span>
+  const menuData = [
+    { id:"bankCardPage", icon:"🏦", text:"Bank Card" },
+    { id:"transactionsPage", icon:"🧾", text:"Transactions" },
+    { id:"myProductPage", icon:"📦", text:"My Product" },
+    { id:"myTeamPage", icon:"👥", text:"My Team" },
+    { id:"customerServicePage", icon:"💬", text:"Customer Service" },
+    { id:null, icon:"📢", text:"Telegram Group", url:"https://t.me/YourTelegramGroupLink" },
+    { id:"resetPasswordPage", icon:"🔒", text:"Reset Password" }
+  ];
+  const wrap = document.getElementById('submenuList');
+  wrap.innerHTML = menuData.map(item =>
+    `<div class="menu-item" tabindex="0">
+      <span class="menu-icon">${item.icon}</span>
+      <span class="menu-text">${item.text}</span>
       <span class="menu-arrow">›</span>
-    </div>
-    <div class="menu-item" onclick="alert('Support panel')"><span class="menu-icon">💬</span><span class="menu-text">Customer Service</span><span class="menu-arrow">›</span></div>
-    <div class="menu-item" onclick="window.open('https://t.me/YourTelegramGroupLink', '_blank')"><span class="menu-icon">📢</span><span class="menu-text">Telegram Group</span><span class="menu-arrow">›</span></div>
-    <div class="menu-item" onclick="alert('Reset Password panel')"><span class="menu-icon">🔒</span><span class="menu-text">Reset Password</span><span class="menu-arrow">›</span></div>
-  `;
-  document.getElementById('accountSection').appendChild(wrap);
-
-  // Big, highlighted Logout button at the bottom
-  const logoutBtn = document.createElement('button');
-  logoutBtn.textContent = 'Logout';
-  logoutBtn.onclick = logoutUser;
-  logoutBtn.className = 'logout-btn-big';
-  wrap.after(logoutBtn);
+    </div>`
+  ).join('');
+  Array.from(wrap.querySelectorAll('.menu-item')).forEach((item, i) => {
+    item.onclick = function() {
+      if(menuData[i].url) {
+        window.open(menuData[i].url, "_blank");
+      } else if(menuData[i].id) {
+        showSection(menuData[i].id);
+      }
+    }
+  });
 })();
 </script>
-
 </body>
 </html>
