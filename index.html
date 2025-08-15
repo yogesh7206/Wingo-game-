@@ -59,8 +59,6 @@ nav button span { font-size:18px; }
 .page-content th, .page-content td{border:1px solid #eee;padding:8px;}
 .page-content th{background:#157efb;color:#fff;}
 .page-content td{background:#f8fafd;}
-
-/* Recharge and Withdrawal modals */
 .modal-overlay {display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,.32);z-index:900;}
 .modal-box {background:#fff;max-width:340px;margin:70px auto 0 auto;padding:28px 20px 20px 20px;border-radius:16px;box-shadow:0 1px 16px #a3c2ff;position:relative;}
 .modal-box h2 {margin-top:0;}
@@ -128,9 +126,9 @@ nav button span { font-size:18px; }
             <div id="userContact" class="user-contact">MOBILE: -</div>
             <div style="display:flex;align-items:center;gap:7px;">
                 <span class="invite-code-box">
-                    Invite Code: <span id="inviteCode">------</span>
+                    User ID: <span id="userIdBox">------</span>
                 </span>
-                <span class="copy-icon" title="Copy" onclick="copyInviteCode()">📋</span>
+                <span class="copy-icon" title="Copy" onclick="copyUserId()">📋</span>
             </div>
         </div>
     </div>
@@ -184,7 +182,6 @@ nav button span { font-size:18px; }
     </form>
   </div>
 </div>
-<!-- Withdrawal Modal -->
 <div id="withdrawalModal" class="modal-overlay">
   <div class="modal-box">
     <span class="close-modal" onclick="closeWithdrawal()">×</span>
@@ -291,15 +288,16 @@ function showSection(id){
   if(el) el.classList.add('active-section');
 }
 
-function copyInviteCode() {
-    var code = document.getElementById('inviteCode').innerText;
+// Copy User ID
+function copyUserId() {
+    var code = document.getElementById('userIdBox').innerText;
     navigator.clipboard.writeText(code);
-    alert('Invite code copied!');
+    alert('User ID copied!');
 }
 
-// Referral logic
+// Referral logic (now uses User ID)
 function updateReferralLink() {
-    var code = document.getElementById("inviteCode").innerText;
+    var code = document.getElementById("userIdBox").innerText;
     var link = location.origin + "/?ref=" + encodeURIComponent(code);
     document.getElementById("referralLink").value = link;
 }
@@ -309,12 +307,11 @@ function copyReferral() {
     alert("Referral link copied!");
 }
 
-// Recharge/Withdrawal modals and logic
+// Recharge/Withdrawal modals and logic (unchanged)
 function openRecharge() { document.getElementById('rechargeModal').style.display = 'block'; }
 function closeRecharge() { document.getElementById('rechargeModal').style.display = 'none'; }
 function openWithdrawal() { document.getElementById('withdrawalModal').style.display = 'block'; }
 function closeWithdrawal() { document.getElementById('withdrawalModal').style.display = 'none'; }
-
 function submitRecharge(e){
   e.preventDefault();
   var amt = document.getElementById("rechargeAmount").value;
@@ -351,9 +348,12 @@ auth.onAuthStateChanged(async (user) => {
   const userRef = db.collection('users').doc(UID);
   const snap = await userRef.get();
 
+  // Generate a unique 6-digit User ID if NOT present
+  let userIdVal = null;
   if (!snap.exists) {
+    userIdVal = String(Math.floor(100000 + Math.random() * 900000));
     await userRef.set({
-      inviteCode: 'xKed0R',
+      userId: userIdVal,
       balance:0, rechargeTotal:0, withdrawalTotal:0, productRevenue:0, orders:0,
       email: user.email,
       mobile: '917206343481',
@@ -362,7 +362,10 @@ auth.onAuthStateChanged(async (user) => {
   } else {
     const data = snap.data();
     const updates = {};
-    if (!data.inviteCode) updates.inviteCode = 'xKed0R';
+    if (!data.userId) {
+      userIdVal = String(Math.floor(100000 + Math.random() * 900000));
+      updates.userId = userIdVal;
+    }
     if (!data.email) updates.email = user.email;
     if (Object.keys(updates).length > 0) await userRef.update(updates);
   }
@@ -377,7 +380,7 @@ auth.onAuthStateChanged(async (user) => {
     document.getElementById('userContact').textContent = d.mobile 
         ? `MOBILE: ${d.mobile}` 
         : (d.email ? `EMAIL: ${d.email}` : '-');
-    document.getElementById('inviteCode').textContent = d.inviteCode || '------';
+    document.getElementById('userIdBox').textContent = d.userId || '------';
     updateReferralLink();
     if(d.avatarUrl) document.getElementById('userAvatar').src = d.avatarUrl;
   });
@@ -396,10 +399,12 @@ async function registerUser(){
   const pass = document.getElementById('registerPassword').value.trim();
   const referral = document.getElementById('registerReferral').value.trim();
   if(!email || !pass){ alert('Enter email & password'); return; }
+  // Generate unique 6-digit User ID
+  const userIdVal = String(Math.floor(100000 + Math.random()*900000));
   try{
     const cred = await auth.createUserWithEmailAndPassword(email, pass);
     await db.collection('users').doc(cred.user.uid).set({
-      inviteCode: 'xKed0R',
+      userId: userIdVal,
       balance:0, rechargeTotal:0, withdrawalTotal:0, productRevenue:0, orders:0,
       email,
       mobile: '',
