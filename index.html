@@ -182,6 +182,7 @@ nav button span { font-size:18px; }
     </form>
   </div>
 </div>
+<!-- Withdrawal Modal -->
 <div id="withdrawalModal" class="modal-overlay">
   <div class="modal-box">
     <span class="close-modal" onclick="closeWithdrawal()">×</span>
@@ -282,23 +283,24 @@ const db = firebase.firestore();
 </script>
 
 <script>
+// Section switcher
 function showSection(id){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active-section'));
   var el = document.getElementById(id);
   if(el) el.classList.add('active-section');
 }
 
-// Copy User ID
+// Copy user id
 function copyUserId() {
     var code = document.getElementById('userIdBox').innerText;
     navigator.clipboard.writeText(code);
     alert('User ID copied!');
 }
 
-// Referral logic (now uses User ID)
+// Referral logic (uses full site url and 6-digit userId)
 function updateReferralLink() {
     var code = document.getElementById("userIdBox").innerText;
-    var link = location.origin + "/?ref=" + encodeURIComponent(code);
+    var link = "https://yogesh7206.github.io/Wingo-game-/#?ref=" + encodeURIComponent(code);
     document.getElementById("referralLink").value = link;
 }
 function copyReferral() {
@@ -307,7 +309,7 @@ function copyReferral() {
     alert("Referral link copied!");
 }
 
-// Recharge/Withdrawal modals and logic (unchanged)
+// Modals
 function openRecharge() { document.getElementById('rechargeModal').style.display = 'block'; }
 function closeRecharge() { document.getElementById('rechargeModal').style.display = 'none'; }
 function openWithdrawal() { document.getElementById('withdrawalModal').style.display = 'block'; }
@@ -333,7 +335,7 @@ function submitWithdrawal(e){
   document.getElementById("withdrawalBank").value="";
 }
 
-// Account information
+// Account information with unique userId
 auth.onAuthStateChanged(async (user) => {
   const nav = document.getElementById('bottomNav');
   if (!user) {
@@ -417,7 +419,6 @@ async function registerUser(){
 
 function logoutUser(){ auth.signOut(); }
 
-// Submenu logic: switch to full page content
 (function(){
   const menuData = [
     { id:"bankCardPage", icon:"🏦", text:"Bank Card" },
@@ -448,4 +449,5 @@ function logoutUser(){ auth.signOut(); }
 })();
 </script>
 </body>
-</html>
+                </html>
+      
