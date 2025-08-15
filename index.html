@@ -20,8 +20,6 @@ nav button span { font-size:18px; }
 .action-buttons button { flex: 1; margin: 5px; padding: 12px; border: none; border-radius: 25px; font-size: 16px; color: #fff; }
 .recharge-btn { background: linear-gradient(45deg, #ffc107, #ffb300); }
 .withdraw-btn { background: linear-gradient(45deg, #28a745, #218838); }
-.submenu { display: none; background: #f4f4f4; padding: 10px; }
-.submenu button { display: block; width: 100%; background: #fff; border: none; text-align: left; padding: 8px; margin-bottom: 5px; border-radius: 6px; }
 .menu-list{margin:15px 0;background:#fff;border-radius:12px;overflow:hidden}
 .menu-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #eceff1; cursor:pointer;}
 .menu-item:last-child{border-bottom:none}
@@ -39,7 +37,12 @@ nav button span { font-size:18px; }
 .tag{display:inline-block;background:#e8f0fe;color:#1967d2;border-radius:8px;padding:2px 8px;font-size:12px;margin-left:6px}
 .hidden{display:none}
 
-/* Big logout button style */
+/* User top info style */
+.user-info-top {background:#f6f6f8; border-radius:16px; display:flex; align-items:center; gap:18px; padding:18px 14px 16px 14px; margin-bottom:15px;}
+.profile-avatar {width:68px; height:68px; border-radius:50%; object-fit:cover;}
+.user-contact {font-size:18px; font-weight:bold; color:#111; margin-bottom:6px;}
+.user-id-box { background:#fff;font-size:16px;padding:4px 14px; border-radius:12px;display:inline-block;letter-spacing:1.2px; color:#157efb; font-weight:500; border:1px solid #e0e6ed;}
+.copy-icon {cursor:pointer; font-size:19px; margin-left:5px;}
 .logout-btn-big {
     display: block;
     width: 94%;
@@ -104,6 +107,21 @@ nav button span { font-size:18px; }
 <div id="accountSection" class="section">
     <h2>My Account</h2>
 
+    <!-- User info panel -->
+    <div class="user-info-top">
+        <img id="userAvatar" class="profile-avatar" src="https://ui-avatars.com/api/?name=User&rounded=true&background=4bb2ff&color=fff&size=96" alt="avatar">
+        <div style="flex:1;">
+            <div id="userContact" class="user-contact">MOBILE: -</div>
+            <div style="display:flex;align-items:center;gap:7px;">
+                <span class="user-id-box">
+                    User ID: <span id="userId6">------</span>
+                </span>
+                <span class="copy-icon" title="Copy" onclick="copyUserId()">📋</span>
+            </div>
+        </div>
+    </div>
+    <!-- END User info panel -->
+
     <div class="account-stats">
         <div class="stat">
             <h3 id="balance">₹0</h3>
@@ -131,7 +149,7 @@ nav button span { font-size:18px; }
         <button class="withdraw-btn">Withdrawal</button>
     </div>
     <br>
-    <!-- The Logout button will appear below the submenus -->
+    <!-- Logout button appears after menu list -->
 </div>
 
 <!-- Bottom navigation -->
@@ -170,6 +188,13 @@ function showSection(id){
   if(el) el.classList.add('active-section');
 }
 
+// Helper: copy User ID
+function copyUserId() {
+    var code = document.getElementById('userId6').innerText;
+    navigator.clipboard.writeText(code);
+    alert('User ID copied!');
+}
+
 // Auth + old user handling
 auth.onAuthStateChanged(async (user) => {
   const nav = document.getElementById('bottomNav');
@@ -190,6 +215,7 @@ auth.onAuthStateChanged(async (user) => {
       userId: Math.floor(100000 + Math.random()*900000),
       balance:0, rechargeTotal:0, withdrawalTotal:0, productRevenue:0, orders:0,
       email: user.email
+      // mobile: '', // you can add default mobile if you wish
     });
   } else {
     const data = snap.data();
@@ -207,7 +233,17 @@ auth.onAuthStateChanged(async (user) => {
     document.getElementById('withdrawal').textContent = '₹'+(d.withdrawalTotal||0);
     document.getElementById('productRevenue').textContent = '₹'+(d.productRevenue||0);
     document.getElementById('myOrders').textContent = d.orders||0;
-    // The userInfo panel is gone, so userEmail/user6Id updates are removed.
+
+    // Show MOBILE (preferred), otherwise EMAIL
+    let contact = d.mobile 
+        ? `MOBILE: ${d.mobile}` 
+        : (d.email ? `EMAIL: ${d.email}` : '-');
+    document.getElementById('userContact').textContent = contact;
+
+    // User ID (6 digits, zero-padded)
+    document.getElementById('userId6').textContent = d.userId ? String(d.userId).padStart(6,'0') : '------';
+    // Optionally, set avatar if you have a field for it:
+    if(d.avatarUrl) document.getElementById('userAvatar').src = d.avatarUrl;
   });
 });
 
@@ -267,5 +303,4 @@ function logoutUser(){ auth.signOut(); }
 </script>
 
 </body>
-                                                   </html>
-                                                   
+</html>
