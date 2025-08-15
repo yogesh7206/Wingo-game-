@@ -196,7 +196,6 @@ nav button span { font-size:18px; }
     </form>
   </div>
 </div>
-<!-- Updated Bank Card section -->
 <div id="bankCardPage" class="section">
   <div class="page-content">
     <h2>Bank Card Details</h2>
@@ -218,13 +217,11 @@ nav button span { font-size:18px; }
   <div class="page-content">
     <h2>Recent Transactions</h2>
     <table>
-      <tr><th>Date</th><th>Type</th><th>Amount</th><th>Status</th></tr>
-      <tr><td>2025-08-10</td><td>Deposit</td><td>₹500</td><td>Success</td></tr>
-      <tr><td>2025-08-12</td><td>Withdrawal</td><td>₹300</td><td>Pending</td></tr>
+      <thead><tr><th>Date</th><th>Type</th><th>Amount</th><th>Status</th></tr></thead>
+      <tbody id="transactionsBody"></tbody>
     </table>
   </div>
 </div>
-<!-- My Products Section -->
 <div id="myProductPage" class="section">
   <div class="page-content">
     <h2>My Products</h2>
@@ -272,7 +269,6 @@ nav button span { font-size:18px; }
     </form>
   </div>
 </div>
-
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -290,8 +286,20 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 </script>
-<!-- PART 3 next -->
+<!-- Part 3 = all main JS logic -->
     <script>
+// Helper to add a transaction record to Firestore for current user
+async function addTransaction(userId, type, amount, status) {
+  const now = new Date();
+  const userTransRef = db.collection('users').doc(userId).collection('transactions');
+  await userTransRef.add({
+    date: now,
+    type: type,
+    amount: amount,
+    status: status
+  });
+}
+
 function showSection(id){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active-section'));
   var el = document.getElementById(id);
@@ -336,7 +344,7 @@ function submitWithdrawal(e){
   document.getElementById("withdrawalAmount").value="";
   document.getElementById("withdrawalBank").value="";
 }
-// -------- Bank details logic (load, save, edit) --------
+// -------- Bank details logic --------
 function loadBankDetails() {
   auth.onAuthStateChanged(async (user) => {
     if (!user) return;
@@ -381,10 +389,10 @@ function enableEditBank() {
     if(id === "bankCardPage") loadBankDetails();
     if(id === "myProductPage") showUserProducts();
     if(id === "investmentSection" && typeof loadBalance === "function") loadBalance();
+    if(id === "transactionsPage") showTransactions();
   };
 })();
-// --------------- Investment logic ----------------
-// Buy VIP 1 product
+// ---- Investment logic: Buy Product, Daily Claim ----
 document.addEventListener("DOMContentLoaded", function() {
   var investBtn = document.getElementById('vip1InvestBtn');
   if (investBtn) {
@@ -409,8 +417,9 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById('vip1InvestError').style.display = "";
         return;
       }
-      // Deduct money and add product for user
+      // Deduct money, add product, add transaction
       await userRef.update({ balance: userBalance - price });
+      await addTransaction(user.uid, "Product Purchase: VIP 1", -price, "Success");
       await productsRef.add({
         productName: 'VIP 1',
         buyPrice: price,
@@ -427,7 +436,6 @@ document.addEventListener("DOMContentLoaded", function() {
     };
   }
 });
-// Show My Products and handle daily claim
 async function showUserProducts() {
   const user = auth.currentUser;
   if (!user) return;
@@ -439,17 +447,14 @@ async function showUserProducts() {
   } else {
     snap.forEach(doc => {
       const d = doc.data();
-      // Date logic
       const today = new Date();
       today.setHours(0,0,0,0);
       let claimButton = "";
       let claimedMsg = "";
       let canClaim = false;
-      // Check if fully claimed
       if ((d.claimedDays || 0) >= d.days) {
         claimButton = '<span style="color:green;">Completed</span>';
       } else {
-        // Can claim today?
         let lastClaim = d.lastClaimDate && d.lastClaimDate.toDate ? d.lastClaimDate.toDate() : (d.lastClaimDate ? new Date(d.lastClaimDate) : null);
         let alreadyClaimed =  lastClaim && new Date(lastClaim).setHours(0,0,0,0) === today.getTime();
         if (alreadyClaimed) {
@@ -470,7 +475,6 @@ async function showUserProducts() {
   document.getElementById('userProducts').innerHTML = html;
 }
 window.showUserProducts = showUserProducts;
-// Daily earnings claim logic
 window.claimDailyEarning = async function(productId) {
   const user = auth.currentUser;
   if (!user) return;
@@ -479,7 +483,6 @@ window.claimDailyEarning = async function(productId) {
   const productDoc = await productRef.get();
   const d = productDoc.data();
   if (!d) return;
-  // Only one claim per calendar day allowed
   const now = new Date();
   now.setHours(0,0,0,0);
   let lastClaim = d.lastClaimDate && d.lastClaimDate.toDate ? d.lastClaimDate.toDate() : (d.lastClaimDate ? new Date(d.lastClaimDate) : null);
@@ -487,19 +490,46 @@ window.claimDailyEarning = async function(productId) {
     alert("You have already claimed today's earning.");
     return;
   }
-  // Update claimedDays, lastClaimDate in product, and add to user's balance
   await productRef.update({
     claimedDays: (d.claimedDays || 0)+1,
     lastClaimDate: new Date()
   });
-  // Increase balance
   const userSnap = await userRef.get();
   const balance = userSnap.data().balance || 0;
   await userRef.update({ balance: balance + d.dailyEarning });
+  await addTransaction(user.uid, "Product Earning Claim: VIP 1", d.dailyEarning, "Success");
+  const prevRevenue = userSnap.data().productRevenue || 0;
+  await userRef.update({ productRevenue: prevRevenue + d.dailyEarning });
   alert(`You have claimed ₹${d.dailyEarning} today!`);
   showUserProducts();
 };
-// ----------------- Referral and account logic (condensed) --------------
+// Transaction history display
+async function showTransactions() {
+  const user = auth.currentUser;
+  if (!user) return;
+  const ref = db.collection('users').doc(user.uid).collection('transactions').orderBy("date", "desc").limit(20);
+  const snap = await ref.get();
+  let html = "";
+  if (snap.empty) {
+    html = "<tr><td colspan='4'>No transactions yet.</td></tr>";
+  } else {
+    snap.forEach(doc => {
+      const d = doc.data();
+      const dt = d.date && d.date.toDate ? d.date.toDate() : new Date(d.date);
+      const showDate = dt.toLocaleDateString()+" "+dt.toLocaleTimeString();
+      html += `<tr>
+        <td>${showDate}</td>
+        <td>${d.type}</td>
+        <td>${d.amount>=0 ? "+" : ""}${d.amount}</td>
+        <td>${d.status}</td>
+      </tr>`;
+    });
+  }
+  document.getElementById("transactionsBody").innerHTML = html;
+}
+window.showTransactions = showTransactions;
+
+// --- User doc initialization/registration/updating ---
 auth.onAuthStateChanged(async (user) => {
   const nav = document.getElementById('bottomNav');
   if (!user) {
@@ -513,13 +543,13 @@ auth.onAuthStateChanged(async (user) => {
   const userRef = db.collection('users').doc(UID);
   const snap = await userRef.get();
   let userIdVal = null;
-  if (!snap.exists) {
+  if (!snap.exists || Object.keys(snap.data()||{}).length===0) {
     userIdVal = String(Math.floor(100000 + Math.random() * 900000));
     await userRef.set({
       userId: userIdVal,
       balance:0, rechargeTotal:0, withdrawalTotal:0, productRevenue:0, orders:0,
       email: user.email,
-      mobile: '917206343481',
+      mobile: '',
       referredBy: "",
       totalInvites: 0,
       todayInvites: 0,
@@ -654,7 +684,6 @@ window.addEventListener("DOMContentLoaded", function () {
     showSection('registerSection');
   }
 });
-// Optional: for live balance on invest tab, if you want it (e.g. display current balance)
 function loadBalance(){}
 </script>
 </body>
