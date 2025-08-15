@@ -59,13 +59,22 @@ nav button span { font-size:18px; }
 .page-content th, .page-content td{border:1px solid #eee;padding:8px;}
 .page-content th{background:#157efb;color:#fff;}
 .page-content td{background:#f8fafd;}
+
+/* Recharge and Withdrawal modals */
+.modal-overlay {display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,.32);z-index:900;}
+.modal-box {background:#fff;max-width:340px;margin:70px auto 0 auto;padding:28px 20px 20px 20px;border-radius:16px;box-shadow:0 1px 16px #a3c2ff;position:relative;}
+.modal-box h2 {margin-top:0;}
+.modal-box label {font-weight:bold;}
+.modal-box input, .modal-box select {width:100%;margin-bottom:12px;padding:8px;border-radius:6px;border:1px solid #ccc;}
+.modal-box button {width:100%;padding:12px 0;font-size:16px;background:#157efb;color:#fff;border:none;border-radius:9px;font-weight:bold;}
+.modal-box .close-modal {position:absolute;right:18px;top:10px;font-size:24px;cursor:pointer;color:#157efb;}
+.modal-box .withdraw-btn {background:#28a745;}
 </style>
 </head>
 <body>
 
 <header>Win89</header>
 
-<!-- Navigation: always shows -->
 <nav id="bottomNav">
     <button onclick="showSection('homeSection')"><span>🏠</span>Home</button>
     <button onclick="showSection('investmentSection')"><span>💰</span>Investment</button>
@@ -74,7 +83,6 @@ nav button span { font-size:18px; }
     <button onclick="showSection('accountSection')"><span>👤</span>Account</button>
 </nav>
 
-<!-- Dashboard MAIN Sections -->
 <div id="loginSection" class="section active-section">
     <h2>Login</h2>
     <input type="email" id="loginEmail" placeholder="Email"><br><br>
@@ -87,6 +95,7 @@ nav button span { font-size:18px; }
     <h2>Register</h2>
     <input type="email" id="registerEmail" placeholder="Email"><br><br>
     <input type="password" id="registerPassword" placeholder="Password"><br><br>
+    <input type="text" id="registerReferral" placeholder="Referral Code (if any)"><br><br>
     <button onclick="registerUser()">Register</button>
     <p>Already have an account? <a href="#" onclick="showSection('loginSection')">Login</a></p>
 </div>
@@ -111,11 +120,8 @@ nav button span { font-size:18px; }
     <p>Important updates.</p>
 </div>
 
-<!-- ACCOUNT DASHBOARD (default page) -->
 <div id="accountSection" class="section">
     <h2>My Account</h2>
-    
-    <!-- User info panel -->
     <div class="user-info-top">
         <img id="userAvatar" class="profile-avatar" src="https://ui-avatars.com/api/?name=User&rounded=true&background=4bb2ff&color=fff&size=96" alt="avatar">
         <div style="flex:1;">
@@ -128,8 +134,6 @@ nav button span { font-size:18px; }
             </div>
         </div>
     </div>
-    <!-- END User info panel -->
-
     <div class="account-stats">
         <div class="stat">
             <h3 id="balance">₹0</h3>
@@ -153,16 +157,48 @@ nav button span { font-size:18px; }
         </div>
     </div>
     <div class="action-buttons">
-        <button class="recharge-btn">Recharge</button>
-        <button class="withdraw-btn">Withdrawal</button>
+        <button class="recharge-btn" onclick="openRecharge()">Recharge</button>
+        <button class="withdraw-btn" onclick="openWithdrawal()">Withdrawal</button>
     </div>
     <br>
-    <!-- Submenus -->
     <div class="menu-list" id="submenuList"></div>
     <button class="logout-btn-big" onclick="logoutUser();">Logout</button>
 </div>
 
-<!-- Merged submenu FULL PAGES - Only one shown at a time -->
+<!-- Recharge Modal -->
+<div id="rechargeModal" class="modal-overlay">
+  <div class="modal-box">
+    <span class="close-modal" onclick="closeRecharge()">×</span>
+    <h2>Recharge</h2>
+    <form onsubmit="submitRecharge(event)">
+      <label>Amount</label>
+      <input id="rechargeAmount" type="number" min="1" required placeholder="Enter amount">
+      <label>Payment Method</label>
+      <select id="rechargeMethod" required>
+        <option value="">Select</option>
+        <option value="UPI">UPI</option>
+        <option value="Card">Debit/Credit Card</option>
+        <option value="NetBanking">Net Banking</option>
+      </select>
+      <button type="submit">Recharge Now</button>
+    </form>
+  </div>
+</div>
+<!-- Withdrawal Modal -->
+<div id="withdrawalModal" class="modal-overlay">
+  <div class="modal-box">
+    <span class="close-modal" onclick="closeWithdrawal()">×</span>
+    <h2>Withdrawal</h2>
+    <form onsubmit="submitWithdrawal(event)">
+      <label>Amount</label>
+      <input id="withdrawalAmount" type="number" min="1" required placeholder="Enter amount">
+      <label>Bank Account / UPI ID</label>
+      <input id="withdrawalBank" type="text" required placeholder="Enter Bank/UPI ID">
+      <button type="submit" class="withdraw-btn">Withdraw</button>
+    </form>
+  </div>
+</div>
+
 <div id="bankCardPage" class="section">
   <div class="page-content">
     <h2>Bank Card Details</h2>
@@ -198,7 +234,13 @@ nav button span { font-size:18px; }
   <div class="page-content">
     <h2>My Team</h2>
     <button class="btn">Invite New Member</button>
-    <ul>
+    <p style="margin-top:18px;margin-bottom:8px;">Share your referral link:</p>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <input id="referralLink" type="text" readonly style="flex:1; padding:6px 10px; font-size:15px; border:1px solid #bcd6f1; border-radius:6px;">
+      <button class="btn" style="padding:6px 10px; font-size:15px;" onclick="copyReferral()">Copy</button>
+    </div>
+    <small style="color:#157efb;margin-top:5px;display:block;">Invite friends using your referral link above.</small>
+    <ul style="margin-top:16px;">
       <li>Team Member 1</li>
       <li>Team Member 2</li>
     </ul>
@@ -249,11 +291,49 @@ function showSection(id){
   if(el) el.classList.add('active-section');
 }
 
-// Invite code copy
 function copyInviteCode() {
     var code = document.getElementById('inviteCode').innerText;
     navigator.clipboard.writeText(code);
     alert('Invite code copied!');
+}
+
+// Referral logic
+function updateReferralLink() {
+    var code = document.getElementById("inviteCode").innerText;
+    var link = location.origin + "/?ref=" + encodeURIComponent(code);
+    document.getElementById("referralLink").value = link;
+}
+function copyReferral() {
+    var val = document.getElementById("referralLink").value;
+    navigator.clipboard.writeText(val);
+    alert("Referral link copied!");
+}
+
+// Recharge/Withdrawal modals and logic
+function openRecharge() { document.getElementById('rechargeModal').style.display = 'block'; }
+function closeRecharge() { document.getElementById('rechargeModal').style.display = 'none'; }
+function openWithdrawal() { document.getElementById('withdrawalModal').style.display = 'block'; }
+function closeWithdrawal() { document.getElementById('withdrawalModal').style.display = 'none'; }
+
+function submitRecharge(e){
+  e.preventDefault();
+  var amt = document.getElementById("rechargeAmount").value;
+  var method = document.getElementById("rechargeMethod").value;
+  if(Number(amt)<1 || !method){ alert("Enter valid amount and payment method."); return;}
+  alert("Recharge of ₹"+amt+" by "+method+" submitted!");
+  closeRecharge();
+  document.getElementById("rechargeAmount").value="";
+  document.getElementById("rechargeMethod").value="";
+}
+function submitWithdrawal(e){
+  e.preventDefault();
+  var amt = document.getElementById("withdrawalAmount").value;
+  var bank = document.getElementById("withdrawalBank").value;
+  if(Number(amt)<1 || !bank){ alert("Enter valid amount and bank/UPI details."); return;}
+  alert("Withdrawal of ₹"+amt+" to "+bank+" submitted!");
+  closeWithdrawal();
+  document.getElementById("withdrawalAmount").value="";
+  document.getElementById("withdrawalBank").value="";
 }
 
 // Account information
@@ -276,7 +356,8 @@ auth.onAuthStateChanged(async (user) => {
       inviteCode: 'xKed0R',
       balance:0, rechargeTotal:0, withdrawalTotal:0, productRevenue:0, orders:0,
       email: user.email,
-      mobile: '917206343481'
+      mobile: '917206343481',
+      referredBy: ""
     });
   } else {
     const data = snap.data();
@@ -297,6 +378,7 @@ auth.onAuthStateChanged(async (user) => {
         ? `MOBILE: ${d.mobile}` 
         : (d.email ? `EMAIL: ${d.email}` : '-');
     document.getElementById('inviteCode').textContent = d.inviteCode || '------';
+    updateReferralLink();
     if(d.avatarUrl) document.getElementById('userAvatar').src = d.avatarUrl;
   });
 });
@@ -312,6 +394,7 @@ async function loginUser(){
 async function registerUser(){
   const email = document.getElementById('registerEmail').value.trim();
   const pass = document.getElementById('registerPassword').value.trim();
+  const referral = document.getElementById('registerReferral').value.trim();
   if(!email || !pass){ alert('Enter email & password'); return; }
   try{
     const cred = await auth.createUserWithEmailAndPassword(email, pass);
@@ -319,7 +402,8 @@ async function registerUser(){
       inviteCode: 'xKed0R',
       balance:0, rechargeTotal:0, withdrawalTotal:0, productRevenue:0, orders:0,
       email,
-      mobile: ''
+      mobile: '',
+      referredBy: referral || ""
     });
     alert('Registered! Please login.');
     showSection('loginSection');
