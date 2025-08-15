@@ -98,8 +98,20 @@ nav button span { font-size:18px; }
     <p>Welcome to Win89!</p>
 </div>
 <div id="investmentSection" class="section">
-    <h2>Investment</h2>
-    <p>Your investments appear here.</p>
+  <h2>Investment</h2>
+  <div id="productList" style="max-width:400px;margin:auto;">
+    <div style="background:#fff;padding:20px 16px;border-radius:12px;box-shadow:0 2px 6px #e1edff;margin-bottom:18px;">
+      <h3 style="margin:0 0 10px 0;">VIP 1</h3>
+      <p style="margin:0 0 8px 0;"><strong>Buy Price:</strong> ₹290</p>
+      <ul style="margin:0 0 12px 16px;padding:0;list-style:square;">
+        <li><strong>Time Period:</strong> 47 days</li>
+        <li><strong>Daily Earning:</strong> ₹234</li>
+        <li><strong>Total Earnings:</strong> ₹11,040</li>
+      </ul>
+      <button id="vip1InvestBtn" style="padding:10px 24px;background:#157efb;color:#fff;border:none;border-radius:7px;font-size:16px;font-weight:bold;">Invest Now</button>
+      <div id="vip1InvestError" style="color:red;font-size:15px;margin-top:10px;display:none;"></div>
+    </div>
+  </div>
 </div>
 <div id="blogSection" class="section">
     <h2>Blog</h2>
@@ -184,7 +196,7 @@ nav button span { font-size:18px; }
     </form>
   </div>
 </div>
-<!-- Updated Bank Card section with Account Holder Name and edit/save -->
+<!-- Updated Bank Card section -->
 <div id="bankCardPage" class="section">
   <div class="page-content">
     <h2>Bank Card Details</h2>
@@ -212,11 +224,11 @@ nav button span { font-size:18px; }
     </table>
   </div>
 </div>
+<!-- My Products Section -->
 <div id="myProductPage" class="section">
   <div class="page-content">
     <h2>My Products</h2>
-    <div class="product">Product A <button class="btn">View</button></div>
-    <div class="product">Product B <button class="btn">View</button></div>
+    <div id="userProducts"></div>
   </div>
 </div>
 <div id="myTeamPage" class="section">
@@ -241,8 +253,7 @@ nav button span { font-size:18px; }
     </ul>
   </div>
 </div>
-<!-- PART 2 starts next, reply "next" to get the remainder -->
-    <div id="customerServicePage" class="section">
+<div id="customerServicePage" class="section">
   <div class="page-content">
     <h2>Customer Service</h2>
     <p>Contact us at <b>support@win89.com</b></p>
@@ -279,14 +290,13 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 </script>
-
-<script>
+<!-- PART 3 next -->
+    <script>
 function showSection(id){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active-section'));
   var el = document.getElementById(id);
   if(el) el.classList.add('active-section');
 }
-
 function copyUserId() {
     var code = document.getElementById('userIdBox').innerText;
     navigator.clipboard.writeText(code);
@@ -326,8 +336,7 @@ function submitWithdrawal(e){
   document.getElementById("withdrawalAmount").value="";
   document.getElementById("withdrawalBank").value="";
 }
-
-// ----------- Bank Details Saving, Editing, and Loading Logic -----------
+// -------- Bank details logic (load, save, edit) --------
 function loadBankDetails() {
   auth.onAuthStateChanged(async (user) => {
     if (!user) return;
@@ -369,12 +378,128 @@ function enableEditBank() {
   let oldShowSection = window.showSection;
   window.showSection = function(id) {
     oldShowSection(id);
-    if(id === "bankCardPage") {
-      loadBankDetails();
-    }
+    if(id === "bankCardPage") loadBankDetails();
+    if(id === "myProductPage") showUserProducts();
+    if(id === "investmentSection" && typeof loadBalance === "function") loadBalance();
   };
 })();
-// ----------------------------------------------------------------------
+// --------------- Investment logic ----------------
+// Buy VIP 1 product
+document.addEventListener("DOMContentLoaded", function() {
+  var investBtn = document.getElementById('vip1InvestBtn');
+  if (investBtn) {
+    investBtn.onclick = async function() {
+      const user = auth.currentUser;
+      if (!user) { alert('Please login.'); return; }
+      const userRef = db.collection('users').doc(user.uid);
+      const doc = await userRef.get();
+      const data = doc.data();
+      const userBalance = data.balance || 0;
+      const price = 290;
+      if (userBalance < price) {
+        document.getElementById('vip1InvestError').innerText = "Insufficient balance.";
+        document.getElementById('vip1InvestError').style.display = "";
+        return;
+      }
+      // Check if already purchased!
+      const productsRef = db.collection('users').doc(user.uid).collection('products');
+      const has = await productsRef.where("productName", "==", "VIP 1").get();
+      if (!has.empty) {
+        document.getElementById('vip1InvestError').innerText = "You have already purchased VIP 1.";
+        document.getElementById('vip1InvestError').style.display = "";
+        return;
+      }
+      // Deduct money and add product for user
+      await userRef.update({ balance: userBalance - price });
+      await productsRef.add({
+        productName: 'VIP 1',
+        buyPrice: price,
+        days: 47,
+        dailyEarning: 234,
+        totalEarning: 11040,
+        purchaseDate: new Date(),
+        claimedDays: 0,
+        lastClaimDate: null
+      });
+      alert('Product purchased successfully!');
+      document.getElementById('vip1InvestError').style.display = "none";
+      showUserProducts();
+    };
+  }
+});
+// Show My Products and handle daily claim
+async function showUserProducts() {
+  const user = auth.currentUser;
+  if (!user) return;
+  const productsRef = db.collection('users').doc(user.uid).collection('products');
+  const snap = await productsRef.get();
+  let html = "";
+  if (snap.empty) {
+    html = "<p>You have no active products.</p>";
+  } else {
+    snap.forEach(doc => {
+      const d = doc.data();
+      // Date logic
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      let claimButton = "";
+      let claimedMsg = "";
+      let canClaim = false;
+      // Check if fully claimed
+      if ((d.claimedDays || 0) >= d.days) {
+        claimButton = '<span style="color:green;">Completed</span>';
+      } else {
+        // Can claim today?
+        let lastClaim = d.lastClaimDate && d.lastClaimDate.toDate ? d.lastClaimDate.toDate() : (d.lastClaimDate ? new Date(d.lastClaimDate) : null);
+        let alreadyClaimed =  lastClaim && new Date(lastClaim).setHours(0,0,0,0) === today.getTime();
+        if (alreadyClaimed) {
+          claimedMsg = '<span style="color:green;">Already claimed for today.</span>';
+        } else {
+          canClaim = true;
+          claimButton = '<button onclick="claimDailyEarning(\''+doc.id+'\')" style=\'margin-top:7px;background:#28a745;color:#fff;padding:7px 18px;border-radius:5px;border:none;font-weight:bold;\'>Claim Today\'s ₹'+d.dailyEarning+'</button>';
+        }
+      }
+      html += `<div style="background:#f4f7ff;padding:13px 11px 12px 13px;margin-bottom:13px;border-radius:10px;">
+          <strong>${d.productName}</strong><br>
+          <span>Days: ${d.days}, Claimed: ${d.claimedDays||0}/${d.days}</span><br>
+          <span style="font-size:15px;">Daily: ₹${d.dailyEarning} | Total: ₹${d.totalEarning}</span><br>
+          ${claimButton} ${claimedMsg}
+        </div>`;
+    });
+  }
+  document.getElementById('userProducts').innerHTML = html;
+}
+window.showUserProducts = showUserProducts;
+// Daily earnings claim logic
+window.claimDailyEarning = async function(productId) {
+  const user = auth.currentUser;
+  if (!user) return;
+  const userRef = db.collection('users').doc(user.uid);
+  const productRef = userRef.collection('products').doc(productId);
+  const productDoc = await productRef.get();
+  const d = productDoc.data();
+  if (!d) return;
+  // Only one claim per calendar day allowed
+  const now = new Date();
+  now.setHours(0,0,0,0);
+  let lastClaim = d.lastClaimDate && d.lastClaimDate.toDate ? d.lastClaimDate.toDate() : (d.lastClaimDate ? new Date(d.lastClaimDate) : null);
+  if (lastClaim && new Date(lastClaim).setHours(0,0,0,0) === now.getTime()) {
+    alert("You have already claimed today's earning.");
+    return;
+  }
+  // Update claimedDays, lastClaimDate in product, and add to user's balance
+  await productRef.update({
+    claimedDays: (d.claimedDays || 0)+1,
+    lastClaimDate: new Date()
+  });
+  // Increase balance
+  const userSnap = await userRef.get();
+  const balance = userSnap.data().balance || 0;
+  await userRef.update({ balance: balance + d.dailyEarning });
+  alert(`You have claimed ₹${d.dailyEarning} today!`);
+  showUserProducts();
+};
+// ----------------- Referral and account logic (condensed) --------------
 auth.onAuthStateChanged(async (user) => {
   const nav = document.getElementById('bottomNav');
   if (!user) {
@@ -428,7 +553,6 @@ auth.onAuthStateChanged(async (user) => {
     document.getElementById('userIdBox').textContent = d.userId || '------';
     updateReferralLink();
     if(d.avatarUrl) document.getElementById('userAvatar').src = d.avatarUrl;
-    // Team stats
     document.getElementById('totalInvites').textContent = d.totalInvites || 0;
     document.getElementById('todayInvites').textContent = d.todayInvites || 0;
     document.getElementById('todayCommission').textContent = d.todayCommission || 0;
@@ -530,6 +654,8 @@ window.addEventListener("DOMContentLoaded", function () {
     showSection('registerSection');
   }
 });
+// Optional: for live balance on invest tab, if you want it (e.g. display current balance)
+function loadBalance(){}
 </script>
 </body>
 </html>
