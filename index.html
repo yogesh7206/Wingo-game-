@@ -38,6 +38,26 @@ nav button span { font-size:18px; }
 .small{color:#6c757d;font-size:12px}
 .tag{display:inline-block;background:#e8f0fe;color:#1967d2;border-radius:8px;padding:2px 8px;font-size:12px;margin-left:6px}
 .hidden{display:none}
+
+/* Big logout button style */
+.logout-btn-big {
+    display: block;
+    width: 94%;
+    margin: 28px auto 18px auto;
+    padding: 18px 0;
+    font-size: 20px;
+    font-weight: bold;
+    border: none;
+    border-radius: 18px;
+    background: linear-gradient(90deg, #157efb 0%, #4bb2ff 100%);
+    color: #fff;
+    box-shadow: 0 1px 7px #1561c340;
+    transition: background 0.2s;
+    cursor: pointer;
+}
+.logout-btn-big:hover {
+    background: linear-gradient(90deg, #1561c3 0%, #2891ec 100%);
+}
 </style>
 </head>
 <body>
@@ -84,8 +104,6 @@ nav button span { font-size:18px; }
 <div id="accountSection" class="section">
     <h2>My Account</h2>
 
-    <!-- Email/Mobile and User ID info panel has been removed -->
-
     <div class="account-stats">
         <div class="stat">
             <h3 id="balance">₹0</h3>
@@ -113,7 +131,7 @@ nav button span { font-size:18px; }
         <button class="withdraw-btn">Withdrawal</button>
     </div>
     <br>
-    <button onclick="logoutUser()">Logout</button>
+    <!-- The Logout button will appear below the submenus -->
 </div>
 
 <!-- Bottom navigation -->
@@ -189,8 +207,7 @@ auth.onAuthStateChanged(async (user) => {
     document.getElementById('withdrawal').textContent = '₹'+(d.withdrawalTotal||0);
     document.getElementById('productRevenue').textContent = '₹'+(d.productRevenue||0);
     document.getElementById('myOrders').textContent = d.orders||0;
-
-    // Removed updating userEmail and user6Id since the panel is gone.
+    // The userInfo panel is gone, so userEmail/user6Id updates are removed.
   });
 });
 
@@ -221,27 +238,34 @@ async function registerUser(){
 
 function logoutUser(){ auth.signOut(); }
 
-// Account submenus
+// Account submenus + Logout button at bottom
 (function(){
   const wrap = document.createElement('div');
   wrap.className = 'menu-list';
   wrap.innerHTML = `
-    
     <div class="menu-item" onclick="alert('Bank Card panel')"><span class="menu-icon">🏦</span><span class="menu-text">Bank Card</span><span class="menu-arrow">›</span></div>
     <div class="menu-item" onclick="alert('Transactions panel')"><span class="menu-icon">🧾</span><span class="menu-text">Transactions</span><span class="menu-arrow">›</span></div>
     <div class="menu-item" onclick="alert('My Product panel')"><span class="menu-icon">📦</span><span class="menu-text">My Product</span><span class="menu-arrow">›</span></div>
     <div class="menu-item" onclick="alert('My Team panel')">
-  <span class="menu-icon">👥</span>
-  <span class="menu-text">My Team</span>
-  <span class="menu-arrow">›</span>
-</div>
+      <span class="menu-icon">👥</span>
+      <span class="menu-text">My Team</span>
+      <span class="menu-arrow">›</span>
+    </div>
     <div class="menu-item" onclick="alert('Support panel')"><span class="menu-icon">💬</span><span class="menu-text">Customer Service</span><span class="menu-arrow">›</span></div>
     <div class="menu-item" onclick="window.open('https://t.me/YourTelegramGroupLink', '_blank')"><span class="menu-icon">📢</span><span class="menu-text">Telegram Group</span><span class="menu-arrow">›</span></div>
     <div class="menu-item" onclick="alert('Reset Password panel')"><span class="menu-icon">🔒</span><span class="menu-text">Reset Password</span><span class="menu-arrow">›</span></div>
   `;
   document.getElementById('accountSection').appendChild(wrap);
+
+  // Big, highlighted Logout button at the bottom
+  const logoutBtn = document.createElement('button');
+  logoutBtn.textContent = 'Logout';
+  logoutBtn.onclick = logoutUser;
+  logoutBtn.className = 'logout-btn-big';
+  wrap.after(logoutBtn);
 })();
 </script>
 
 </body>
-</html>
+                                                   </html>
+                                                   
