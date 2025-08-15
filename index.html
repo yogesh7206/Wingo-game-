@@ -184,17 +184,21 @@ nav button span { font-size:18px; }
     </form>
   </div>
 </div>
+<!-- Updated Bank Card section with Account Holder Name and edit/save -->
 <div id="bankCardPage" class="section">
   <div class="page-content">
     <h2>Bank Card Details</h2>
-    <form>
+    <form id="bankCardForm" onsubmit="saveBankDetails(event)">
+      <label>Account Holder Name</label>
+      <input type="text" id="accountHolder" placeholder="Enter account holder name" required>
       <label>Card Number</label>
-      <input type="text" placeholder="Enter card number" required>
+      <input type="text" id="cardNumber" placeholder="Enter card number" required>
       <label>Bank Name</label>
-      <input type="text" placeholder="Enter bank name" required>
+      <input type="text" id="bankName" placeholder="Enter bank name" required>
       <label>IFSC Code</label>
-      <input type="text" placeholder="Enter IFSC code">
-      <button type="submit">Save Card</button>
+      <input type="text" id="ifscCode" placeholder="Enter IFSC code" required>
+      <button type="submit" id="saveBankBtn">Save Card</button>
+      <button type="button" id="editBankBtn" style="display:none;margin-top:10px;" onclick="enableEditBank()">Edit</button>
     </form>
   </div>
 </div>
@@ -237,8 +241,8 @@ nav button span { font-size:18px; }
     </ul>
   </div>
 </div>
-<!-- Part 2 begins next -->
-   <div id="customerServicePage" class="section">
+<!-- PART 2 starts next, reply "next" to get the remainder -->
+    <div id="customerServicePage" class="section">
   <div class="page-content">
     <h2>Customer Service</h2>
     <p>Contact us at <b>support@win89.com</b></p>
@@ -323,6 +327,54 @@ function submitWithdrawal(e){
   document.getElementById("withdrawalBank").value="";
 }
 
+// ----------- Bank Details Saving, Editing, and Loading Logic -----------
+function loadBankDetails() {
+  auth.onAuthStateChanged(async (user) => {
+    if (!user) return;
+    const userRef = db.collection('users').doc(user.uid);
+    const doc = await userRef.get();
+    const d = doc.data() || {};
+    document.getElementById('accountHolder').value = d.accountHolder || '';
+    document.getElementById('cardNumber').value = d.cardNumber || '';
+    document.getElementById('bankName').value = d.bankName || '';
+    document.getElementById('ifscCode').value = d.ifscCode || '';
+    Array.from(document.querySelectorAll("#bankCardForm input")).forEach(inp => inp.readOnly = true);
+    document.getElementById("saveBankBtn").style.display = "none";
+    document.getElementById("editBankBtn").style.display = "inline-block";
+  });
+}
+async function saveBankDetails(event) {
+  event.preventDefault();
+  const accountHolder = document.getElementById('accountHolder').value.trim();
+  const cardNumber = document.getElementById('cardNumber').value.trim();
+  const bankName = document.getElementById('bankName').value.trim();
+  const ifscCode = document.getElementById('ifscCode').value.trim();
+  if (!accountHolder || !cardNumber || !bankName || !ifscCode) {
+    alert("All fields required."); return;
+  }
+  const user = auth.currentUser;
+  if (!user) { alert("Not logged in."); return; }
+  await db.collection('users').doc(user.uid).update({
+    accountHolder, cardNumber, bankName, ifscCode
+  });
+  alert("Bank details saved!");
+  loadBankDetails();
+}
+function enableEditBank() {
+  Array.from(document.querySelectorAll("#bankCardForm input")).forEach(inp => inp.readOnly = false);
+  document.getElementById("saveBankBtn").style.display = "inline-block";
+  document.getElementById("editBankBtn").style.display = "none";
+}
+(function(){
+  let oldShowSection = window.showSection;
+  window.showSection = function(id) {
+    oldShowSection(id);
+    if(id === "bankCardPage") {
+      loadBankDetails();
+    }
+  };
+})();
+// ----------------------------------------------------------------------
 auth.onAuthStateChanged(async (user) => {
   const nav = document.getElementById('bottomNav');
   if (!user) {
@@ -332,11 +384,9 @@ auth.onAuthStateChanged(async (user) => {
   }
   nav.style.display = 'flex';
   showSection('homeSection');
-
   const UID = user.uid;
   const userRef = db.collection('users').doc(UID);
   const snap = await userRef.get();
-
   let userIdVal = null;
   if (!snap.exists) {
     userIdVal = String(Math.floor(100000 + Math.random() * 900000));
@@ -349,7 +399,11 @@ auth.onAuthStateChanged(async (user) => {
       totalInvites: 0,
       todayInvites: 0,
       todayCommission: 0,
-      yesterdayCommission: 0
+      yesterdayCommission: 0,
+      accountHolder: "",
+      cardNumber: "",
+      bankName: "",
+      ifscCode: ""
     });
   } else {
     const data = snap.data();
@@ -361,7 +415,6 @@ auth.onAuthStateChanged(async (user) => {
     if (!data.email) updates.email = user.email;
     if (Object.keys(updates).length > 0) await userRef.update(updates);
   }
-
   userRef.onSnapshot(doc => {
     const d = doc.data() || {};
     document.getElementById('balance').textContent = '₹'+(d.balance||0);
@@ -382,7 +435,6 @@ auth.onAuthStateChanged(async (user) => {
     document.getElementById('yesterdayCommission').textContent = d.yesterdayCommission || 0;
   });
 });
-
 async function loginUser(){
   const email = document.getElementById('loginEmail').value.trim();
   const pass = document.getElementById('loginPassword').value.trim();
@@ -390,7 +442,6 @@ async function loginUser(){
   try{ await auth.signInWithEmailAndPassword(email, pass); }
   catch(e){ alert(e.message); if(e.code==='auth/user-not-found') showSection('registerSection'); }
 }
-
 async function registerUser(){
   const email = document.getElementById('registerEmail').value.trim();
   const pass = document.getElementById('registerPassword').value.trim();
@@ -408,10 +459,12 @@ async function registerUser(){
       totalInvites: 0,
       todayInvites: 0,
       todayCommission: 0,
-      yesterdayCommission: 0
+      yesterdayCommission: 0,
+      accountHolder: "",
+      cardNumber: "",
+      bankName: "",
+      ifscCode: ""
     });
-
-    // Increment totalInvites and todayInvites for supervisor/referrer (if referral code entered)
     if(referral){
       const supervisorSnap = await db.collection('users').where("userId", "==", referral).limit(1).get();
       if(!supervisorSnap.empty){
@@ -431,9 +484,7 @@ async function registerUser(){
     showSection('loginSection');
   }catch(e){ alert(e.message); }
 }
-
 function logoutUser(){ auth.signOut(); }
-
 (function(){
   const menuData = [
     { id:"bankCardPage", icon:"🏦", text:"Bank Card" },
@@ -462,7 +513,6 @@ function logoutUser(){ auth.signOut(); }
     }
   });
 })();
-
 // --- Auto-fill referral code from ?ref=... in hash or search and auto-open registration page ---
 window.addEventListener("DOMContentLoaded", function () {
   function getRefCode() {
